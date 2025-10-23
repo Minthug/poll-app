@@ -19,5 +19,13 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/minthug/poll-app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/minthug/poll-app/issues"
+  },
+  "homepage": "https://github.com/minthug/poll-app#readme"
 }
