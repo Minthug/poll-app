@@ -28,6 +28,13 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB 연결 성공'))
   .catch(err => console.error('MongoDB 연결 오류:', err));
 
+// app.js에 추가
+const pollRoutes = require('./routes/polls');
+app.use('/polls', pollRoutes);
+
+// io 객체를 라우트에서 사용할 수 있도록 설정
+app.set('io', io);
+
 // 서버 시작
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
