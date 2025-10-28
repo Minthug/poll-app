@@ -18,3 +18,49 @@ router.get('/new', (req, res) => {
 });
 
 
+// 여론조사 생성
+router.post('/', async (req, res) => {
+    try {
+        const { title, description, options } = req.body;
+        const poll = new Poll({
+            title,
+            description,
+            options: options.map(opt => ({ text: opt }))
+        });
+        await poll.save();
+        res.redirect(`/polls/${poll._id}`);
+    } catch (error) {
+        res.status(500).send('서버 오류');
+    }
+});
+
+// 여론조사 상세
+router.get('/:id', async (req, res) => {
+    try {
+        const poll = await Poll.findById(req.params.id);
+        if (!poll) return res.status(404).send('여론조사를 찾을 수 없습니다');
+    
+        poll.options.id(req.body.optionId).votes++;
+        await poll.save();
+
+        req.app.get('io').emit('vote', { PollId: poll._id });
+    
+        res.redirect(`/polls/${poll._id}/results`);
+    } catch (error) {
+        res.status(500).send('서버 오류');
+    }
+});
+
+// 결과 보기
+routeer.get('/:id/results', async ( req, res) => {
+    try {
+        const poll = await Poll.findById(req.params.id);
+        if (!poll) return res.status(404).send('여론조사를 찾을 수 없습니다');
+        res.render('polls/results', { poll });
+    } catch (error) {
+        res.status(500).send('서버 오류');
+    }
+})
+
+module.exports = router;
+
