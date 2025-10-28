@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const optionSchema = new mongoose.Schema({
     text: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
     votes: {
         type: Number,
@@ -14,15 +15,20 @@ const optionSchema = new mongoose.Schema({
 const pollSchema = new mongoose.Schema({
     title: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
     description: {
-        type: String
+        type: String,
+        trim: true
     },
     options: [optionSchema],
     createdAt: {
         type: Date,
         defalut: Date.now
+    },
+    endDate: {
+        type: Date
     }
 });
 

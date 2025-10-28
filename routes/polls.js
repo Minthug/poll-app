@@ -52,7 +52,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // 결과 보기
-routeer.get('/:id/results', async ( req, res) => {
+router.get('/:id/results', async ( req, res) => {
     try {
         const poll = await Poll.findById(req.params.id);
         if (!poll) return res.status(404).send('여론조사를 찾을 수 없습니다');
