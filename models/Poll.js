@@ -22,6 +22,8 @@ const pollSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+
+    // 최대 5개의 옵션을 가질 수 있음
     options: [optionSchema],
     createdAt: {
         type: Date,
@@ -32,4 +34,10 @@ const pollSchema = new mongoose.Schema({
     }
 });
 
+pollSchema.virtual('totalVotes').get(function() {
+        return this.options.reduce((sum, option) => sum + option.votes, 0);
+})
+
+pollSchema.set('toJSON', { virtuals: true });
+pollSchema.set('toObject', { virtuals: true });
 module.exports = mongoose.model('Poll', pollSchema);
