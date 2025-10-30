@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= poll.title %> | 여론조사</title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/poll.css">
+</head>
+<body>
+  <div class="container mt-4">
+    <div class="card shadow">
+      <div class="card-header bg-primary text-white">
+        <h1 class="h3"><%= poll.title %></h1>
+      </div>
+      
+      <div class="card-body">
+        <% if (poll.description) { %>
+          <p class="lead mb-4"><%= poll.description %></p>
+        <% } %>
+        
+        <form id="vote-form" data-poll-id="<%= poll._id %>">
+          <div class="touch-options">
+            <% poll.options.forEach((option, index) => { %>
+              <div class="touch-option" data-option-id="<%= option._id %>">
+                <%= option.text %>
+              </div>
+            <% }) %>
+          </div>
+          
+          <input type="hidden" id="selected-option" name="optionId">
+          <button type="submit" class="btn btn-primary mt-3" disabled>투표하기</button>
+        </form>
+        
+        <div id="results-container" class="mt-4 d-none">
+          <!-- 결과가 여기에 표시됩니다 -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/bootstrap.bundle.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/poll.js"></script>
+</body>
+</html>

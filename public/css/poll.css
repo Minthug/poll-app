@@ -1,0 +1,85 @@
+.touch-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.touch-option {
+  flex: 1;
+  min-width: 150px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  border: 2px solid #dee2e6;
+  padding: 15px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.touch-option:hover {
+  background-color: #e9ecef;
+}
+
+.touch-option.selected {
+  background-color: #cfe2ff;
+  border-color: #0d6efd;
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.results-grid {
+  display: flex;
+  height: 300px;
+  align-items: flex-end;
+  gap: 20px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.result-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.result-bar {
+  width: 80%;
+  background-color: #0d6efd;
+  border-radius: 8px 8px 0 0;
+  min-height: 10px;
+  transition: height 1s ease;
+}
+
+.result-text {
+  text-align: center;
+  padding-top: 10px;
+}
+
+.result-percentage {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.result-label {
+  margin-top: 5px;
+}
+
+.result-votes {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+/* 반응형 레이아웃 */
+@media (max-width: 768px) {
+  .touch-option {
+    min-width: 120px;
+    height: 80px;
+  }
+}
