@@ -35,6 +35,12 @@ app.use('/polls', pollRoutes);
 // io 객체를 라우트에서 사용할 수 있도록 설정
 app.set('io', io);
 
+// 라우터 불러오기
+const pollsRouter = require('./routes/polls');
+
+// 라우터 설정
+app.use('/polls', pollsRouter);
+
 // 서버 시작
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

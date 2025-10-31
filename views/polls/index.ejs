@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>여론조사 목록</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container mt-4">
+    <div class="row mb-4">
+      <div class="col-md-8">
+        <h1>여론조사 목록</h1>
+      </div>
+      <div class="col-md-4 text-end">
+        <a href="/polls/new" class="btn btn-primary">새 여론조사 만들기</a>
+      </div>
+    </div>
+    
+    <% if (polls && polls.length > 0) { %>
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <% polls.forEach(poll => { %>
+          <div class="col">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title"><%= poll.title %></h5>
+                <% if (poll.description) { %>
+                  <p class="card-text text-muted"><%= poll.description %></p>
+                <% } %>
+                <p class="card-text">
+                  <small class="text-muted">
+                    옵션 <%= poll.options.length %>개 | 총 <%= poll.options.reduce((sum, opt) => sum + opt.votes, 0) %> 투표
+                  </small>
+                </p>
+              </div>
+              <div class="card-footer bg-transparent">
+                <a href="/polls/<%= poll._id %>" class="btn btn-outline-primary w-100">투표하기</a>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="alert alert-info">
+        아직 생성된 여론조사가 없습니다. 첫 번째 여론조사를 만들어보세요!
+      </div>
+    <% } %>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
