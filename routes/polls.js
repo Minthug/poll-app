@@ -35,7 +35,7 @@ router.post('/', async (req, res) => {
             description,
             options: pollOptions
         });
-        
+
         await poll.save();
         res.redirect(`/polls/${poll._id}`);
     } catch (error) {
@@ -47,18 +47,45 @@ router.post('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const poll = await Poll.findById(req.params.id);
-        if (!poll) return res.status(404).send('여론조사를 찾을 수 없습니다');
-    
-        poll.options.id(req.body.optionId).votes++;
-        await poll.save();
-
-        req.app.get('io').emit('vote', { PollId: poll._id });
-    
-        res.redirect(`/polls/${poll._id}/results`);
-    } catch (error) {
+        if (!poll) { 
+            return res.status(404).send('여론조사를 찾을 수 없습니다');
+        }
+            res.render('polls/show', { poll });
+        } catch (error) {
+            console.error(error);
         res.status(500).send('서버 오류');
     }
 });
+
+
+// 투표 처리
+router.post('/:id/vote', async (req, res) => {
+    try {
+        const { optionId } = req.body;
+
+        const poll = await Poll.findById(req.params.id);
+        if (!poll) {
+            return res.status(404).json({ success: false, error: '여론조사를 찾을 수 없습니다'})
+        }
+
+        const option = poll.options.id(optionId);
+        if (!poll) {
+            return res.status(404).json({ success: false, error: '옵션을 찾을 수 없습니다'})
+        }
+
+        option.votes += 1;
+        await poll.save();
+
+        res.json({
+            success: true,
+            votes: option.votes,
+            totalVotes: poll.totalVotes
+        });
+    } catch(error) {
+        console.error(error);
+        res.status(500).json({ success: false, error: '서버 오류'})
+    }
+})
 
 // 결과 보기
 router.get('/:id/results', async ( req, res) => {
