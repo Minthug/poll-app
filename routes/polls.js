@@ -88,13 +88,22 @@ router.post('/:id/vote', async (req, res) => {
 })
 
 // 결과 보기
-router.get('/:id/results', async ( req, res) => {
+router.get('/:id/results', async (req, res ) => {
     try {
         const poll = await Poll.findById(req.params.id);
-        if (!poll) return res.status(404).send('여론조사를 찾을 수 없습니다');
-        res.render('polls/results', { poll });
+        if (!poll) {
+            return res.status(404).json({ success: false, error: '여론 조사를 찾을 수 없습니다'});
+        }
+
+        const pollObj = poll.toJSON ? poll.toJSON() : poll;
+
+        res.json({
+            success: true,
+            poll: pollObj
+        });
     } catch (error) {
-        res.status(500).send('서버 오류');
+        console.error('결과 조회 오류', error);
+        res.status(500).json({ success: false, error: '결과를 불러오는 중 오류가 발생 했습니다.'})
     }
 })
 
