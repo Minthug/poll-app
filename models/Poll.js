@@ -31,6 +31,10 @@ const pollSchema = new mongoose.Schema({
     },
     endDate: {
         type: Date
+    },
+    voteIps: {
+        type: [String],
+        default: []
     }
 });
 
