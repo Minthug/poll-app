@@ -62,18 +62,37 @@ router.get('/:id', async (req, res) => {
 router.post('/:id/vote', async (req, res) => {
     try {
         const { optionId } = req.body;
+        const { pollId } = req.params.id;
 
-        const poll = await Poll.findById(req.params.id);
+        // 클라이언트 IP 가져오기
+        const clientIp = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+        console.log('투표 요청 IP:', clientIp);
+
+        // 여론조사 찾기
+        const poll = await Poll.findById(pollId);
         if (!poll) {
             return res.status(404).json({ success: false, error: '여론조사를 찾을 수 없습니다'})
         }
 
+        // IP 주소로 중복 투표 확인 (Poll 모델에 voteIps 필드가 추가 되어야함)
+        if (poll.voteIps && poll.voteIps.includes(clientIp)) {
+            return res.status(403).json({
+                success: false,
+                error: '이미 투표하셨습니다',
+                alreadyVoted: true
+            });
+        }
+
+        // 옵션 찾기 (오류 수정: !poll -> !option)
         const option = poll.options.id(optionId);
-        if (!poll) {
+        if (!option) {
             return res.status(404).json({ success: false, error: '옵션을 찾을 수 없습니다'})
         }
 
+        // 투표 증가
         option.votes += 1;
+
         await poll.save();
 
         res.json({
