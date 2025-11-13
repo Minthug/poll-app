@@ -18,10 +18,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// 기본 라우트
-app.get('/', (req, res) => {
-  res.render('index', { title: '여론조사 사이트' });
+// Socket.IO 이벤트 리스너 추가
+io.on('connection', (socket) => {
+  console.log('새 클라이언트 연결', socket.id);
+
+  socket.on('disconnect', () => {
+    console.log('클라이언트 연결 종료:', socket.id);
+  })
 });
+
+// io 객체를 라우트에서 사용할 수 있도록 설정
+app.set('io', io);
 
 // MongoDB 연결
 mongoose.connect(process.env.MONGODB_URI)
@@ -30,16 +37,21 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // app.js에 추가
 const pollRoutes = require('./routes/polls');
+
+// 라우터 설정
 app.use('/polls', pollRoutes);
 
-// io 객체를 라우트에서 사용할 수 있도록 설정
-app.set('io', io);
-
-// 라우터 불러오기
+// 라우터 불러오기(중복제거)
 const pollsRouter = require('./routes/polls');
+const { Socket } = require('dgram');
 
 // 라우터 설정
 app.use('/polls', pollsRouter);
+
+// 기본 라우트
+app.get('/', (req, res) => {
+  res.render('index', { title: '여론조사 사이트' });
+});
 
 // 서버 시작
 const PORT = process.env.PORT || 3000;

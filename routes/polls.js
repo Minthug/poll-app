@@ -93,7 +93,16 @@ router.post('/:id/vote', async (req, res) => {
         // 투표 증가
         option.votes += 1;
 
+        // 투표한 IP 추가 (Poll 모델에 voteIps 필드가 추가 되어야 함)
+        if (!poll.voteIps) poll.voteIps = [];
+        poll.voteIps.push(clientIp);
+
+        // 저장
         await poll.save();
+
+        if (req.app.get('io')) {
+            req.app.get('io').emit('vote-update', { pollId: poll._id });
+        }
 
         res.json({
             success: true,
