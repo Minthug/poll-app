@@ -49,8 +49,21 @@ const { Socket } = require('dgram');
 app.use('/polls', pollsRouter);
 
 // 기본 라우트
-app.get('/', (req, res) => {
-  res.render('index', { title: '여론조사 사이트' });
+app.get('/', async (req, res) => {
+  try {
+    const recentPolls = await Poll.find().sort({ createdAt: -1 }).limit(3);
+
+    res.render('index', { 
+      title: '여론조사 사이트',
+      recentPolls
+    });
+  } catch (error) {
+    console.error('홈페이지 로딩 오류:', error);
+    res.render('index', {
+      title: '여론조사 사이트',
+      recentPolls: []
+    });
+  }
 });
 
 // 서버 시작
