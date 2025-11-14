@@ -2,7 +2,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   // DOM 요소 참조
   const voteForm = document.getElementById('vote-form');
-  const optionZones = document.querySelectorAll('.option-zone');
+  const optionCards = document.querySelectorAll('.option-card');
   const optionIdInput = document.getElementById('option-id-input');
   const submitButton = document.querySelector('button[type="submit"]');
   const selectedOptionDiv = document.querySelector('.selected-option');
@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const resultsDiv = document.getElementById('results');
   const totalVotesP = document.getElementById('total-votes');
   const backToVoteBtn = document.getElementById('back-to-vote');
+  
 
   // 폼에서 poll ID 가져오기
   const pollId = voteForm.getAttribute('data-poll-id');
@@ -19,32 +20,33 @@ document.addEventListener('DOMContentLoaded', () => {
   const socket = io();
   
   // 옵션 영역 클릭 이벤트
-  optionZones.forEach(zone => {
+  optionCards.forEach(card => {
     // 싱글 클릭 처리
-    zone.addEventListener('click', () => {
+    card.addEventListener('click', () => {
+      console.log('옵션 클릭됨');
       // 이전 선택 초기화
-      optionZones.forEach(z => z.classList.remove('selected'));
+      optionCards.forEach(z => z.classList.remove('selected'));
       
       // 현재 선택 표시
-      zone.classList.add('selected');
+      card.classList.add('selected');
       
       // 선택한 옵션 ID 저장
-      const optionId = zone.getAttribute('data-option-id');
+      const optionId = card.getAttribute('data-option-id');
       optionIdInput.value = optionId;
       
       // 선택한 옵션 텍스트 표시
-      const optionText = zone.querySelector('.option-label').textContent;
-      selectedOptionText.textContent = optionText;
-      selectedOptionDiv.classList.remove('d-none');
+    const optionText = card.querySelector('.option-label').textContent;
+    selectedOptionText.textContent = optionText;
+    selectedOptionDiv.querySelector('.alert').classList.remove('d-none');
       
       // 투표 버튼 활성화
       submitButton.disabled = false;
     });
     
     // 더블 클릭으로 바로 투표
-    zone.addEventListener('dblclick', async () => {
+    card.addEventListener('dblclick', async () => {
       // 해당 옵션 ID 가져오기
-      const optionId = zone.getAttribute('data-option-id');
+      const optionId = card.getAttribute('data-option-id');
       
       if (!optionId) return;
       

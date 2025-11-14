@@ -19,72 +19,28 @@
       </div>
       
       <div class="card-body">
-        <form id="vote-form" data-poll-id="<%= poll._id %>">
-          <div id="touch-pad" class="touch-pad">
-            <% 
-              // 옵션에 따라 영역 분할
-              const options = poll.options;
-              let zones = [];
-              
-              // 옵션 수에 따라 레이아웃 결정
-              if (options.length === 2) {
-                // 2개 옵션: 좌/우 분할
-                zones = [
-                  { left: '0%', top: '0%', width: '50%', height: '100%' },
-                  { left: '50%', top: '0%', width: '50%', height: '100%' }
-                ];
-              } else if (options.length === 3) {
-                // 3개 옵션: 상단 전체, 하단 좌/우
-                zones = [
-                  { left: '0%', top: '0%', width: '100%', height: '50%' },
-                  { left: '0%', top: '50%', width: '50%', height: '50%' },
-                  { left: '50%', top: '50%', width: '50%', height: '50%' }
-                ];
-              } else if (options.length === 4) {
-                // 4개 옵션: 2x2 그리드
-                zones = [
-                  { left: '0%', top: '0%', width: '50%', height: '50%' },
-                  { left: '50%', top: '0%', width: '50%', height: '50%' },
-                  { left: '0%', top: '50%', width: '50%', height: '50%' },
-                  { left: '50%', top: '50%', width: '50%', height: '50%' }
-                ];
-              } else if (options.length === 5) {
-                // 5개 옵션: 상단 2개, 중간 1개, 하단 2개
-                zones = [
-                  { left: '0%', top: '0%', width: '50%', height: '40%' },
-                  { left: '50%', top: '0%', width: '50%', height: '40%' },
-                  { left: '0%', top: '40%', width: '100%', height: '20%' },
-                  { left: '0%', top: '60%', width: '50%', height: '40%' },
-                  { left: '50%', top: '60%', width: '50%', height: '40%' }
-                ];
-              } else {
-                // 기본: 균등 분할
-                const height = 100 / options.length + '%';
-                for (let i = 0; i < options.length; i++) {
-                  zones.push({
-                    left: '0%',
-                    top: (i * 100 / options.length) + '%',
-                    width: '100%',
-                    height: height
-                  });
-                }
-              }
-            %>
-            
-            <% options.forEach((option, index) => { %>
-              <div class="option-zone" 
-                   data-option-id="<%= option._id %>" 
-                   style="left: <%= zones[index].left %>; 
-                          top: <%= zones[index].top %>; 
-                          width: <%= zones[index].width %>; 
-                          height: <%= zones[index].height %>;">
-                <span class="option-label"><%= option.text %></span>
+       <form id="vote-form" data-poll-id="<%= poll._id %>">
+        <!-- 간단한 옵션 목록으로 변경 -->
+        <div class="mb-4">
+          <p class="mb-3">아래 옵션 중 하나를 선택하여 투표하세요:</p>
+          <div class="row row-cols-1 row-cols-md-2 g-3">
+            <% poll.options.forEach(option => { %>
+              <div class="col">
+                <div class="option-card card h-100" data-option-id="<%= option._id %>">
+                  <div class="card-body d-flex align-items-center justify-content-center">
+                    <h5 class="card-title mb-0 text-center"><%= option.text %></h5>
+                  </div>
+                </div>
               </div>
             <% }); %>
           </div>
-          
+        </div>
+        
          <div class="selected-option mb-3">
         <small class="text-muted">원하는 옵션을 선택하면 강조 표시됩니다. 더블클릭으로 바로 투표할 수 있습니다.</small>
+         <div class="alert alert-primary mt-2 d-none">
+          선택: <span id="selected-option-text"></span>
+          </div>
         </div>
           
           <input type="hidden" id="option-id-input" name="optionId">
