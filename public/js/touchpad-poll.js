@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const resultsDiv = document.getElementById('results');
   const totalVotesP = document.getElementById('total-votes');
   const backToVoteBtn = document.getElementById('back-to-vote');
-  
+
   // 폼에서 poll ID 가져오기
   const pollId = voteForm.getAttribute('data-poll-id');
   
@@ -112,10 +112,61 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   // 결과 로드
-  async function loadResults() {
-    try {
-      console.log('결과 로드 시작...');
-      const response = await fetch(`/polls/${pollId}/results`);
+async function loadResults() {
+  try {
+    console.log('결과 로드 시작...');
+    const response = await fetch(`/polls/${pollId}/results`);
+    
+    // 응답 상태 확인
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log('받은 데이터:', data);
+    
+    if (data.success) {
+      const { poll } = data;
+      const totalVotes = poll.totalVotes || poll.options.reduce((sum, opt) => sum + opt.votes, 0);
       
-      // 응답 상태 확인
-      if (!response.ok)
+      let resultsHTML = '';
+      
+      poll.options.forEach(option => {
+        const percentage = totalVotes > 0 ? (option.votes / totalVotes * 100).toFixed(1) : 0;
+        
+        resultsHTML += `
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <strong>${option.text}</strong>
+              <span>${option.votes}표 (${percentage}%)</span>
+            </div>
+            <div class="progress">
+              <div class="progress-bar" role="progressbar" style="width: ${percentage}%" 
+                   aria-valuenow="${percentage}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+          </div>
+        `;
+      });
+      
+      resultsDiv.innerHTML = resultsHTML;
+      totalVotesP.textContent = `총 ${totalVotes}명 참여`;
+      
+      // 결과 표시, 폼 숨기기
+      voteForm.classList.add('d-none');
+      resultsContainer.classList.remove('d-none');
+    } else {
+      alert('결과를 불러오는 중 오류가 발생했습니다: ' + (data.error || '알 수 없는 오류'));
+    }
+  } catch (error) {
+    console.error('결과 로드 오류:', error);
+    alert('결과를 불러오는 중 오류가 발생했습니다: ' + error.message);
+  }
+}
+
+if (backToVoteBtn) {
+  backToVoteBtn.addEventListener('click', () => {
+    resultsContainer.classList.add('d-none');
+    voteForm.classList.remove('d-none');
+  });
+}
+});
