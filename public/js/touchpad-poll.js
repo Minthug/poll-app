@@ -10,15 +10,25 @@ document.addEventListener('DOMContentLoaded', () => {
   const resultsContainer = document.getElementById('results-container');
   const resultsDiv = document.getElementById('results');
   const totalVotesP = document.getElementById('total-votes');
-  const backToVoteBtn = document.getElementById('back-to-vote');
-  
+  const backToVoteBtn = document.getElementById('back-to-vote');  
 
   // 폼에서 poll ID 가져오기
-  const pollId = voteForm.getAttribute('data-poll-id');
+  const pollId = document.getElementById('vote-form').dataset.pollId;
   
   // Socket.io 연결
   const socket = io();
   
+  socket.on('vote-update', (data) => {
+    if (data.pollId === pollId) {
+      updateVoteDisplay(data.poll);
+    }
+  });
+
+  // 투표 정보 업데이트 함수
+  function updateVoteDisplay(pollData) {
+    const
+  }
+
   // 옵션 영역 클릭 이벤트
   optionCards.forEach(card => {
     // 싱글 클릭 처리
