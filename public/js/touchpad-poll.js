@@ -26,7 +26,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 투표 정보 업데이트 함수
   function updateVoteDisplay(pollData) {
-    const
+    // 총 투표 수 계산
+    const totalVotes = pollData.options.reduce((sum, opt) => sum + opt.votes, 0);
+
+    // 총 투표 수 업데이트
+    document.getElementById('total-votes-count').textContent = totalVotes;
+
+    // 각 옵션 업데이트
+    pollData.options.forEach(option => {
+      const card = document.querySelector(`[data-option-id="${option._id}]`);
+      if (card) {
+        const voteCount = card.querySelector('.vote-count');
+        voteCount.textContent = `${option.votes}표`;
+
+        // 비율 계산
+        const percentage = totalVotes > 0 ? ((option.votes / totalVotes) * 100).toFixed(1) : 0;
+
+        // 비율 업데이트
+        const votePercentage = card.querySelector('.vote-percentage');
+        votePercentage.textContent = `${percentage}%`;
+
+        // 프로그레스 바 업데이트
+        const progressBar = card.querySelector('.progress-bar');
+        progressBar.style.width = `${percentage}%`;
+        progressBar.setAttribute('aria-valuenow', percentage);
+      }
+    }) 
   }
 
   // 옵션 영역 클릭 이벤트
