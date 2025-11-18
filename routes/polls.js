@@ -62,17 +62,19 @@ router.get('/:id', async (req, res) => {
 router.post('/:id/vote', async (req, res) => {
     try {
         const { optionId } = req.body;
-        const { pollId } = req.params.id;
+        const pollId = req.params.id;
 
         // 클라이언트 IP 가져오기
         const clientIp = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
-        console.log('투표 요청 IP:', clientIp);
+        console.log('투표 요청 - Poll ID:', pollId);
+        console.log('투표 요청 - Option ID:', optionId);
+        console.log('투표 요청 - IP:', clientIp);
 
         // 여론조사 찾기
         const poll = await Poll.findById(pollId);
         if (!poll) {
-            return res.status(404).json({ success: false, error: '여론조사를 찾을 수 없습니다'})
+            return res.status(404).json({ success: false, error: '여론조사를 찾을 수 없습니다'});
         }
 
         // IP 주소로 중복 투표 확인 (Poll 모델에 voteIps 필드가 추가 되어야함)
@@ -87,12 +89,12 @@ router.post('/:id/vote', async (req, res) => {
         // 옵션 찾기 (오류 수정: !poll -> !option)
         const option = poll.options.id(optionId);
         if (!option) {
+            console.log('옵션을 찾을 수 없음:', optionId);
             return res.status(404).json({ success: false, error: '옵션을 찾을 수 없습니다'})
         }
 
         // 투표 증가
         option.votes += 1;
-        await poll.save();
 
         // 투표한 IP 추가 (Poll 모델에 voteIps 필드가 추가 되어야 함)
         if (!poll.voteIps) poll.voteIps = [];
@@ -101,18 +103,32 @@ router.post('/:id/vote', async (req, res) => {
         // 저장
         await poll.save();
 
-        if (req.app.get('io')) {
-            req.app.get('io').emit('vote-update', { pollId: poll._id });
+        console.log('투표 성공 - 옵션:', option.text, '투표수:', option.votes);
+
+        const io = req.app.get('io');
+        if (io) {
+            const pollObject = poll.toObject;
+
+            console.log('Socket .IO 전송 데이터:', {
+                pollId: poll._id.toString(),
+                poll: pollObject
+            });
+            
+            io.emit('vote-update', {
+                pollId: poll._id.toString(),
+                poll: pollObject
+            });
         }
 
         res.json({
             success: true,
+            poll: poll,
             votes: option.votes,
             totalVotes: poll.totalVotes
         });
     } catch(error) {
         console.error(error);
-        res.status(500).json({ success: false, error: '서버 오류'})
+        res.status(500).json({ success: false, error: '서버 오류', error: error.message})
     }
 })
 

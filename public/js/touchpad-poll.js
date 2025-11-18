@@ -13,7 +13,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const backToVoteBtn = document.getElementById('back-to-vote');  
 
   // 폼에서 poll ID 가져오기
-  const pollId = document.getElementById('vote-form').dataset.pollId;
+  const pollId = voteForm ? voteForm.dataset.pollId : null;
+  if (!pollId) {
+    console.error('Poll ID를 찾을 수 없습니다');
+    return;
+  }
+
+console.log('Poll ID:', pollId);
+console.log('Poll ID type:', typeof pollId);
+console.log('Poll ID length:', pollId ? pollId.length : 0);
   
   // Socket.io 연결
   const socket = io();
@@ -21,6 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
   socket.on('vote-update', (data) => {
     if (data.pollId === pollId) {
       updateVoteDisplay(data.poll);
+
+      if (!resultsContainer.classList.contains('d-none')) {
+        loadResults();
+      }
     }
   });
 
@@ -30,11 +42,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalVotes = pollData.options.reduce((sum, opt) => sum + opt.votes, 0);
 
     // 총 투표 수 업데이트
-    document.getElementById('total-votes-count').textContent = totalVotes;
+    const totalVotesElement = document.getElementById('total-votes-count');
+    if (totalVotesElement) {
+      totalVotesElement.textContent = totalVotes;
+    }
 
     // 각 옵션 업데이트
     pollData.options.forEach(option => {
-      const card = document.querySelector(`[data-option-id="${option._id}]`);
+      const card = document.querySelector(`[data-option-id="${option._id}"]`);
       if (card) {
         const voteCount = card.querySelector('.vote-count');
         voteCount.textContent = `${option.votes}표`;
@@ -44,14 +59,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 비율 업데이트
         const votePercentage = card.querySelector('.vote-percentage');
-        votePercentage.textContent = `${percentage}%`;
+        if (votePercentage) {
+          votePercentage.textContent = `${percentage}%`;
+        }
 
         // 프로그레스 바 업데이트
         const progressBar = card.querySelector('.progress-bar');
-        progressBar.style.width = `${percentage}%`;
-        progressBar.setAttribute('aria-valuenow', percentage);
+        if (progressBar) {
+          progressBar.style.width = `${percentage}%`;
+          progressBar.setAttribute('aria-valuenow', percentage);
+        }
       }
-    }) 
+    });
   }
 
   // 옵션 영역 클릭 이벤트
@@ -60,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
     card.addEventListener('click', () => {
       console.log('옵션 클릭됨');
       // 이전 선택 초기화
-      optionCards.forEach(z => z.classList.remove('selected'));
+      optionCards.forEach(c => c.classList.remove('selected'));
       
       // 현재 선택 표시
       card.classList.add('selected');
@@ -70,12 +89,20 @@ document.addEventListener('DOMContentLoaded', () => {
       optionIdInput.value = optionId;
       
       // 선택한 옵션 텍스트 표시
-    const optionText = card.querySelector('.option-label').textContent;
-    selectedOptionText.textContent = optionText;
-    selectedOptionDiv.querySelector('.alert').classList.remove('d-none');
+      // 수정: .option-label 대신 .card-title 사용
+    const optionTextElement = card.querySelector('.card-title');
+    if (optionTextElement && selectedOptionText) {
+      selectedOptionText.textContent = optionTextElement.textContent;
+      const alertElement = selectedOptionDiv.querySelector('.alert');
+      if (alertElement) {
+        alertElement.classList.remove('d-none');
+      }
+    }
       
       // 투표 버튼 활성화
-      submitButton.disabled = false;
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
     });
     
     // 더블 클릭으로 바로 투표
