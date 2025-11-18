@@ -27,19 +27,27 @@ console.log('Poll ID length:', pollId ? pollId.length : 0);
   const socket = io();
   
   socket.on('vote-update', (data) => {
-    if (data.pollId === pollId) {
-      updateVoteDisplay(data.poll);
+    console.log('Socket 데이터:', data);
 
-      if (!resultsContainer.classList.contains('d-none')) {
-        loadResults();
+    if (data && data.pollId === pollId) {
+      if (data.poll && data.poll.options) {
+      updateVoteDisplay(data.poll);
+      } else {
+        console.warn('poll data 없음:', data);
       }
     }
   });
-
-  // 투표 정보 업데이트 함수
-  function updateVoteDisplay(pollData) {
-    // 총 투표 수 계산
-    const totalVotes = pollData.options.reduce((sum, opt) => sum + opt.votes, 0);
+  
+// 투표 정보 업데이트 함수
+function updateVoteDisplay(pollData) {
+  // 데이터 검증 추가
+  if (!pollData || !pollData.options) {
+    console.error('pollData가 유효하지 않음:', pollData);
+    return;  // 함수 종료
+  }
+  
+  // 총 투표 수 계산
+  const totalVotes = pollData.options.reduce((sum, opt) => sum + (opt.votes || 0), 0);
 
     // 총 투표 수 업데이트
     const totalVotesElement = document.getElementById('total-votes-count');
