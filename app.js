@@ -9,6 +9,8 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
+const Poll = require('./models/Poll');
+
 // 미들웨어 설정
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -52,7 +54,6 @@ app.use('/polls', pollsRouter);
 app.get('/', async (req, res) => {
   try {
     const recentPolls = await Poll.find().sort({ createdAt: -1 }).limit(3);
-
     res.render('index', { 
       title: '여론조사 사이트',
       recentPolls
