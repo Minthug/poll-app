@@ -8,6 +8,35 @@
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="d-flex flex-column min-vh-100">
+  <!-- 공지사항 모달 -->
+  <% if (notice && notice.isActive) { %>
+  <div class="modal fade" id="noticeModal" tabindex="-1" aria-labelledby="noticeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="noticeModalLabel"><%= notice.title %></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <%- notice.content %>
+          
+          <!-- 체크박스 -->
+          <div class="form-check mt-3">
+            <input class="form-check-input" type="checkbox" id="dontShowToday">
+            <label class="form-check-label" for="dontShowToday">
+              위 내용에 동의하면 체크를 누르고 여론 조사에 참여하세요
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">동의</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <% } %>
+
   <!-- 간단한 네비게이션 바 -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
@@ -47,7 +76,7 @@
           <div class="col-md-6">
             <div class="card h-100 shadow-sm">
               <div class="card-body text-center">
-                <h5 class="card-title">투표하기</h5>
+                <h5 class="card-title">📊 투표하기</h5>
                 <p class="card-text">다양한 주제의 여론조사에 참여해보세요.</p>
                 <a href="/polls" class="stretched-link"></a>
               </div>
@@ -56,7 +85,7 @@
           <div class="col-md-6">
             <div class="card h-100 shadow-sm">
               <div class="card-body text-center">
-                <h5 class="card-title">만들기</h5>
+                <h5 class="card-title">✨ 만들기</h5>
                 <p class="card-text">나만의 여론조사를 만들어 공유해보세요.</p>
                 <a href="/polls/new" class="stretched-link"></a>
               </div>
@@ -70,7 +99,6 @@
     <div class="mt-5">
       <h2 class="mb-4">최신 여론조사</h2>
       <div id="recent-polls" class="row row-cols-1 row-cols-md-3 g-4">
-        <!-- 이 부분은 서버에서 데이터를 받아와 채웁니다 -->
         <% if (typeof recentPolls !== 'undefined' && recentPolls.length > 0) { %>
           <% recentPolls.slice(0, 3).forEach(poll => { %>
             <div class="col">
@@ -103,6 +131,31 @@
     </div>
   </footer>
 
+  <!-- JavaScript -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- 모달 자동 띄우기 -->
+  <% if (notice && notice.isActive) { %>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const hideNotice = localStorage.getItem('hideHomeNoticeUntil');
+      const now = new Date().getTime();
+
+      if (!hideNotice || now > parseInt(hideNotice)) {
+        const noticeModal = new bootstrap.Modal(document.getElementById('noticeModal'));
+        noticeModal.show();
+
+        document.getElementById('noticeModal').addEventListener('hidden.bs.modal', () => {
+          const dontShow = document.getElementById('dontShowToday').checked;
+          if (dontShow) {
+            const tomorrow = now + (24 * 60 * 60 * 1000);
+            localStorage.setItem('hideHomeNoticeUntil', tomorrow.toString());
+            console.log('홈 공지사항을 24시간 동안 숨깁니다');
+          }
+        });
+      }
+    });
+  </script>
+  <% } %>
 </body>
 </html>
