@@ -79,6 +79,28 @@ app.get('/', async (req, res) => {
   }
 });
 
+//약관 동의 기록 API
+app.post('/api/agree-terms', async (req, res) => {
+  try {
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const userAgent = req.headers['user-agent'];
+
+    // IP 기록 저장
+    await Visitor.create({
+      ip,
+      action: 'agree_terms',
+      userAgent
+    });
+
+    console.log(`약관 동의: ${ip}`);
+
+    res.json({ success: true, message: '약관 동의가 기록되었습니다'});
+  } catch (error) {
+    console.error('약관 동의 기록 오류:', error);
+    res.status(500).json({ success: false, message: '기록 실패'});
+  }
+});
+
 // 서버 시작
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

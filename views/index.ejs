@@ -153,21 +153,41 @@
         });
 
         // 동의 버튼 클릭 시
-        agreeButton.addEventListener('click', () => {
+        agreeButton.addEventListener('click', async () => {
+          console.log('동의 버튼 클릭, 체크박스:', agreeCheckbox.checked);
+
           if (agreeCheckbox.checked) {
-            // 24시간 동안 다시 안 보기
+            try {
+              const response = await fetch('/api/agree-terms', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                }
+              });
+
+              const data = await response.json();
+              console.log('약관 동의 기록됨:', data);
+
+              // 24시간 동안 다시 안 보기
+              const tomorrow = now + (24 * 60 * 60 * 1000);
+              localStorage.setItem('hideHomeNoticeUntil', tomorrow.toString());
+              console.log('✅ 동의 완료. 24시간 동안 숨김');
+
+             // 모달 닫기
+            noticeModal.hide();
+          } catch (error) {
+            console.error('약관 동의 기록 실패:', error);
+            // 에러가 나도 모달은 닫기
             const tomorrow = now + (24 * 60 * 60 * 1000);
             localStorage.setItem('hideHomeNoticeUntil', tomorrow.toString());
-            console.log('동의 완료. 24시간 동안 공지를 표시하지 않습니다.');
-            
-            // 모달 닫기
             noticeModal.hide();
-          } else {
-            alert('약관에 동의해야 여론조사에 참여할 수 있습니다.');
-          }
-        });
-      }
+        }
+        } else {
+          alert('약관에 동의해야 여론조사에 참여할 수 있습니다.');
+        }
     });
+  }
+});
   </script>
   <% } %>
 </body>

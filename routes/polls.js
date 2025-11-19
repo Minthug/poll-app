@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Poll = require('../models/Poll');
+const Visitor = require('../models/Visitor');
 
 // 모든 여론 조사 목록
 router.get('/', async (req, res) => {
@@ -66,6 +67,7 @@ router.post('/:id/vote', async (req, res) => {
 
         // 클라이언트 IP 가져오기
         const clientIp = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const userAgent = req.headers['user-agent'];
 
         console.log('투표 요청 - Poll ID:', pollId);
         console.log('투표 요청 - Option ID:', optionId);
@@ -103,7 +105,15 @@ router.post('/:id/vote', async (req, res) => {
         // 저장
         await poll.save();
 
+        await Visitor.create({
+            ip: clientIp,
+            action: 'vote',
+            pollId: poll._id,
+            userAgent
+        });
+
         console.log('투표 성공 - 옵션:', option.text, '투표수:', option.votes);
+        console.log('투표 IP 기록 완료:', clientIp);
 
         const io = req.app.get('io');
         if (io) {
@@ -162,7 +172,7 @@ router.get('/:id/voted-ips', async (req, res) => {
         res.render('polls/voted-ips', { poll });
     } catch (error) {
         console.error(error)
-        res.render(500).send('서버 오류')
+        res.render(500).send('서버 오류');
     }
 })
 
