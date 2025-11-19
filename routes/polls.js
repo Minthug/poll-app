@@ -152,5 +152,19 @@ router.get('/:id/results', async (req, res ) => {
     }
 })
 
+router.get('/:id/voted-ips', async (req, res) => {
+    try {
+        const poll = await Poll.findById(req.params.id);
+        if (!poll) {
+            return res.status(404).send('여론조사를 찾을 수 없습니다');
+        }
+
+        res.render('polls/voted-ips', { poll });
+    } catch (error) {
+        console.error(error)
+        res.render(500).send('서버 오류')
+    }
+})
+
 module.exports = router;
 
