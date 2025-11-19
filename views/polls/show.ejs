@@ -27,10 +27,18 @@
           <div class="alert alert-info mb-0">
             실시간으로 투표 결과가 업데이트됩니다! 📊
           </div>
+          
+          <!-- 체크박스 추가-->
+          <div class="form-check mt-3">
+            <input class="form-check-input" type="checkbox" id="dontShowToday">
+            <label class="form-check-label" for="dontShowToday">
+              오늘 하루 보지 않기
+            </label>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">투표하러 가기</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">확인</button>
         </div>
       </div>
     </div>
@@ -125,8 +133,27 @@
   <script>
     // 페이지 로드 시 모달 표시
     window.addEventListener('DOMContentLoaded', () => {
-      const noticeModal = new bootstrap.Modal(document.getElementById('noticeModal'));
-      noticeModal.show();
+      const hideNotice = localStorage.getItem('hideNoticeUntil');
+      const now = new Date().getTime();
+
+      //저장된 시간이 없거나 지났으면 모달 표시
+      if (!hideNotice || now > parseInt(hideNotice)) {
+        const noticeModal = new bootstrap.Modal(document.getElementById('noticeModal'));
+        noticeModal.show();
+
+        //모달이 닫힐 때 체크박스 확인
+        document.getElementById('noticeModal').addEventListener('hidden.bs.modal', () => {
+          const dontShow = document.getElementById('dontShowToday').checked;
+          if (dontShow) {
+            // 24시간 후 timestamp 저장
+            const tomorrow = now + (24 * 60 * 60 * 1000);
+            localStorage.setItem('hideNoticeUntil', tomorrow.toString());
+            console.log('공지사항을 24시간 동안 숨깁니다');
+          }
+        });
+      } else {
+        console.log('공지사항이 숨겨진 상태입니다. 다음 표시 시간:', new Date(parseInt(hideNotice)));
+      }
     });
   </script>
 </body>
