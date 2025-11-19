@@ -10,6 +10,7 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 const Poll = require('./models/Poll');
+const Visitor = require('./models/Visitor')
 
 // 미들웨어 설정
 app.use(express.json());
