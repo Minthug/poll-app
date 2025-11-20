@@ -53,7 +53,8 @@ router.get('/dashboard', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).send('서버오류');
-    }
+        }
+    });
         // IP별 지역 통계 (추가 예정)
 
         //약관 동의 IP 목록 
@@ -67,9 +68,43 @@ router.get('/dashboard', async (req, res) => {
                 res.status(500).send('서버오류');
             } 
         });
+
         // 투표 IP 목록
-
+        router.get('/voted-ips', async (req, res) => {
+            try {
+                const votedVisitors = await Visitor.find({ action: 'vote' })
+                    .populate('pollId', 'title')
+                    .sort({ timestamps: -1});
+                
+                res.render('admin/voted-ips', { visitors: votedVisitors });
+            } catch (error) {
+                console.error(error);
+                res.status(500).send('서버오류');
+            }
+        });
+        
         // 특정 IP 상세 정보
+        router.get('/ip/:ip', async (req, res) => {
+            try {
+                const ip = req.params.ip;
 
-    }
-});
+                const activities = await Visitor.find( { ip })
+                    .populate('pollId', 'title')
+                    .sort({ timestamps: -1 });
+
+                const agreeCount = activities.filter(a => a.action === 'agree_terms').length;
+                const voteCount = activities.filter(a => a.action === 'vote').length;
+
+                res.render('admin/ip-detail', {
+                    ip,
+                    activities,
+                    agreeCount,
+                    voteCount
+                });
+            } catch (error) {
+                console.error(error);
+                res.status(500).send('서버오류');
+            }
+        });
+    
+module.exports = router;
