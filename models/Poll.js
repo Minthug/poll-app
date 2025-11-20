@@ -32,7 +32,7 @@ const pollSchema = new mongoose.Schema({
     endDate: {
         type: Date
     },
-    voteIps: {
+    voteIPs: {
         type: [String],
         default: []
     }
