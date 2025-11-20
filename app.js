@@ -41,6 +41,8 @@ mongoose.connect(process.env.MONGODB_URI)
 // 라우터 설정 (중복 제거)
 const pollRoutes = require('./routes/polls');
 app.use('/polls', pollRoutes);
+const adminRoutes = require('./routes/admin');
+app.use('/admin', adminRoutes);
 
 // 기본 라우트 (홈페이지) - 공지사항 추가
 app.get('/', async (req, res) => {
