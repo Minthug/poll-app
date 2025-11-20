@@ -12,6 +12,64 @@ router.get('/dashboard', async (req, res) => {
         // 투표한 고유 IP 수
         const voteIPs = await Visitor.distinct('ip', { action: 'vote' });
 
-        
+        // 전체 약관 동의 수
+        const totalAgrees = await Visitor.countDocuments({ action: 'agree_terms'});
+
+        // 전체 투표 수
+        const totalVotes = await Visitor.countDocuments({ action: 'vote' });
+
+        // 최근 활동 (100개)
+        const recentActivities = await Visitor.find()
+            .populate('pollId', 'title')
+            .sort({ timestamps: -1 })
+            .limit(100);
+
+        // IP별 활동 통계
+        const ipStats = await Visitor.aggregate([
+            {
+                $group: {
+                    _id: '$ip',
+                    agreeCount: {
+                        $sum: { $cond: [{ $eq: ['$action', 'agree_terms'] }, 1, 0] }
+                    },
+                    voteCount: {
+                        $sum: { $cond: [{ $eq: ['$action', 'vote'] }, 1, 0] }
+                    },
+                    lastActivity: { $max: '$timestamp' }
+                }
+            },
+            { $sort: { lastActivity: -1 } },
+            { $limit: 100 }
+        ]);
+
+        res.render('admin/dashboard', {
+            agreeIPCount: agreeIPs.length,
+            voteIPCount: voteIPs.length,
+            totalAgrees,
+            totalVotes,
+            recentActivities,
+            ipStats
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('서버오류');
+    }
+        // IP별 지역 통계 (추가 예정)
+
+        //약관 동의 IP 목록 
+        router.get('/agreed-ips', async (req, res) => {
+            try {
+                const agreedVisitors = await Visitor.find({ action: 'agree_terms' }).sort({ timestamps: -1});
+
+                res.render('admin/agreed-ips', { visitors: agreedVisitors })
+            } catch (error) {
+                console.error(error);
+                res.status(500).send('서버오류');
+            } 
+        });
+        // 투표 IP 목록
+
+        // 특정 IP 상세 정보
+
     }
 });
