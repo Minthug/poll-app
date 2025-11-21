@@ -3,6 +3,25 @@ const router = express.Router();
 const Visitor = require('../models/Visitor');
 const Poll = require('../models/Poll');
 
+router.get('/', async (req, res) => {
+    try {
+        // 모든 poll 가져오기
+        const polls = await Poll.find().sort({ createdAt: -1 });
+
+        const totalVotes = polls.reduce((sum, poll) => {
+            return sum + poll.options.reduce((optSum, opt) => optSum + opt.votes, 0);
+        }, 0);
+
+        res.render('admin/dashboard', {
+            polls,
+            totalVotes
+        });
+    } catch (error) {
+        console.error('대시보드 로딩 에러:', error);
+        res.status(500).send('서버 에러');
+    }
+});
+
 // IP 통계 대시보드
 router.get('/dashboard', async (req, res) => {
     try {
@@ -86,7 +105,7 @@ router.get('/dashboard', async (req, res) => {
         // 특정 IP 상세 정보
         router.get('/ip/:ip', async (req, res) => {
             try {
-                const ipAddress = decodeURIComponent(req.params.id);
+                const ipAddress = decodeURIComponent(req.params.ip);
 
                 const polls = await Visitor.find( { votedIPs: ipAddress });
 
@@ -101,4 +120,13 @@ router.get('/dashboard', async (req, res) => {
             }
         });
     
+        router.post('/poll/:id/delete', async (req, res) => {
+            try {
+                await Poll.findByIdAndDelete(req.params.id);
+                res.redirect('/admin');
+            } catch (error) {
+                console.error('Poll 삭제 에러:', error);
+                res.status(500).send('서버 에러');
+            }
+        });
 module.exports = router;
