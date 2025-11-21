@@ -27,12 +27,12 @@ const pollSchema = new mongoose.Schema({
     options: [optionSchema],
     createdAt: {
         type: Date,
-        defalut: Date.now
+        default: Date.now
     },
     endDate: {
         type: Date
     },
-    voteIPs: {
+    votedIPs: {
         type: [String],
         default: []
     }

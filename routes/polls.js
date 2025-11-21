@@ -80,7 +80,7 @@ router.post('/:id/vote', async (req, res) => {
         }
 
         // IP 주소로 중복 투표 확인 (Poll 모델에 voteIps 필드가 추가 되어야함)
-        if (poll.voteIps && poll.voteIps.includes(clientIp)) {
+        if (poll.votedIPs && poll.votedIPs.includes(clientIp)) {
             return res.status(403).json({
                 success: false,
                 error: '이미 투표하셨습니다',
@@ -99,8 +99,8 @@ router.post('/:id/vote', async (req, res) => {
         option.votes += 1;
 
         // 투표한 IP 추가 (Poll 모델에 voteIps 필드가 추가 되어야 함)
-        if (!poll.voteIps) poll.voteIps = [];
-        poll.voteIps.push(clientIp);
+        if (!poll.votedIPs) poll.votedIPs = [];
+        poll.votedIPs.push(clientIp);
 
         // 저장
         await poll.save();
@@ -117,7 +117,7 @@ router.post('/:id/vote', async (req, res) => {
 
         const io = req.app.get('io');
         if (io) {
-            const pollObject = poll.toObject;
+            const pollObject = poll.toObject();
 
             console.log('Socket .IO 전송 데이터:', {
                 pollId: poll._id.toString(),
