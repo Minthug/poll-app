@@ -25,6 +25,9 @@ router.get('/', async (req, res) => {
 // IP 통계 대시보드
 router.get('/dashboard', async (req, res) => {
     try {
+        // Poll 데이터 추가
+        const polls = await Poll.find().sort({ createdAt: -1 });
+
         // 약관 동의한 고유 IP 수
         const agreeIPs = await Visitor.distinct('ip', { action: 'agree_terms'});
 
@@ -34,8 +37,10 @@ router.get('/dashboard', async (req, res) => {
         // 전체 약관 동의 수
         const totalAgrees = await Visitor.countDocuments({ action: 'agree_terms'});
 
-        // 전체 투표 수
-        const totalVotes = await Visitor.countDocuments({ action: 'vote' });
+        // 전체 투표 수(수정)
+        const totalVotes = await polls.reduce((sum, poll) => {
+            return sum + poll.options.reduce((optSum, opt) => optSum + opt.votes, 0); 
+        }, 0);
 
         // 최근 활동 (100개)
         const recentActivities = await Visitor.find()
@@ -62,6 +67,7 @@ router.get('/dashboard', async (req, res) => {
         ]);
 
         res.render('admin/dashboard', {
+            polls,
             agreeIPCount: agreeIPs.length,
             voteIPCount: voteIPs.length,
             totalAgrees,
