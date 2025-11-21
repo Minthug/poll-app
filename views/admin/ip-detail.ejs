@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IP 상세 정보 - 관리자</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .ip-detail-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .ip-header {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .ip-address {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .vote-summary {
+      color: #666;
+      font-size: 16px;
+    }
+    .polls-grid {
+      display: grid;
+      gap: 20px;
+    }
+    .poll-card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .poll-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .poll-date {
+      color: #999;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    .voted-option {
+      background: #e3f2fd;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    .option-name {
+      font-weight: 500;
+      color: #1976d2;
+    }
+    .back-button {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #666;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    .back-button:hover {
+      background: #555;
+    }
+    .no-votes {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="ip-detail-container">
+    <a href="/admin" class="back-button">← 관리자 페이지로 돌아가기</a>
+    
+    <div class="ip-header">
+      <h1 class="ip-address"><%= ipAddress %></h1>
+      <p class="vote-summary">총 <%= voteCount %>개의 투표에 참여했습니다</p>
+    </div>
+
+    <div class="polls-grid">
+      <% if (polls.length === 0) { %>
+        <div class="no-votes">
+          <p>이 IP 주소로 투표한 기록이 없습니다.</p>
+        </div>
+      <% } else { %>
+        <% polls.forEach(poll => { %>
+          <div class="poll-card">
+            <h2 class="poll-title"><%= poll.title %></h2>
+            <p class="poll-date">투표일: <%= new Date(poll.createdAt).toLocaleString('ko-KR') %></p>
+            
+            <div class="voted-option">
+              <% 
+                // 이 IP가 투표한 옵션 찾기
+                const votedOption = poll.options.find(opt => 
+                  opt.voters && opt.voters.includes(ipAddress)
+                );
+              %>
+              <% if (votedOption) { %>
+                <p class="option-name">투표한 항목: <%= votedOption.name %></p>
+                <p>득표수: <%= votedOption.votes %>표</p>
+              <% } %>
+            </div>
+
+            <a href="/poll/<%= poll._id %>" target="_blank">투표 결과 보기 →</a>
+          </div>
+        <% }); %>
+      <% } %>
+    </div>
+  </div>
+</body>
+</html>

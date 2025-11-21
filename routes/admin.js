@@ -86,23 +86,17 @@ router.get('/dashboard', async (req, res) => {
         // 특정 IP 상세 정보
         router.get('/ip/:ip', async (req, res) => {
             try {
-                const ip = req.params.ip;
+                const ipAddress = decodeURIComponent(req.params.id);
 
-                const activities = await Visitor.find( { ip })
-                    .populate('pollId', 'title')
-                    .sort({ timestamps: -1 });
-
-                const agreeCount = activities.filter(a => a.action === 'agree_terms').length;
-                const voteCount = activities.filter(a => a.action === 'vote').length;
+                const polls = await Visitor.find( { votedIPs: ipAddress });
 
                 res.render('admin/ip-detail', {
-                    ip,
-                    activities,
-                    agreeCount,
-                    voteCount
+                    ipAddress,
+                    polls,
+                    voteCount: polls.length
                 });
             } catch (error) {
-                console.error(error);
+                console.error('IP 상세 조회 오류:', error);
                 res.status(500).send('서버오류');
             }
         });
