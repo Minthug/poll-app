@@ -2,6 +2,31 @@ const express = require('express');
 const router = express.Router();
 const Visitor = require('../models/Visitor');
 const Poll = require('../models/Poll');
+const { checkAuth } = require('../middleware/auth');
+
+router.get('/login', (req, res) => {
+    res.render('admin/login', { error: null });
+});
+
+router.post('/login', (req, res) => {
+    const { username, password } = req.body;
+
+    // 환경변수와 비교
+    if (username === process.env.ADMIN_USERNAME &&
+        password === process.env.ADMIN_PASSWORD) {
+            req.session.isAdmin = true;
+            res.redirect('/admin');
+        } else {
+            res.render('admin/login', { error: '아이디 또는 비밀번호가 틀렸습니다.' });
+        }
+});
+
+router.get('logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/admin/login');
+});
+
+router.use(checkAuth);
 
 router.get('/', async (req, res) => {
     try {
