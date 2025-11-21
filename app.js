@@ -1,5 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const session = require('express-session');
+require('dotenv').config();
+
 const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
@@ -13,9 +16,21 @@ const Poll = require('./models/Poll');
 const Visitor = require('./models/Visitor')
 
 // 미들웨어 설정
+app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// 세션 설정 추가
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24
+  }
+}));
+
 
 // 뷰 엔진 설정
 app.set('view engine', 'ejs');
