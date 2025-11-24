@@ -58,7 +58,7 @@ router.get('/:id', async (req, res) => {
 
         // 이미 투표했으면 결과 페이지로 리다이렉트
         if (hasVoted) {
-            return res.redirect(`/polls/${poll._id}/result`);
+            return res.redirect(`/polls/${poll._id}/result?already_voted=true`);
         }
 
             res.render('polls/show', { poll });
@@ -74,7 +74,10 @@ router.get('/:id/result', async (req, res) => {
         if (!poll) {
             return res.status(404).send('여론조사를 찾을 수 없습니다');
         }
-        res.render('polls/result', { poll });
+
+        const alreadyVoted = req.query.already_voted === 'true';
+        
+        res.render('polls/result', { poll, alreadyVoted });
     } catch (error) {
         console.error(error);
         res.status(500).send('서버 오류');
