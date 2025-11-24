@@ -44,16 +44,29 @@ router.post('/', async (req, res) => {
     }
 });
 
-// 여론조사 상세
+// 여론조사 상세 - 투표 페이지
 router.get('/:id', async (req, res) => {
     try {
         const poll = await Poll.findById(req.params.id);
         if (!poll) { 
             return res.status(404).send('여론조사를 찾을 수 없습니다');
         }
-            res.render('polls/show', { poll });
+            res.render('show', { poll });
         } catch (error) {
             console.error(error);
+        res.status(500).send('서버 오류');
+    }
+});
+
+router.get('/:id/result', async (req, res) => {
+    try {
+        const poll = await Poll.findById(req.params.id);
+        if (!poll) {
+            return res.status(404).send('여론조사를 찾을 수 없습니다');
+        }
+        res.render('result', { poll });
+    } catch (error) {
+        console.error(error);
         res.status(500).send('서버 오류');
     }
 });
