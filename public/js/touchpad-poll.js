@@ -37,49 +37,49 @@ console.log('Poll ID length:', pollId ? pollId.length : 0);
       }
     }
   });
-  
+
 // 투표 정보 업데이트 함수
-function updateVoteDisplay(pollData) {
-  // 데이터 검증 추가
-  if (!pollData || !pollData.options) {
-    console.error('pollData가 유효하지 않음:', pollData);
-    return;  // 함수 종료
-  }
+// function updateVoteDisplay(pollData) {
+//   // 데이터 검증 추가
+//   if (!pollData || !pollData.options) {
+//     console.error('pollData가 유효하지 않음:', pollData);
+//     return;  // 함수 종료
+//   }
   
-  // 총 투표 수 계산
-  const totalVotes = pollData.options.reduce((sum, opt) => sum + (opt.votes || 0), 0);
+//   // 총 투표 수 계산
+//   const totalVotes = pollData.options.reduce((sum, opt) => sum + (opt.votes || 0), 0);
 
-    // 총 투표 수 업데이트
-    const totalVotesElement = document.getElementById('total-votes-count');
-    if (totalVotesElement) {
-      totalVotesElement.textContent = totalVotes;
-    }
+//     // 총 투표 수 업데이트
+//     const totalVotesElement = document.getElementById('total-votes-count');
+//     if (totalVotesElement) {
+//       totalVotesElement.textContent = totalVotes;
+//     }
 
-    // 각 옵션 업데이트
-    pollData.options.forEach(option => {
-      const card = document.querySelector(`[data-option-id="${option._id}"]`);
-      if (card) {
-        const voteCount = card.querySelector('.vote-count');
-        voteCount.textContent = `${option.votes}표`;
+//     // 각 옵션 업데이트
+//     pollData.options.forEach(option => {
+//       const card = document.querySelector(`[data-option-id="${option._id}"]`);
+//       if (card) {
+//         const voteCount = card.querySelector('.vote-count');
+//         voteCount.textContent = `${option.votes}표`;
 
-        // 비율 계산
-        const percentage = totalVotes > 0 ? ((option.votes / totalVotes) * 100).toFixed(1) : 0;
+//         // 비율 계산
+//         const percentage = totalVotes > 0 ? ((option.votes / totalVotes) * 100).toFixed(1) : 0;
 
-        // 비율 업데이트
-        const votePercentage = card.querySelector('.vote-percentage');
-        if (votePercentage) {
-          votePercentage.textContent = `${percentage}%`;
-        }
+//         // 비율 업데이트
+//         const votePercentage = card.querySelector('.vote-percentage');
+//         if (votePercentage) {
+//           votePercentage.textContent = `${percentage}%`;
+//         }
 
-        // 프로그레스 바 업데이트
-        const progressBar = card.querySelector('.progress-bar');
-        if (progressBar) {
-          progressBar.style.width = `${percentage}%`;
-          progressBar.setAttribute('aria-valuenow', percentage);
-        }
-      }
-    });
-  }
+//         // 프로그레스 바 업데이트
+//         const progressBar = card.querySelector('.progress-bar');
+//         if (progressBar) {
+//           progressBar.style.width = `${percentage}%`;
+//           progressBar.setAttribute('aria-valuenow', percentage);
+//         }
+//       }
+//     });
+//   }
 
   // 옵션 영역 클릭 이벤트
   optionCards.forEach(card => {
@@ -222,6 +222,22 @@ async function loadResults() {
       
       resultsDiv.innerHTML = resultsHTML;
       totalVotesP.textContent = `총 ${totalVotes}명 참여`;
+
+      // 결과 보기 버튼이 있는지 확인하고 없으면 추가
+      const existingResultButton = document.querySelector('.btn-result-detail');
+      if (!existingResultButton) {
+        const resultButton = document.createElement('a');
+        resultButton.href = `/polls/${pollId}/result`;
+        resultButton.className = 'btn btn-info me-2 btn-result-detail';
+        resultButton.innerHTML = '📊 상세 결과 보기 (원 그래프)';
+        resultButton.target = '_blank';
+
+        // 버튼 컨테이너 찾아서 추가
+        const buttonContainer = resultsContainer.querySelector('.mt-3');
+        if (buttonContainer) {
+          buttonContainer.insertBefore(resultButton, buttonContainer.firstChild);
+        }
+      }
       
       // 결과 표시, 폼 숨기기
       voteForm.classList.add('d-none');
