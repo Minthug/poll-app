@@ -115,12 +115,14 @@
         </form>
         
         <div id="results-container" class="results-container d-none">
-          <h4 class="mb-3">투표 결과</h4>
-          <div id="results"></div>
-          <p id="total-votes" class="mt-3 text-muted"></p>
-          <button id="back-to-vote" class="btn btn-outline-secondary">다시 투표하기</button>
-        </div>
-      </div>
+  <h4 class="mb-3">투표 결과</h4>
+  <div id="results"></div>
+  <p id="total-votes" class="mt-3 text-muted"></p>
+  <div class="mt-3">
+    <a href="/polls/<%= poll._id %>/result" class="btn btn-info me-2">📊 상세 결과 보기 (원 그래프)</a>
+    <button id="back-to-vote" class="btn btn-outline-secondary">다시 투표하기</button>
+  </div>
+</div>
     </div>
   </div>
 

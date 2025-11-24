@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= poll.title %> - 투표 결과</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    .header p {
+      opacity: 0.9;
+      font-size: 16px;
+    }
+    .content {
+      padding: 40px;
+    }
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 40px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+    .stat-item {
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 32px;
+      font-weight: bold;
+      color: #667eea;
+    }
+    .stat-label {
+      color: #666;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    .chart-container {
+      position: relative;
+      height: 400px;
+      margin-bottom: 40px;
+    }
+    .options-list {
+      margin-top: 30px;
+    }
+    .option-item {
+      background: #f8f9fa;
+      padding: 15px 20px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s;
+    }
+    .option-item:hover {
+      transform: translateX(5px);
+    }
+    .option-name {
+      font-weight: 500;
+      color: #333;
+      display: flex;
+      align-items: center;
+    }
+    .color-dot {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    .option-stats {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .option-votes {
+      font-size: 18px;
+      font-weight: bold;
+      color: #667eea;
+    }
+    .option-percentage {
+      color: #666;
+      font-size: 14px;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+    .btn {
+      padding: 12px 30px;
+      color: white;
+      text-decoration: none;
+      border-radius: 25px;
+      transition: all 0.3s;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      display: inline-block;
+    }
+    .btn-primary {
+      background: #667eea;
+    }
+    .btn-primary:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    .btn-secondary {
+      background: #6c757d;
+    }
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+    .live-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+      margin-right: 8px;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1><%= poll.title %></h1>
+      <% if (poll.description) { %>
+        <p><%= poll.description %></p>
+      <% } %>
+    </div>
+
+    <div class="content">
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-number" id="total-votes"><%= poll.options.reduce((sum, opt) => sum + opt.votes, 0) %></div>
+          <div class="stat-label">총 투표수</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number"><%= poll.options.length %></div>
+          <div class="stat-label">선택지 수</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">
+            <span class="live-indicator"></span>
+            실시간 업데이트
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <canvas id="pollChart"></canvas>
+      </div>
+
+      <div class="options-list">
+        <h2 style="margin-bottom: 20px; color: #333;">상세 결과</h2>
+        <% 
+          const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+          const colors = [
+            'rgba(102, 126, 234, 0.8)',
+            'rgba(118, 75, 162, 0.8)',
+            'rgba(237, 100, 166, 0.8)',
+            'rgba(255, 154, 158, 0.8)',
+            'rgba(250, 208, 196, 0.8)',
+            'rgba(155, 93, 229, 0.8)',
+            'rgba(237, 187, 153, 0.8)',
+            'rgba(34, 197, 94, 0.8)'
+          ];
+        %>
+        <% poll.options.forEach((option, index) => { %>
+          <div class="option-item" data-option-id="<%= option._id %>">
+            <div class="option-name">
+              <span class="color-dot" style="background: <%= colors[index % colors.length] %>;"></span>
+              <%= option.text %>
+            </div>
+            <div class="option-stats">
+              <span class="option-votes"><%= option.votes %>표</span>
+              <span class="option-percentage">
+                <%= totalVotes > 0 ? ((option.votes / totalVotes) * 100).toFixed(1) : 0 %>%
+              </span>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+
+      <div class="action-buttons">
+        <a href="/polls/<%= poll._id %>" class="btn btn-primary">투표하러 가기</a>
+        <a href="/polls" class="btn btn-secondary">목록으로</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const pollId = '<%= poll._id %>';
+    const socket = io();
+
+    const colors = [
+      'rgba(102, 126, 234, 0.8)',
+      'rgba(118, 75, 162, 0.8)',
+      'rgba(237, 100, 166, 0.8)',
+      'rgba(255, 154, 158, 0.8)',
+      'rgba(250, 208, 196, 0.8)',
+      'rgba(155, 93, 229, 0.8)',
+      'rgba(237, 187, 153, 0.8)',
+      'rgba(34, 197, 94, 0.8)'
+    ];
+
+    const ctx = document.getElementById('pollChart').getContext('2d');
+    let pollChart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: [
+          <% poll.options.forEach((option, index) => { %>
+            '<%= option.text %>'<%= index < poll.options.length - 1 ? ',' : '' %>
+          <% }); %>
+        ],
+        datasets: [{
+          data: [
+            <% poll.options.forEach((option, index) => { %>
+              <%= option.votes %><%= index < poll.options.length - 1 ? ',' : '' %>
+            <% }); %>
+          ],
+          backgroundColor: colors,
+          borderColor: 'white',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 20,
+              font: {
+                size: 14
+              }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.parsed || 0;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                return label + ': ' + value + '표 (' + percentage + '%)';
+              }
+            }
+          }
+        }
+      }
+    });
+
+    socket.on('vote-update', (data) => {
+      if (data.pollId === pollId) {
+        console.log('투표 업데이트 수신:', data);
+        
+        pollChart.data.datasets[0].data = data.poll.options.map(opt => opt.votes);
+        pollChart.update('active');
+
+        const totalVotes = data.poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+        document.getElementById('total-votes').textContent = totalVotes;
+
+        data.poll.options.forEach(option => {
+          const optionElement = document.querySelector('[data-option-id="' + option._id + '"]');
+          if (optionElement) {
+            const percentage = totalVotes > 0 ? ((option.votes / totalVotes) * 100).toFixed(1) : 0;
+            optionElement.querySelector('.option-votes').textContent = option.votes + '표';
+            optionElement.querySelector('.option-percentage').textContent = percentage + '%';
+          }
+        });
+      }
+    });
+
+    socket.on('connect', () => {
+      console.log('Socket.IO 연결됨');
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Socket.IO 연결 종료');
+    });
+  </script>
+</body>
+</html>

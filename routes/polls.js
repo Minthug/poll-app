@@ -51,7 +51,7 @@ router.get('/:id', async (req, res) => {
         if (!poll) { 
             return res.status(404).send('여론조사를 찾을 수 없습니다');
         }
-            res.render('show', { poll });
+            res.render('polls/show', { poll });
         } catch (error) {
             console.error(error);
         res.status(500).send('서버 오류');
@@ -64,7 +64,7 @@ router.get('/:id/result', async (req, res) => {
         if (!poll) {
             return res.status(404).send('여론조사를 찾을 수 없습니다');
         }
-        res.render('result', { poll });
+        res.render('polls/result', { poll });
     } catch (error) {
         console.error(error);
         res.status(500).send('서버 오류');
