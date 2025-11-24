@@ -51,6 +51,16 @@ router.get('/:id', async (req, res) => {
         if (!poll) { 
             return res.status(404).send('여론조사를 찾을 수 없습니다');
         }
+        
+        // 이미 투표한 IP인지 확인
+        const clientIP = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const hasVoted = poll.votedIPs && poll.votedIPs.includes(clientIP);
+
+        // 이미 투표했으면 결과 페이지로 리다이렉트
+        if (hasVoted) {
+            return res.redirect(`/polls/${poll._id}/result`);
+        }
+
             res.render('polls/show', { poll });
         } catch (error) {
             console.error(error);
