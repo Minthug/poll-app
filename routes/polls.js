@@ -77,8 +77,31 @@ router.get('/:id/result', async (req, res) => {
         }
 
         const alreadyVoted = req.query.already_voted === 'true';
+
+        // 지역별 투표 통계
+        const locationStats = await Visitor.aggregate([
+            {
+                $match: {
+                    pollId: poll._id,
+                    action: 'vote'
+                }
+            },
+            {
+                $group: {
+                    _id: '$location.city',
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { count: -1 } // 투표 많은 순으로 정리
+            }
+    ]);
         
-        res.render('polls/result', { poll, alreadyVoted });
+        res.render('polls/result', { 
+            poll, 
+            alreadyVoted,
+            locationStats // EJS로 전달
+         });
     } catch (error) {
         console.error(error);
         res.status(500).send('서버 오류');
@@ -201,13 +224,15 @@ router.post('/:id/vote', async (req, res) => {
     }
 })
 
-// 결과 보기
+// 결과 보기 API
 router.get('/:id/results', async (req, res ) => {
     try {
         const poll = await Poll.findById(req.params.id);
+    
         if (!poll) {
             return res.status(404).json({ success: false, error: '여론 조사를 찾을 수 없습니다'});
         }
+
 
         const pollObj = poll.toJSON ? poll.toJSON() : poll;
 
