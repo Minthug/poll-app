@@ -19,7 +19,6 @@
       padding: 20px;
     }
 
-    /* 알림 배너 스타일 추가 */
     .alert-banner {
       background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
       color: #2d3436;
@@ -104,19 +103,24 @@
       margin-top: 5px;
     }
     
-    /* ⭐ 차트 2개 나란히 배치 */
     .charts-wrapper {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 2fr 1fr;
       gap: 30px;
       margin-bottom: 40px;
+      align-items: start;
     }
     .chart-container {
       position: relative;
-      height: 350px;
       background: #f8f9fa;
       padding: 20px;
       border-radius: 10px;
+    }
+    .chart-container.main-chart {
+      height: 400px;
+    }
+    .chart-container.location-chart {
+      height: 300px;
     }
     .chart-title {
       text-align: center;
@@ -125,8 +129,11 @@
       margin-bottom: 15px;
       font-size: 18px;
     }
+    .chart-title.location-title {
+      font-size: 16px;
+      color: #666;
+    }
     
-    /* 모바일 반응형 */
     @media (max-width: 768px) {
       .charts-wrapper {
         grid-template-columns: 1fr;
@@ -223,7 +230,6 @@
   </style>
 </head>
 <body>
-  <!-- 이미 투표한 경우 알림 배너 표시 -->
   <% if (typeof alreadyVoted !== 'undefined' && alreadyVoted) { %>
     <div class="container" style="margin-bottom: 20px;">
       <div class="alert-banner">
@@ -269,17 +275,14 @@
         </div>
       </div>
 
-      <!-- ⭐ 2개의 차트를 나란히 배치 -->
       <div class="charts-wrapper">
-        <!-- 투표 결과 차트 -->
-        <div class="chart-container">
+        <div class="chart-container main-chart">
           <div class="chart-title">📊 투표 결과</div>
           <canvas id="pollChart"></canvas>
         </div>
 
-        <!-- 지역별 투표 차트 -->
-        <div class="chart-container">
-          <div class="chart-title">🗺️ 지역별 투표 현황</div>
+        <div class="chart-container location-chart">
+          <div class="chart-title location-title">🗺️ 지역별 투표</div>
           <canvas id="locationChart"></canvas>
         </div>
       </div>
@@ -338,17 +341,16 @@
     ];
 
     const locationColors = [
-      'rgba(255, 99, 132, 0.8)',
-      'rgba(54, 162, 235, 0.8)',
-      'rgba(255, 206, 86, 0.8)',
-      'rgba(75, 192, 192, 0.8)',
-      'rgba(153, 102, 255, 0.8)',
-      'rgba(255, 159, 64, 0.8)',
-      'rgba(199, 199, 199, 0.8)',
-      'rgba(83, 102, 255, 0.8)'
+      'rgba(50, 50, 50, 0.8)',
+      'rgba(100, 100, 100, 0.8)',
+      'rgba(150, 150, 150, 0.8)',
+      'rgba(180, 180, 180, 0.8)',
+      'rgba(210, 210, 210, 0.8)',
+      'rgba(70, 70, 70, 0.8)',
+      'rgba(120, 120, 120, 0.8)',
+      'rgba(160, 160, 160, 0.8)'
     ];
 
-    // ⭐ 투표 결과 차트
     const ctx = document.getElementById('pollChart').getContext('2d');
     let pollChart = new Chart(ctx, {
       type: 'pie',
@@ -397,31 +399,7 @@
       }
     });
 
-    // ⭐ 지역별 투표 차트
     const locationCtx = document.getElementById('locationChart').getContext('2d');
-    
-    <% 
-      // 지역 이름 매핑 (한글)
-      const regionNames = {
-        'Seoul': '서울',
-        'Busan': '부산',
-        'Incheon': '인천',
-        'Daegu': '대구',
-        'Daejeon': '대전',
-        'Gwangju': '광주',
-        'Ulsan': '울산',
-        'Sejong': '세종',
-        'Gyeonggi': '경기',
-        'Gangwon': '강원',
-        'Chungbuk': '충북',
-        'Chungnam': '충남',
-        'Jeonbuk': '전북',
-        'Jeonnam': '전남',
-        'Gyeongbuk': '경북',
-        'Gyeongnam': '경남',
-        'Jeju': '제주'
-      };
-    %>
     
     let locationChart = new Chart(locationCtx, {
       type: 'pie',
@@ -457,9 +435,9 @@
           legend: {
             position: 'bottom',
             labels: {
-              padding: 15,
+              padding: 10,
               font: {
-                size: 12
+                size: 11
               }
             }
           },

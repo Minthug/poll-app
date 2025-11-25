@@ -116,25 +116,31 @@ router.post('/:id/vote', async (req, res) => {
         const pollId = req.params.id;
 
         // 클라이언트 IP 가져오기
-        const clientIp = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        let clientIp = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
         const userAgent = req.headers['user-agent'];
 
            // ⭐ 개발 환경 체크
-        const isDevelopment = process.env.NODE_ENV !== 'production';
         const isLocalhost = clientIp === '::1' || clientIp === '127.0.0.1' || clientIp === '::ffff:127.0.0.1';
 
-        // ⭐ 여기에 지역 체크 추가
-        const geo = geoip.lookup(ip);
-
-        // 로컬 개발 환경이면 가짜 한국 지역 정보 사용
-        if (isDevelopment && isLocalhost) {
-            geo = {
-                country: 'KR',
-                region: '11',
-                city: 'Seoul'
-            };
-            console.log('🔧 개발 모드: 가짜 한국 IP 사용');
+        if (isLocalhost && process.env === process.env.NODE_ENV !== 'production') {
+            clientIp = '220.76.108.45';
+            console.log('🧪 개발 모드: 테스트 IP 사용');
         }
+
+        // ⭐ 여기에 지역 체크 추가
+        let geo = geoip.lookup(clientIp);
+        console.log('📍 감지된 지역:', geo);
+
+
+        // // 로컬 개발 환경이면 가짜 한국 지역 정보 사용
+        // if (isDevelopment && isLocalhost) {
+        //     geo = {
+        //         country: 'KR',
+        //         region: '11',
+        //         city: 'Seoul'
+        //     };
+        //     console.log('🔧 개발 모드: 가짜 한국 IP 사용');
+        // }
 
         // 한국 IP가 아니면 차단
         if (!geo || geo.country !== 'KR') {
@@ -144,6 +150,28 @@ router.post('/:id/vote', async (req, res) => {
                 blocked: true
             });
         }
+
+        // ⭐ 한국 지역 코드 매핑
+        const regionMap = {
+            '11': '서울',
+            '26': '부산',
+            '27': '대구',
+            '28': '인천',
+            '29': '광주',
+            '30': '대전',
+            '31': '울산',
+            '36': '세종',
+            '41': '경기',
+            '42': '강원',
+            '43': '충북',
+            '44': '충남',
+            '45': '전북',
+            '46': '전남',
+            '47': '경북',
+            '48': '경남',
+            '50': '제주'
+        };
+
 
         console.log('투표 요청 - Poll ID:', pollId);
         console.log('투표 요청 - Option ID:', optionId);
