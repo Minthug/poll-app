@@ -96,8 +96,22 @@ router.post('/:id/vote', async (req, res) => {
         const clientIp = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
         const userAgent = req.headers['user-agent'];
 
+           // ⭐ 개발 환경 체크
+        const isDevelopment = process.env.NODE_ENV !== 'production';
+        const isLocalhost = clientIp === '::1' || clientIp === '127.0.0.1' || clientIp === '::ffff:127.0.0.1';
+
         // ⭐ 여기에 지역 체크 추가
         const geo = geoip.lookup(ip);
+
+        // 로컬 개발 환경이면 가짜 한국 지역 정보 사용
+        if (isDevelopment && isLocalhost) {
+            geo = {
+                country: 'KR',
+                region: '11',
+                city: 'Seoul'
+            };
+            console.log('🔧 개발 모드: 가짜 한국 IP 사용');
+        }
 
         // 한국 IP가 아니면 차단
         if (!geo || geo.country !== 'KR') {
