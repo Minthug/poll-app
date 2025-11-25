@@ -21,7 +21,13 @@ const visitorSchema = new mongoose.Schema({
     timeStamps: {
         type: Date,
         default: Date.now
-    }
+    },
+    location: {
+        country: String,
+        region: String,
+        city: String
+    },
+    createdAt: { type: Date, default: Date.now }
 });
 
 // 인덱스 추가 (검색 성능 향상)

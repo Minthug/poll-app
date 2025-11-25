@@ -149,7 +149,12 @@ router.post('/:id/vote', async (req, res) => {
             ip: clientIp,
             action: 'vote',
             pollId: poll._id,
-            userAgent
+            userAgent,
+            location: {
+                country: geo.country,
+                region: geo.region,
+                city: geo.city
+            }
         });
 
         console.log('투표 성공 - 옵션:', option.text, '투표수:', option.votes);
