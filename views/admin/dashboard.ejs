@@ -191,7 +191,7 @@
                 </p>
               </div>
               <div class="poll-actions">
-                <a href="/poll/<%= poll._id %>" class="btn-view" target="_blank">보기</a>
+                <a href="/polls/<%= poll._id %>" class="btn-view" target="_blank">보기</a>
                 <form method="POST" action="/admin/poll/<%= poll._id %>/delete" style="display: inline;">
                   <button type="submit" class="btn-delete" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
                 </form>
