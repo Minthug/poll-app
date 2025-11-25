@@ -35,6 +35,12 @@ const pollSchema = new mongoose.Schema({
     votedIPs: {
         type: [String],
         default: []
+    },
+    location: {
+        country: String,
+        region: String,
+        city: String,
+        isKorea: { type: Boolean, default: true}
     }
 });
 

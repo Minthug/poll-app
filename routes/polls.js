@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Poll = require('../models/Poll');
 const Visitor = require('../models/Visitor');
+const geoip = require('geoip-lite');
 
 // 모든 여론 조사 목록
 router.get('/', async (req, res) => {
@@ -95,9 +96,22 @@ router.post('/:id/vote', async (req, res) => {
         const clientIp = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
         const userAgent = req.headers['user-agent'];
 
+        // ⭐ 여기에 지역 체크 추가
+        const geo = geoip.lookup(ip);
+
+        // 한국 IP가 아니면 차단
+        if (!geo || geo.country !== 'KR') {
+            return res.status(403).json({
+                success: false,
+                error: '한국에서만 투표가 가능합니다',
+                blocked: true
+            });
+        }
+
         console.log('투표 요청 - Poll ID:', pollId);
         console.log('투표 요청 - Option ID:', optionId);
         console.log('투표 요청 - IP:', clientIp);
+        console.log('투표 요청 - 지역:', geo);
 
         // 여론조사 찾기
         const poll = await Poll.findById(pollId);
