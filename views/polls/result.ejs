@@ -12,11 +12,31 @@
       padding: 0;
       box-sizing: border-box;
     }
+    
+    :root {
+      --bg-gradient-start: #667eea;
+      --bg-gradient-end: #764ba2;
+      --card-bg: white;
+      --text-color: #333;
+      --secondary-bg: #f8f9fa;
+      --border-color: #dee2e6;
+    }
+    
+    [data-theme="dark"] {
+      --bg-gradient-start: #1a1a2e;
+      --bg-gradient-end: #16213e;
+      --card-bg: #2d2d2d;
+      --text-color: #e0e0e0;
+      --secondary-bg: #3a3a3a;
+      --border-color: #404040;
+    }
+    
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
       min-height: 100vh;
       padding: 20px;
+      transition: background 0.3s ease;
     }
 
     .alert-banner {
@@ -59,13 +79,14 @@
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      background: white;
+      background: var(--card-bg);
       border-radius: 20px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
       overflow: hidden;
+      transition: background-color 0.3s ease;
     }
     .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
       color: white;
       padding: 30px;
       text-align: center;
@@ -86,8 +107,9 @@
       justify-content: space-around;
       margin-bottom: 40px;
       padding: 20px;
-      background: #f8f9fa;
+      background: var(--secondary-bg);
       border-radius: 10px;
+      transition: background-color 0.3s ease;
     }
     .stat-item {
       text-align: center;
@@ -103,6 +125,10 @@
       margin-top: 5px;
     }
     
+    [data-theme="dark"] .stat-label {
+      color: #aaa;
+    }
+    
     .charts-wrapper {
       display: grid;
       grid-template-columns: 2fr 1fr;
@@ -112,9 +138,10 @@
     }
     .chart-container {
       position: relative;
-      background: #f8f9fa;
+      background: var(--secondary-bg);
       padding: 20px;
       border-radius: 10px;
+      transition: background-color 0.3s ease;
     }
     .chart-container.main-chart {
       height: 400px;
@@ -125,13 +152,17 @@
     .chart-title {
       text-align: center;
       font-weight: bold;
-      color: #333;
+      color: var(--text-color);
       margin-bottom: 15px;
       font-size: 18px;
     }
     .chart-title.location-title {
       font-size: 16px;
       color: #666;
+    }
+    
+    [data-theme="dark"] .chart-title.location-title {
+      color: #aaa;
     }
     
     @media (max-width: 768px) {
@@ -143,22 +174,26 @@
     .options-list {
       margin-top: 30px;
     }
+    .options-list h2 {
+      color: var(--text-color);
+    }
     .option-item {
-      background: #f8f9fa;
+      background: var(--secondary-bg);
       padding: 15px 20px;
       margin-bottom: 15px;
       border-radius: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      transition: transform 0.2s;
+      transition: all 0.3s ease;
     }
     .option-item:hover {
       transform: translateX(5px);
+      background: var(--border-color);
     }
     .option-name {
       font-weight: 500;
-      color: #333;
+      color: var(--text-color);
       display: flex;
       align-items: center;
     }
@@ -183,6 +218,11 @@
       color: #666;
       font-size: 14px;
     }
+    
+    [data-theme="dark"] .option-percentage {
+      color: #aaa;
+    }
+    
     .action-buttons {
       display: flex;
       gap: 10px;
@@ -227,9 +267,48 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
     }
+    
+    /* 다크모드 토글 버튼 */
+    .dark-mode-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1050;
+    }
+    
+    .toggle-btn {
+      background-color: var(--card-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 50px;
+      padding: 8px 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      color: var(--text-color);
+      transition: all 0.3s ease;
+    }
+    
+    .toggle-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    
+    .toggle-icon {
+      font-size: 20px;
+    }
   </style>
 </head>
 <body>
+  <!-- 다크모드 토글 버튼 -->
+  <div class="dark-mode-toggle">
+    <button class="toggle-btn" onclick="toggleDarkMode()">
+      <span class="toggle-icon" id="themeIcon">🌙</span>
+      <span id="themeText">다크</span>
+    </button>
+  </div>
+
   <% if (typeof alreadyVoted !== 'undefined' && alreadyVoted) { %>
     <div class="container" style="margin-bottom: 20px;">
       <div class="alert-banner">
@@ -288,7 +367,7 @@
       </div>
 
       <div class="options-list">
-        <h2 style="margin-bottom: 20px; color: #333;">상세 결과</h2>
+        <h2 style="margin-bottom: 20px;">상세 결과</h2>
         <% 
           const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
           const colors = [
@@ -326,6 +405,40 @@
   </div>
 
   <script>
+    // 다크모드 함수들 (맨 위에 배치)
+    function initDarkMode() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      updateThemeIcon(savedTheme);
+    }
+
+    function toggleDarkMode() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeIcon(newTheme);
+    }
+
+    function updateThemeIcon(theme) {
+      const icon = document.getElementById('themeIcon');
+      const text = document.getElementById('themeText');
+      
+      if (icon && text) {
+        if (theme === 'dark') {
+          icon.textContent = '☀️';
+          text.textContent = '라이트';
+        } else {
+          icon.textContent = '🌙';
+          text.textContent = '다크';
+        }
+      }
+    }
+
+    // 즉시 다크모드 초기화
+    initDarkMode();
+
     const pollId = '<%= poll._id %>';
     const socket = io();
 
