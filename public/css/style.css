@@ -7,3 +7,98 @@ body {
 .container {
   max-width: 1200px;
 }
+
+
+/* 기존 CSS는 유지하고, 아래 내용을 추가 */
+
+/* 다크모드 변수 */
+:root {
+    --bg-color: #f8f9fa;
+    --card-bg: white;
+    --text-color: #333;
+    --border-color: #dee2e6;
+    --hover-bg: #f8f9fa;
+}
+
+[data-theme="dark"] {
+    --bg-color: #1a1a1a;
+    --card-bg: #2d2d2d;
+    --text-color: #e0e0e0;
+    --border-color: #404040;
+    --hover-bg: #3a3a3a;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.container {
+    background-color: var(--card-bg);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: background-color 0.3s ease;
+}
+
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    background-color: var(--hover-bg);
+}
+
+/* 다크모드 토글 버튼 스타일 */
+.dark-mode-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.toggle-btn {
+    background-color: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 50px;
+    padding: 8px 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.toggle-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.toggle-icon {
+    font-size: 20px;
+}
+
+/* Chart.js 다크모드 대응 */
+[data-theme="dark"] canvas {
+    filter: brightness(0.9);
+}
+
+/* 진행바 다크모드 */
+[data-theme="dark"] .progress {
+    background-color: #404040;
+}
+
+/* 버튼 다크모드 */
+[data-theme="dark"] .btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+[data-theme="dark"] .btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}

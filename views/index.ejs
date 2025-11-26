@@ -8,6 +8,16 @@
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="d-flex flex-column min-vh-100">
+
+
+    <!-- 다크모드 토글 버튼 -->
+    <div class="dark-mode-toggle">
+        <button class="toggle-btn" onclick="toggleDarkMode()">
+            <span class="toggle-icon" id="themeIcon">🌙</span>
+            <span id="themeText">다크모드</span>
+        </button>
+    </div>
+
   <!-- 공지사항 모달 -->
   <% if (notice && notice.isActive) { %>
   <div class="modal fade" id="noticeModal" tabindex="-1" aria-labelledby="noticeModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
