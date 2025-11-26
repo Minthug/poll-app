@@ -115,34 +115,38 @@ router.post('/:id/vote', async (req, res) => {
         const { optionId } = req.body;
         const pollId = req.params.id;
 
-        // 클라이언트 IP 가져오기
         let clientIp = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
         const userAgent = req.headers['user-agent'];
 
-           // ⭐ 개발 환경 체크
-        const isLocalhost = clientIp === '::1' || clientIp === '127.0.0.1' || clientIp === '::ffff:127.0.0.1';
-
-        if (isLocalhost && process.env === process.env.NODE_ENV !== 'production') {
-            clientIp = '220.76.108.45';
-            console.log('🧪 개발 모드: 테스트 IP 사용');
+        // ⭐ 테스트 모드 체크
+        if (process.env.TEST_MODE === 'true') {
+            const testIPs = {
+                seoul: '211.36.148.123',       // 서울
+                gyeonggi: '14.63.180.1',       // 경기 수원 (수정)
+                busan: '121.162.45.78',        // 부산
+                daegu: '175.209.0.1',          // 대구
+                incheon: '121.165.0.1',        // 인천
+                gwangju: '118.235.0.1',        // 광주
+                daejeon: '121.254.0.1',        // 대전
+                ulsan: '112.217.0.1',          // 울산
+                gangwon: '175.193.0.1',        // 강원
+                chungbuk: '125.129.0.1',       // 충북
+                chungnam: '121.162.0.1',       // 충남
+                jeonbuk: '121.162.100.1',      // 전북
+                jeonnam: '121.162.150.1',      // 전남
+                gyeongbuk: '125.180.0.1',      // 경북
+                gyeongnam: '211.246.200.1',    // 경남 (실제 이 IP가 경남임)
+                jeju: '125.177.0.1'            // 제주
+            };
+            
+            const testRegion = process.env.TEST_REGION || 'seoul';
+            clientIp = testIPs[testRegion] || clientIp;
+            console.log(`🧪 테스트 모드: ${testRegion} IP 사용 (${clientIp})`);
         }
 
-        // ⭐ 여기에 지역 체크 추가
         let geo = geoip.lookup(clientIp);
         console.log('📍 감지된 지역:', geo);
 
-
-        // // 로컬 개발 환경이면 가짜 한국 지역 정보 사용
-        // if (isDevelopment && isLocalhost) {
-        //     geo = {
-        //         country: 'KR',
-        //         region: '11',
-        //         city: 'Seoul'
-        //     };
-        //     console.log('🔧 개발 모드: 가짜 한국 IP 사용');
-        // }
-
-        // 한국 IP가 아니면 차단
         if (!geo || geo.country !== 'KR') {
             return res.status(403).json({
                 success: false,
@@ -151,7 +155,7 @@ router.post('/:id/vote', async (req, res) => {
             });
         }
 
-        // ⭐ 한국 지역 코드 매핑
+        // 한국 지역 코드 매핑
         const regionMap = {
             '11': '서울',
             '26': '부산',
@@ -172,11 +176,12 @@ router.post('/:id/vote', async (req, res) => {
             '50': '제주'
         };
 
+        const regionName = regionMap[geo.region] || geo.city || '알 수 없음';
+        console.log('✅ 투표 지역:', regionName);
 
         console.log('투표 요청 - Poll ID:', pollId);
         console.log('투표 요청 - Option ID:', optionId);
         console.log('투표 요청 - IP:', clientIp);
-        console.log('투표 요청 - 지역:', geo);
 
         // 여론조사 찾기
         const poll = await Poll.findById(pollId);
@@ -184,7 +189,7 @@ router.post('/:id/vote', async (req, res) => {
             return res.status(404).json({ success: false, error: '여론조사를 찾을 수 없습니다'});
         }
 
-        // IP 주소로 중복 투표 확인 (Poll 모델에 voteIps 필드가 추가 되어야함)
+        // IP 주소로 중복 투표 확인
         if (poll.votedIPs && poll.votedIPs.includes(clientIp)) {
             return res.status(403).json({
                 success: false,
@@ -193,7 +198,7 @@ router.post('/:id/vote', async (req, res) => {
             });
         }
 
-        // 옵션 찾기 (오류 수정: !poll -> !option)
+        // 옵션 찾기
         const option = poll.options.id(optionId);
         if (!option) {
             console.log('옵션을 찾을 수 없음:', optionId);
@@ -203,13 +208,14 @@ router.post('/:id/vote', async (req, res) => {
         // 투표 증가
         option.votes += 1;
 
-        // 투표한 IP 추가 (Poll 모델에 voteIps 필드가 추가 되어야 함)
+        // 투표한 IP 추가
         if (!poll.votedIPs) poll.votedIPs = [];
         poll.votedIPs.push(clientIp);
 
         // 저장
         await poll.save();
 
+        // Visitor 저장 시 한글 지역명 사용
         await Visitor.create({
             ip: clientIp,
             action: 'vote',
@@ -218,18 +224,19 @@ router.post('/:id/vote', async (req, res) => {
             location: {
                 country: geo.country,
                 region: geo.region,
-                city: geo.city
+                city: regionName
             }
         });
 
         console.log('투표 성공 - 옵션:', option.text, '투표수:', option.votes);
+        console.log('투표 성공 - 지역:', regionName);
         console.log('투표 IP 기록 완료:', clientIp);
 
         const io = req.app.get('io');
         if (io) {
             const pollObject = poll.toObject();
 
-            console.log('Socket .IO 전송 데이터:', {
+            console.log('Socket.IO 전송 데이터:', {
                 pollId: poll._id.toString(),
                 poll: pollObject
             });
@@ -248,9 +255,9 @@ router.post('/:id/vote', async (req, res) => {
         });
     } catch(error) {
         console.error(error);
-        res.status(500).json({ success: false, error: '서버 오류', error: error.message})
+        res.status(500).json({ success: false, error: '서버 오류', message: error.message})
     }
-})
+});
 
 // 결과 보기 API
 router.get('/:id/results', async (req, res ) => {
