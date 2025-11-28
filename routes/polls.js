@@ -24,7 +24,7 @@ router.get('/new', (req, res) => {
 // 여론조사 생성
 router.post('/', async (req, res) => {
     try {
-        const { title, description, options } = req.body;
+        const { title, description, options, endDate } = req.body;
 
         // 빈 옵션 필터링
         const pollOptions = options.filter(opt => opt.trim() !== '').map(opt => ({
@@ -35,7 +35,8 @@ router.post('/', async (req, res) => {
         const poll = new Poll({
             title,
             description,
-            options: pollOptions
+            options: pollOptions,
+            endDate: endDate ? new Date(endDate) : null // 종료 시간이 있으면 Date 객체로 변환 
         });
 
         await poll.save();
@@ -51,6 +52,11 @@ router.get('/:id', async (req, res) => {
         const poll = await Poll.findById(req.params.id);
         if (!poll) { 
             return res.status(404).send('여론조사를 찾을 수 없습니다');
+        }
+
+        // 투표가 종료되었으면 결과 페이지로 리다이렉트
+        if (poll.isEnded()) {
+            return res.redirect(`/polls/${poll._id}/results?ended=true`);
         }
         
         // 이미 투표한 IP인지 확인
@@ -187,6 +193,15 @@ router.post('/:id/vote', async (req, res) => {
         const poll = await Poll.findById(pollId);
         if (!poll) {
             return res.status(404).json({ success: false, error: '여론조사를 찾을 수 없습니다'});
+        }
+
+        // 투표 종료 체크 추가
+        if (poll.isEnded()) {
+            return res.status(403).json({
+                success: false,
+                error: '투표가 종료되었습니다',
+                ended: true
+            })
         }
 
         // IP 주소로 중복 투표 확인
