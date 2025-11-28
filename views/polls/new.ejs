@@ -118,19 +118,20 @@
           </div>
 
           <!-- 투표 종료 시간 설정 -->
-          <div class="mb-3">
+           <div class="mb-3">
             <label class="form-label">투표 종료 시간 (선택사항)</label>
-            <div class="mb-2">
-              <small class="text-muted">빠른 설정:</small><br>
-              <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" onclick="setEndTime(1)">1시간 후</button>
-              <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" onclick="setEndTime(3)">3시간 후</button>
-              <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" onclick="setEndTime(24)">1일 후</button>
-              <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" onclick="setEndTime(72)">3일 후</button>
-              <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" onclick="setEndTime(168)">1주일 후</button>
-              <button type="button" class="btn btn-sm btn-outline-danger preset-btn" onclick="clearEndTime()">종료 시간 없음</button>
+            <div class="d-flex flex-wrap gap-2">
+              <button type="button" class="btn btn-outline-secondary" onclick="setEndTime(1)">1시간 후</button>
+              <button type="button" class="btn btn-outline-secondary" onclick="setEndTime(6)">6시간 후</button>
+              <button type="button" class="btn btn-outline-secondary" onclick="setEndTime(24)">1일 후</button>
+              <button type="button" class="btn btn-outline-secondary" onclick="setEndTime(72)">3일 후</button>
+              <button type="button" class="btn btn-outline-secondary" onclick="setEndTime(168)">1주일 후</button>
+              <button type="button" class="btn btn-outline-danger" onclick="clearEndTime()">무제한</button>
             </div>
-            <input type="datetime-local" class="form-control" id="endDate" name="endDate">
-            <small class="text-muted">종료 시간을 설정하지 않으면 무제한으로 투표가 진행됩니다.</small>
+            <input type="hidden" id="endDate" name="endDate">
+            <small class="text-muted d-block mt-2">
+              <span id="endTimeDisplay">종료 시간이 설정되지 않았습니다 (무제한)</span>
+            </small>
           </div>
           
           <div class="mb-3">
@@ -203,10 +204,25 @@
       
       const formatted = `${year}-${month}-${day}T${hour}:${minute}`;
       document.getElementById('endDate').value = formatted;
+
+      const displayDate = `${year}년 ${month}월 ${day}일 ${hour}시 ${minute}분`;
+      document.getElementById('endTimeDisplay').textContent = `종료 시간: ${displayDate}`;
+
+      document.querySelectorAll('.btn-outline-secondary, .btn-outline-danger').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
     }
 
     function clearEndTime() {
       document.getElementById('endDate').value = '';
+      document.getElementById('endTimeDisplay').textContent = '종료 시간이 설정되지 않았습니다 (무제한)';
+    
+      // 선택한 버튼 강조
+      document.querySelectorAll('.btn-outline-secondary, .btn-outline-danger').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
     }
 
     // 즉시 다크모드 초기화
