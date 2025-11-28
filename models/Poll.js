@@ -30,7 +30,8 @@ const pollSchema = new mongoose.Schema({
         default: Date.now
     },
     endDate: {
-        type: Date
+        type: Date,
+        default: null
     },
     votedIPs: {
         type: [String],
@@ -44,10 +45,30 @@ const pollSchema = new mongoose.Schema({
     }
 });
 
+pollSchema.methods.isEnded = function() {
+    if (!this.endDate) return false;
+    return new Date() > this.endDate;
+}
+
+pollSchema.methods.getTimeRemaining = function() {
+    if (!this.endDate) return null;
+    const now = new Date();
+    const diff = this.endDate - now;
+
+    if (diff <= 0) return { ended: true };
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    return { days, hours, minutes, ended: false}
+}
+
 pollSchema.virtual('totalVotes').get(function() {
         return this.options.reduce((sum, option) => sum + option.votes, 0);
 })
 
 pollSchema.set('toJSON', { virtuals: true });
 pollSchema.set('toObject', { virtuals: true });
+
 module.exports = mongoose.model('Poll', pollSchema);
