@@ -32,9 +32,20 @@ router.post('/', async (req, res) => {
             votes: 0
         }));
 
+        // 태그 처리 (쉼표로 구분된 문자열을 배열로 변환)
+        let tagArray = [];
+        if (tags && tags.trim() !== '') {
+            tagArray = tags.split(',')
+                .map(tag => tag.trim())
+                .filter(tag => tag !== '')
+                .slice(0, 5); // 최대 5개
+        }
+
         const poll = new Poll({
             title,
             description,
+            category: category || '일반',
+            tags: tagArray,
             options: pollOptions,
             endDate: endDate ? new Date(endDate) : null // 종료 시간이 있으면 Date 객체로 변환 
         });

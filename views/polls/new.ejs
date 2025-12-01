@@ -124,11 +124,37 @@
             <input type="text" class="form-control" id="title" name="title" required>
           </div>
           
-          <div class="mb-3">
-            <label for="description" class="form-label">설명 (선택사항)</label>
-            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-          </div>
+        <div class="mb-3">
+          <label for="description" class="form-label">설명 (선택사항)</label>
+          <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+        </div>
 
+        <!-- ⭐ 카테고리 선택 추가 -->
+        <div class="mb-3">
+          <label for="category" class="form-label">카테고리</label>
+          <select class="form-select" id="category" name="category" required>
+            <option value="일반" selected>일반</option>
+            <option value="정치">정치</option>
+            <option value="경제">경제</option>
+            <option value="사회">사회</option>
+            <option value="문화">문화</option>
+            <option value="스포츠">스포츠</option>
+            <option value="연예">연예</option>
+            <option value="기술">기술</option>
+            <option value="게임">게임</option>
+            <option value="음식">음식</option>
+            <option value="기타">기타</option>
+          </select>
+        </div>
+
+        <!-- ⭐ 태그 입력 추가 -->
+        <div class="mb-3">
+          <label for="tags" class="form-label">태그 (선택사항)</label>
+          <input type="text" class="form-control" id="tags" name="tags" placeholder="쉼표로 구분해서 입력하세요 (예: 추천, 인기, 트렌드)">
+          <small class="text-muted">여러 개의 태그를 쉼표(,)로 구분해서 입력하세요. 최대 5개까지 가능합니다.</small>
+        </div>
+
+        <!-- 투표 종료 시간 설정 -->
           <!-- 투표 종료 시간 설정 -->
            <div class="mb-3">
             <label class="form-label">투표 종료 시간 (선택사항)</label>
