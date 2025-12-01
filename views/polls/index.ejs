@@ -72,6 +72,10 @@
     .toggle-icon {
       font-size: 20px;
     }
+
+    .btn-group .btn {
+      margin-bottom: 5px;
+    }
   </style>
 </head>
 <body>
@@ -92,6 +96,22 @@
         <a href="/polls/new" class="btn btn-primary">새 여론조사 만들기</a>
       </div>
     </div>
+
+    <!-- 카테고리 필터 -->
+    <div class="mb-4">
+      <div class="btn-group flex-wrap" role="group">
+        <a href="/polls" class="btn btn-outline-primary <%= typeof category === 'undefined' || !category ? 'active' : '' %>">전체</a>
+        <a href="/polls?category=일반" class="btn btn-outline-primary <%= category === '일반' ? 'active' : '' %>">일반</a>
+        <a href="/polls?category=정치" class="btn btn-outline-primary <%= category === '정치' ? 'active' : '' %>">정치</a>
+        <a href="/polls?category=경제" class="btn btn-outline-primary <%= category === '경제' ? 'active' : '' %>">경제</a>
+        <a href="/polls?category=사회" class="btn btn-outline-primary <%= category === '사회' ? 'active' : '' %>">사회</a>
+        <a href="/polls?category=문화" class="btn btn-outline-primary <%= category === '문화' ? 'active' : '' %>">문화</a>
+        <a href="/polls?category=스포츠" class="btn btn-outline-primary <%= category === '스포츠' ? 'active' : '' %>">스포츠</a>
+        <a href="/polls?category=게임" class="btn btn-outline-primary <%= category === '게임' ? 'active' : '' %>">게임</a>
+        <a href="/polls?category=음식" class="btn btn-outline-primary <%= category === '음식' ? 'active' : '' %>">음식</a>
+        <a href="/polls?category=기타" class="btn btn-outline-primary <%= category === '기타' ? 'active' : '' %>">기타</a>
+      </div>
+    </div>
     
     <% if (polls && polls.length > 0) { %>
       <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
@@ -99,6 +119,16 @@
           <div class="col">
             <div class="card h-100 shadow-sm">
               <div class="card-body">
+                <!-- 카테고리 및 태그 배지 -->
+                <div class="mb-2">
+                  <span class="badge bg-primary"><%= poll.category || '일반' %></span>
+                  <% if (poll.tags && poll.tags.length > 0) { %>
+                    <% poll.tags.forEach(tag => { %>
+                      <span class="badge bg-secondary"><%= tag %></span>
+                    <% }); %>
+                  <% } %>
+                </div>
+                
                 <h5 class="card-title"><%= poll.title %></h5>
                 <% if (poll.description) { %>
                   <p class="card-text text-muted"><%= poll.description %></p>

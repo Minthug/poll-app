@@ -7,8 +7,15 @@ const geoip = require('geoip-lite');
 // 모든 여론 조사 목록
 router.get('/', async (req, res) => {
     try {
+        const { category } = req.query;
+        let query = {};
+
+        if (category) {
+            query.category = category;
+        }
+
         const polls = await Poll.find().sort({ createdAt: -1 });
-        res.render('polls/index', { polls });
+        res.render('polls/index', { polls: polls, category: category || null });
     } catch (error) {
         console.error(error);
         res.status(500).send('서버 오류');
