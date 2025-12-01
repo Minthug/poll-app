@@ -23,6 +23,17 @@ const pollSchema = new mongoose.Schema({
         trim: true
     },
 
+    category: {
+        type: String,
+        enum: ['일반', '정치', '경제', '사회', '문화', '스포츠', '연예', '기술', '게임', '음식', '기타'],
+        default: '일반'
+    },
+
+    tags: [{
+        type: String,
+        trim: true
+    }],
+
     // 최대 5개의 옵션을 가질 수 있음
     options: [optionSchema],
     createdAt: {
@@ -61,8 +72,8 @@ pollSchema.methods.getTimeRemaining = function() {
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-    return { days, hours, minutes, ended: false}
-}
+    return { days, hours, minutes, ended: false };
+};
 
 pollSchema.virtual('totalVotes').get(function() {
         return this.options.reduce((sum, option) => sum + option.votes, 0);
