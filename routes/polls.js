@@ -31,7 +31,9 @@ router.get('/new', (req, res) => {
 // 여론조사 생성
 router.post('/', async (req, res) => {
     try {
-        const { title, description, options, endDate } = req.body;
+        const { title, description, options, endDate, category, tags } = req.body;
+
+        console.log('받은 데이터:', { title, description, category, tags, endDate });
 
         // 빈 옵션 필터링
         const pollOptions = options.filter(opt => opt.trim() !== '').map(opt => ({

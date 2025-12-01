@@ -116,34 +116,48 @@
     <% if (polls && polls.length > 0) { %>
       <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         <% polls.forEach(poll => { %>
-          <div class="col">
-            <div class="card h-100 shadow-sm">
-              <div class="card-body">
-                <!-- 카테고리 및 태그 배지 -->
-                <div class="mb-2">
-                  <span class="badge bg-primary"><%= poll.category || '일반' %></span>
-                  <% if (poll.tags && poll.tags.length > 0) { %>
-                    <% poll.tags.forEach(tag => { %>
-                      <span class="badge bg-secondary"><%= tag %></span>
-                    <% }); %>
-                  <% } %>
-                </div>
-                
-                <h5 class="card-title"><%= poll.title %></h5>
-                <% if (poll.description) { %>
-                  <p class="card-text text-muted"><%= poll.description %></p>
+        <div class="col">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <!-- 카테고리 및 태그 배지 -->
+              <div class="mb-2">
+                <span class="badge bg-primary"><%= poll.category || '일반' %></span>
+                <% if (poll.tags && poll.tags.length > 0) { %>
+                  <% poll.tags.forEach(tag => { %>
+                    <span class="badge bg-secondary"><%= tag %></span>
+                  <% }); %>
                 <% } %>
-                <p class="card-text">
-                  <small class="text-muted">
-                    옵션 <%= poll.options.length %>개 | 총 <%= poll.options.reduce((sum, opt) => sum + opt.votes, 0) %> 투표
-                  </small>
+              </div>
+              
+              <h5 class="card-title">
+                <a href="/polls/<%= poll._id %>" class="text-decoration-none" style="color: var(--text-color);">
+                  <%= poll.title %>
+                </a>
+              </h5>
+              
+              <!-- 설명 (100자 제한) -->
+              <% if (poll.description) { %>
+                <p class="card-text text-muted" style="min-height: 60px;">
+                  <%= poll.description.length > 100 ? poll.description.substring(0, 100) + '...' : poll.description %>
                 </p>
-              </div>
-              <div class="card-footer bg-transparent">
-                <a href="/polls/<%= poll._id %>" class="btn btn-outline-primary w-100">투표하기</a>
-              </div>
+              <% } else { %>
+                <p class="card-text text-muted" style="min-height: 60px;">
+                  <em>설명이 없습니다.</em>
+                </p>
+              <% } %>
+              
+              <!-- 투표 정보 -->
+              <p class="card-text">
+                <small class="text-muted">
+                  옵션 <%= poll.options.length %>개 | 총 <%= poll.options.reduce((sum, opt) => sum + opt.votes, 0) %> 투표
+                </small>
+              </p>
+            </div>
+            <div class="card-footer bg-transparent">
+              <a href="/polls/<%= poll._id %>" class="btn btn-outline-primary w-100">투표하기</a>
             </div>
           </div>
+        </div>
         <% }) %>
       </div>
     <% } else { %>

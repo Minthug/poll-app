@@ -95,6 +95,40 @@
     .toggle-icon {
       font-size: 20px;
     }
+
+    /* 옵션 카드 스타일 개선 */
+    .option-card {
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+
+    .option-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      border-color: #0d6efd;
+    }
+
+    .option-card.selected {
+      border: 3px solid #0d6efd;
+      background-color: rgba(13, 110, 253, 0.05);
+      transform: scale(1.02);
+    }
+
+    [data-theme="dark"] .option-card.selected {
+      background-color: rgba(13, 110, 253, 0.15);
+    }
+
+    .option-card .card-title {
+      color: var(--text-color);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .progress-bar {
+      font-size: 1rem;
+      font-weight: 600;
+      transition: width 0.6s ease;
+    }
   </style>
 </head>
 <body>
@@ -147,34 +181,63 @@
       <div class="card-header">
         <h1 class="h3 mb-0"><%= poll.title %></h1>
         <% if (poll.description) { %>
-          <p class="text-muted mb-0"><%= poll.description %></p>
+          <p class="mb-0" style="font-size: 1.1rem; line-height: 1.6; margin-top: 12px; color: var(--text-color); opacity: 0.9;">
+            <%= poll.description %>
+          </p>
+        <% } %>
+        
+        <!-- 카테고리/태그 추가 -->
+        <% if (poll.category || (poll.tags && poll.tags.length > 0)) { %>
+          <div style="margin-top: 15px;">
+            <% if (poll.category) { %>
+              <span class="badge bg-primary" style="font-size: 0.9rem; padding: 6px 12px;">
+                <%= poll.category %>
+              </span>
+            <% } %>
+            <% if (poll.tags && poll.tags.length > 0) { %>
+              <% poll.tags.forEach(tag => { %>
+                <span class="badge bg-secondary" style="font-size: 0.85rem; padding: 5px 10px; margin-left: 5px;">
+                  #<%= tag %>
+                </span>
+              <% }); %>
+            <% } %>
+          </div>
         <% } %>
       </div>
-      
       <div class="card-body">
         <form id="vote-form" data-poll-id="<%= poll._id %>">
-          <!-- 간단한 옵션 목록으로 변경 -->
+          <!-- 옵션 목록 -->
           <div class="mb-4">
-            <p class="mb-3">아래 옵션 중 하나를 선택하여 투표하세요:</p>
             <div class="row row-cols-1 row-cols-md-2 g-3">
               <% poll.options.forEach(option => { %>
                 <div class="col">
                   <div class="option-card card h-100" data-option-id="<%= option._id %>">
-                    <div class="card-body">
-                      <h5 class="card-title text-center mb-3"><%= option.text %></h5>
+                    <div class="card-body d-flex flex-column justify-content-center" style="min-height: 150px; padding: 25px;">
+                      <!-- 옵션 텍스트를 더 크고 굵게 -->
+                      <h3 class="card-title text-center mb-4" style="font-size: 1.8rem; font-weight: 700; line-height: 1.4; word-break: keep-all;">
+                        <%= option.text %>
+                      </h3>
                       
-                      <div class="progress" style="height: 25px;">
-                        <div class="progress-bar bg-gradient" 
-                             role="progressbar" 
-                             style="width: <%= 
-                               (() => {
-                                 const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
-                                 return totalVotes > 0 ? ((option.votes / totalVotes) * 100).toFixed(1) : 0;
-                               })()
-                             %>%"
-                             aria-valuenow="<%= option.votes %>" 
-                             aria-valuemin="0" 
-                             aria-valuemax="100">
+                      <!-- 프로그레스 바도 크게 -->
+                      <div class="progress" style="height: 35px; font-size: 1rem;">
+                        <div class="progress-bar bg-gradient d-flex align-items-center justify-content-center" 
+                            role="progressbar" 
+                            style="width: <%= 
+                              (() => {
+                                const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+                                const percentage = totalVotes > 0 ? ((option.votes / totalVotes) * 100).toFixed(1) : 0;
+                                return percentage;
+                              })()
+                            %>%; font-weight: bold;"
+                            aria-valuenow="<%= option.votes %>" 
+                            aria-valuemin="0" 
+                            aria-valuemax="100">
+                          <%= option.votes %>표 (<%= 
+                            (() => {
+                              const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+                              return totalVotes > 0 ? ((option.votes / totalVotes) * 100).toFixed(1) : 0;
+                            })()
+                          %>%)
                         </div>
                       </div>
                     </div>

@@ -332,7 +332,25 @@
     <div class="header">
       <h1><%= poll.title %></h1>
       <% if (poll.description) { %>
-        <p><%= poll.description %></p>
+        <p style="font-size: 1.1rem; line-height: 1.6; margin-top: 15px;"><%= poll.description %></p>
+      <% } %>
+      
+      <!-- 카테고리/태그 추가 -->
+      <% if (poll.category || (poll.tags && poll.tags.length > 0)) { %>
+        <div style="margin-top: 15px;">
+          <% if (poll.category) { %>
+            <span style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; margin-right: 8px; font-size: 0.9rem;">
+              <%= poll.category %>
+            </span>
+          <% } %>
+          <% if (poll.tags && poll.tags.length > 0) { %>
+            <% poll.tags.forEach(tag => { %>
+              <span style="background: rgba(255,255,255,0.15); padding: 5px 12px; border-radius: 20px; margin-right: 5px; font-size: 0.85rem;">
+                #<%= tag %>
+              </span>
+            <% }); %>
+          <% } %>
+        </div>
       <% } %>
     </div>
 
