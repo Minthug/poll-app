@@ -144,43 +144,6 @@ router.post('/:id/vote', async (req, res) => {
         let clientIp = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
         const userAgent = req.headers['user-agent'];
 
-        // ⭐ 테스트 모드 체크
-        if (process.env.TEST_MODE === 'true') {
-            const testIPs = {
-                seoul: '211.36.148.123',       // 서울
-                gyeonggi: '14.63.180.1',       // 경기 수원 (수정)
-                busan: '121.162.45.78',        // 부산
-                daegu: '175.209.0.1',          // 대구
-                incheon: '121.165.0.1',        // 인천
-                gwangju: '118.235.0.1',        // 광주
-                daejeon: '121.254.0.1',        // 대전
-                ulsan: '112.217.0.1',          // 울산
-                gangwon: '175.193.0.1',        // 강원
-                chungbuk: '125.129.0.1',       // 충북
-                chungnam: '121.162.0.1',       // 충남
-                jeonbuk: '121.162.100.1',      // 전북
-                jeonnam: '121.162.150.1',      // 전남
-                gyeongbuk: '125.180.0.1',      // 경북
-                gyeongnam: '211.246.200.1',    // 경남 (실제 이 IP가 경남임)
-                jeju: '125.177.0.1'            // 제주
-            };
-            
-            const testRegion = process.env.TEST_REGION || 'seoul';
-            clientIp = testIPs[testRegion] || clientIp;
-            console.log(`🧪 테스트 모드: ${testRegion} IP 사용 (${clientIp})`);
-        }
-
-        let geo = geoip.lookup(clientIp);
-        console.log('📍 감지된 지역:', geo);
-
-        if (!geo || geo.country !== 'KR') {
-            return res.status(403).json({
-                success: false,
-                error: '한국에서만 투표가 가능합니다',
-                blocked: true
-            });
-        }
-
         // 한국 지역 코드 매핑
         const regionMap = {
             '11': '서울',
@@ -202,8 +165,30 @@ router.post('/:id/vote', async (req, res) => {
             '50': '제주'
         };
 
-        const regionName = regionMap[geo.region] || geo.city || '알 수 없음';
+        const isLocalhost = clientIp === '::1' || clientIp === '127.0.0.1' || clientIp.includes('localhost');
+
+        let geo = null;
+        let regionName = '알 수 없음';
+
+        if (isLocalhost) {
+            console.log('🏠 localhost 접속 - 지역 체크 건너뜀');
+            regionName = '로컬 개발';
+        } else {
+            geo = geoip.lookup(clientIp);
+            console.log('📍 감지된 지역:', geo);
+                
+            // 한국이 아니면 차단
+            if (!geo || geo.country !== 'KR') {
+                return res.status(403).json({
+                    success: false,
+                    error: '한국에서만 투표가 가능합니다',
+                    blocked: true
+                });
+        }
+     
+        regionName = regionMap[geo.region] || geo.city || '알 수 없음';
         console.log('✅ 투표 지역:', regionName);
+    }
 
         console.log('투표 요청 - Poll ID:', pollId);
         console.log('투표 요청 - Option ID:', optionId);
@@ -257,8 +242,8 @@ router.post('/:id/vote', async (req, res) => {
             pollId: poll._id,
             userAgent,
             location: {
-                country: geo.country,
-                region: geo.region,
+                country: geo ? geo.country : 'LOCAL',
+                region: geo ? geo.region : 'localhost',
                 city: regionName
             }
         });
@@ -328,6 +313,20 @@ router.get('/:id/voted-ips', async (req, res) => {
         console.error(error)
         res.render(500).send('서버 오류');
     }
+})
+
+router.get('/debug/ip', (req, res) => {
+    const clientIP = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const geo = geoip.lookup(clientIP);
+
+    res.json({
+        rawIp: req.ip,
+        forwardedFor: req.headers['x-forwarded-for'],
+        socketAddress: req.socket.remoteAddress,
+        finalIp: clientIP,
+        geoipResult: geo,
+        isKorea: geo ? geo.country === 'KR' : false
+    });
 })
 
 module.exports = router;
