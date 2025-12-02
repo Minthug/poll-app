@@ -120,6 +120,6 @@ app.post('/api/agree-terms', async (req, res) => {
 
 // 서버 시작
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`서버가 http://localhost:${PORT} 에서 실행 중입니다`);
 });
