@@ -3,6 +3,7 @@ const router = express.Router();
 const Poll = require('../models/Poll');
 const Visitor = require('../models/Visitor');
 const geoip = require('geoip-lite');
+const axios = require('axios');
 
 // 모든 여론 조사 목록
 router.get('/', async (req, res) => {
@@ -167,29 +168,38 @@ router.post('/:id/vote', async (req, res) => {
 
         const isLocalhost = clientIp === '::1' || clientIp === '127.0.0.1' || clientIp.includes('localhost');
 
-        let geo = null;
-        let regionName = '알 수 없음';
-
         if (isLocalhost) {
+            try {
             console.log('🏠 localhost 접속 - 지역 체크 건너뜀');
-            regionName = '로컬 개발';
-        } else {
-            geo = geoip.lookup(clientIp);
-            console.log('📍 감지된 지역:', geo);
-                
-            // 한국이 아니면 차단
-            if (!geo || geo.country !== 'KR') {
-                return res.status(403).json({
+            const response = await axios.get('https://api.ipify.org?format=json', { timeout: 5000 });
+            clientIp = response.data.ip;
+            console.log('🌐 실제 공인 IP 사용:', clientIp);
+            } catch(error) {
+                console.log('⚠️ 공인 IP를 가져올 수 없음:', error.message);
+                return res.status(500).json({
                     success: false,
-                    error: '한국에서만 투표가 가능합니다',
-                    blocked: true
+                    error: '네트워크 연결을 확인해주세요'
                 });
+            }
+        }
+        
+        let geo = geoip.lookup(clientIp);
+        console.log('📍 감지된 지역:', geo);
+        console.log('📍 사용된 IP:', clientIp);
+                
+        // 한국이 아니면 차단
+        if (!geo || geo.country !== 'KR') {
+            return res.status(403).json({
+                success: false,
+                error: '한국에서만 투표가 가능합니다',
+                blocked: true,
+                ip: clientIp,
+                country: geo ? geo.country : 'unknown'
+            });
         }
      
         regionName = regionMap[geo.region] || geo.city || '알 수 없음';
         console.log('✅ 투표 지역:', regionName);
-    }
-
         console.log('투표 요청 - Poll ID:', pollId);
         console.log('투표 요청 - Option ID:', optionId);
         console.log('투표 요청 - IP:', clientIp);
