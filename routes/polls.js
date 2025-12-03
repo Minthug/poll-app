@@ -215,16 +215,16 @@ router.post('/:id/vote', async (req, res) => {
             console.log('📍 감지된 지역:', geo);
             console.log('📍 사용된 IP:', clientIp);
                             
-            // 한국이 아니면 차단
-            if (!geo || geo.country !== 'KR') {
-                return res.status(403).json({
-                    success: false,
-                    error: '한국에서만 투표가 가능합니다',
-                    blocked: true,
-                    ip: clientIp,
-                    country: geo ? geo.country : 'unknown'
-                });
-            }
+            // // 한국이 아니면 차단
+            // if (!geo || geo.country !== 'KR') {
+            //     return res.status(403).json({
+            //         success: false,
+            //         error: '한국에서만 투표가 가능합니다',
+            //         blocked: true,
+            //         ip: clientIp,
+            //         country: geo ? geo.country : 'unknown'
+            //     });
+            // }
 
             // 한국 지역명 설정
             regionName = regionMap[geo.region] || geo.city || '알 수 없음';
