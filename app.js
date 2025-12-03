@@ -8,11 +8,12 @@ const socketIo = require('socket.io');
 const path = require('path');
 require('dotenv').config();
 
+const app = express();
+const server = http.createServer(app);
+
 // ⭐ Render 프록시 신뢰 설정 (맨 위에 추가)
 app.set('trust proxy', true);
 
-const app = express();
-const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
     origin: "*",  // 프로덕션에서는 실제 도메인으로 변경 권장

@@ -104,41 +104,34 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+// 결과 페이지
 router.get('/:id/result', async (req, res) => {
     try {
         const poll = await Poll.findById(req.params.id);
+        
         if (!poll) {
             return res.status(404).send('여론조사를 찾을 수 없습니다');
         }
 
-        const alreadyVoted = req.query.already_voted === 'true';
-
-        // 지역별 투표 통계
+        // 지역별 통계
         const locationStats = await Visitor.aggregate([
-            {
-                $match: {
-                    pollId: poll._id,
-                    action: 'vote'
-                }
-            },
-            {
-                $group: {
-                    _id: '$location.city',
-                    count: { $sum: 1 }
-                }
-            },
-            {
-                $sort: { count: -1 } // 투표 많은 순으로 정리
-            }
-    ]);
-        
+            { $match: { pollId: poll._id, action: 'vote' } },
+            { $group: { _id: '$location.city', count: { $sum: 1 } } },
+            { $sort: { count: -1 } }
+        ]);
+
+        // ⭐ 쿼리 파라미터 받기
+        const alreadyVoted = req.query.alreadyVoted === 'true';
+        const ended = req.query.ended === 'true';
+
         res.render('polls/result', { 
             poll, 
-            alreadyVoted,
-            locationStats // EJS로 전달
-         });
+            locationStats,
+            alreadyVoted,  // ⭐ 추가
+            ended          // ⭐ 추가
+        });
     } catch (error) {
-        console.error(error);
+        console.error('결과 페이지 로딩 오류:', error);
         res.status(500).send('서버 오류');
     }
 });
