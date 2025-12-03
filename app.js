@@ -13,7 +13,14 @@ app.set('trust proxy', true);
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = socketIo(server, {
+  cors: {
+    origin: "*",  // 프로덕션에서는 실제 도메인으로 변경 권장
+    methods: ["GET", "POST"]
+  },
+  transports: ['websocket', 'polling'],  // polling도 허용
+  allowEIO3: true
+});
 
 const Poll = require('./models/Poll');
 const Visitor = require('./models/Visitor')
