@@ -38,6 +38,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // 투표 성공 후 모달 표시 함수
+  function showVoteSuccessModal() {
+    // 기존 모달 제거
+    const existingModal = document.getElementById('vote-success-modal');
+    if (existingModal) {
+      existingModal.remove();
+    }
+
+    // 모달 HTML 생성
+    const modalHTML = `
+      <div class="modal fade" id="vote-success-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+              <h5 class="modal-title">✅ 투표 완료!</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+              <p class="mb-4">투표해 주셔서 감사합니다!</p>
+              <div class="d-grid gap-2">
+                <a href="/polls/${pollId}/result" class="btn btn-primary btn-lg">
+                  📊 상세 결과 보기
+                </a>
+                <a href="/polls" class="btn btn-outline-secondary">
+                  목록으로 돌아가기
+                </a>
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">
+                  이 페이지에 머물기
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // 모달 추가
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // 모달 표시
+    const modal = new bootstrap.Modal(document.getElementById('vote-success-modal'));
+    modal.show();
+  }
+
+
   // 투표 정보 업데이트 함수 (주석 해제 및 수정)
   function updateVoteDisplay(pollData) {
     // 데이터 검증
