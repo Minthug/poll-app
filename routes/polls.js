@@ -141,8 +141,13 @@ router.post('/:id/vote', async (req, res) => {
         const { optionId } = req.body;
         const pollId = req.params.id;
 
-        let clientIp = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        let clientIp = req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : req.ip
+        || req.socket.remoteAddress;
         const userAgent = req.headers['user-agent'];
+
+        console.log('🔍 원본 IP:', req.ip);
+        console.log('🔍 X-Forwarded-For:', req.headers['x-forwarded-for']);
+        console.log('🔍 최종 사용 IP:', clientIp);
 
         // 한국 지역 코드 매핑
         const regionMap = {
