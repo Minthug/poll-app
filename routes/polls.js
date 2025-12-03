@@ -141,6 +141,16 @@ router.post('/:id/vote', async (req, res) => {
         const { optionId } = req.body;
         const pollId = req.params.id;
 
+
+        // ⭐ 디버깅 로그 추가
+        console.log('========== 투표 요청 시작 ==========');
+        console.log('Headers:', JSON.stringify(req.headers, null, 2));
+        console.log('req.ip:', req.ip);
+        console.log('req.ips:', req.ips);
+        console.log('X-Forwarded-For:', req.headers['x-forwarded-for']);
+        console.log('trust proxy:', req.app.get('trust proxy'));
+        
+
         let clientIp = req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : req.ip
         || req.socket.remoteAddress;
         const userAgent = req.headers['user-agent'];
