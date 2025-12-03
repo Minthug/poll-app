@@ -8,6 +8,9 @@ const socketIo = require('socket.io');
 const path = require('path');
 require('dotenv').config();
 
+// ⭐ Render 프록시 신뢰 설정 (맨 위에 추가)
+app.set('trust proxy', true);
+
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
