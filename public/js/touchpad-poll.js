@@ -82,8 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.show();
   }
 
-
-  // 투표 정보 업데이트 함수 (주석 해제 및 수정)
+  // 투표 정보 업데이트 함수
   function updateVoteDisplay(pollData) {
     // 데이터 검증
     if (!pollData || !pollData.options) {
@@ -177,7 +176,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
         
         if (data.success) {
-          loadResults();
+          // 모달 표시
+          showVoteSuccessModal();
         } else {
           alert('투표 처리 중 오류가 발생했습니다: ' + data.error);
         }
@@ -209,7 +209,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       
       if (data.success) {
-        loadResults();
+        // 모달 표시
+        showVoteSuccessModal();
       } else {
         alert('투표 처리 중 오류가 발생했습니다: ' + data.error);
       }
