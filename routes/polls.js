@@ -67,31 +67,39 @@ router.post('/', async (req, res) => {
     }
 });
 
-// 여론조사 상세 - 투표 페이지
+// 여론조사 상세 - 투표 페이지// 투표 페이지
 router.get('/:id', async (req, res) => {
     try {
         const poll = await Poll.findById(req.params.id);
-        if (!poll) { 
+        
+        if (!poll) {
             return res.status(404).send('여론조사를 찾을 수 없습니다');
         }
 
-        // 투표가 종료되었으면 결과 페이지로 리다이렉트
+        // ⭐ IP 체크 및 이미 투표했는지 확인
+        let clientIp = req.headers['x-forwarded-for'] 
+            ? req.headers['x-forwarded-for'].split(',')[0].trim()
+            : req.ip || req.socket.remoteAddress;
+
+        console.log('투표 페이지 접속 IP:', clientIp);
+        console.log('투표한 IP 목록:', poll.votedIPs);
+
+        // 이미 투표한 IP면 결과 페이지로 리다이렉트
+        if (poll.votedIPs && poll.votedIPs.includes(clientIp)) {
+            console.log('✅ 이미 투표한 사용자 - 결과 페이지로 리다이렉트');
+            return res.redirect(`/polls/${req.params.id}/result?alreadyVoted=true`);
+        }
+
+        // 투표 종료되었으면 결과 페이지로 리다이렉트
         if (poll.isEnded()) {
-            return res.redirect(`/polls/${poll._id}/results?ended=true`);
-        }
-        
-        // 이미 투표한 IP인지 확인
-        const clientIP = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-        const hasVoted = poll.votedIPs && poll.votedIPs.includes(clientIP);
-
-        // 이미 투표했으면 결과 페이지로 리다이렉트
-        if (hasVoted) {
-            return res.redirect(`/polls/${poll._id}/result?already_voted=true`);
+            console.log('✅ 투표 종료 - 결과 페이지로 리다이렉트');
+            return res.redirect(`/polls/${req.params.id}/result?ended=true`);
         }
 
-            res.render('polls/show', { poll });
-        } catch (error) {
-            console.error(error);
+        // 투표 안 했으면 투표 페이지 표시
+        res.render('polls/show', { poll });
+    } catch (error) {
+        console.error(error);
         res.status(500).send('서버 오류');
     }
 });
