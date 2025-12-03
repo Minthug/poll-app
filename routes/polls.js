@@ -135,7 +135,6 @@ router.get('/:id/result', async (req, res) => {
     }
 });
 
-
 // 투표 처리
 router.post('/:id/vote', async (req, res) => {
     try {
@@ -167,38 +166,55 @@ router.post('/:id/vote', async (req, res) => {
         };
 
         const isLocalhost = clientIp === '::1' || clientIp === '127.0.0.1' || clientIp.includes('localhost');
+        const isDevelopment = process.env.NODE_ENV !== 'production';
 
-        if (isLocalhost) {
-            try {
-            console.log('🏠 localhost 접속 - 지역 체크 건너뜀');
-            const response = await axios.get('https://api.ipify.org?format=json', { timeout: 5000 });
-            clientIp = response.data.ip;
-            console.log('🌐 실제 공인 IP 사용:', clientIp);
-            } catch(error) {
-                console.log('⚠️ 공인 IP를 가져올 수 없음:', error.message);
-                return res.status(500).json({
+        let geo = null;
+        let regionName = '알 수 없음';
+
+        
+        // localhost이고 개발 환경일 때만 특별 처리
+        if (isLocalhost && isDevelopment) {
+            console.log('🏠 localhost (개발 모드) - 지역 체크 건너뜀');
+            regionName = '로컬 개발';
+            // 개발 환경의 localhost는 지역 체크 없이 통과
+        } else {
+            // 그 외 모든 경우: 무조건 한국 IP 체크
+            
+            // localhost이지만 프로덕션이면 실제 공인 IP 조회
+            if (isLocalhost) {
+                try {
+                    console.log('🔍 localhost (프로덕션) - 실제 공인 IP 조회 중...');
+                    const response = await axios.get('https://api.ipify.org?format=json', { timeout: 5000 });
+                    clientIp = response.data.ip;
+                    console.log('🌐 실제 공인 IP 사용:', clientIp);
+                } catch(error) {
+                    console.log('⚠️ 공인 IP를 가져올 수 없음:', error.message);
+                    return res.status(500).json({
+                        success: false,
+                        error: '네트워크 연결을 확인해주세요'
+                    });
+                }
+            }
+
+            geo = geoip.lookup(clientIp);
+            console.log('📍 감지된 지역:', geo);
+            console.log('📍 사용된 IP:', clientIp);
+                            
+            // 한국이 아니면 차단
+            if (!geo || geo.country !== 'KR') {
+                return res.status(403).json({
                     success: false,
-                    error: '네트워크 연결을 확인해주세요'
+                    error: '한국에서만 투표가 가능합니다',
+                    blocked: true,
+                    ip: clientIp,
+                    country: geo ? geo.country : 'unknown'
                 });
             }
-        }
-        
-        let geo = geoip.lookup(clientIp);
-        console.log('📍 감지된 지역:', geo);
-        console.log('📍 사용된 IP:', clientIp);
-                
-        // 한국이 아니면 차단
-        if (!geo || geo.country !== 'KR') {
-            return res.status(403).json({
-                success: false,
-                error: '한국에서만 투표가 가능합니다',
-                blocked: true,
-                ip: clientIp,
-                country: geo ? geo.country : 'unknown'
-            });
+
+            // 한국 지역명 설정
+            regionName = regionMap[geo.region] || geo.city || '알 수 없음';
         }
      
-        regionName = regionMap[geo.region] || geo.city || '알 수 없음';
         console.log('✅ 투표 지역:', regionName);
         console.log('투표 요청 - Poll ID:', pollId);
         console.log('투표 요청 - Option ID:', optionId);
@@ -210,13 +226,13 @@ router.post('/:id/vote', async (req, res) => {
             return res.status(404).json({ success: false, error: '여론조사를 찾을 수 없습니다'});
         }
 
-        // 투표 종료 체크 추가
+        // 투표 종료 체크
         if (poll.isEnded()) {
             return res.status(403).json({
                 success: false,
                 error: '투표가 종료되었습니다',
                 ended: true
-            })
+            });
         }
 
         // IP 주소로 중복 투표 확인
@@ -232,7 +248,7 @@ router.post('/:id/vote', async (req, res) => {
         const option = poll.options.id(optionId);
         if (!option) {
             console.log('옵션을 찾을 수 없음:', optionId);
-            return res.status(404).json({ success: false, error: '옵션을 찾을 수 없습니다'})
+            return res.status(404).json({ success: false, error: '옵션을 찾을 수 없습니다'});
         }
 
         // 투표 증가
@@ -245,7 +261,7 @@ router.post('/:id/vote', async (req, res) => {
         // 저장
         await poll.save();
 
-        // Visitor 저장 시 한글 지역명 사용
+        // Visitor 저장
         await Visitor.create({
             ip: clientIp,
             action: 'vote',
@@ -285,7 +301,7 @@ router.post('/:id/vote', async (req, res) => {
         });
     } catch(error) {
         console.error(error);
-        res.status(500).json({ success: false, error: '서버 오류', message: error.message})
+        res.status(500).json({ success: false, error: '서버 오류', message: error.message});
     }
 });
 
