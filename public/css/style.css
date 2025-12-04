@@ -82,6 +82,43 @@ body {
     font-size: 20px;
 }
 
+/* 홈 버튼 스타일*/
+.home-button {
+  position: fixed;
+   top: 20px;
+    left: 20px;
+    z-index: 1040;
+    background-color: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 50px;
+    padding: 10px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    color: var(--text-color);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.home-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    color: var(--text-color);
+}
+
+.home-icon {
+    font-size: 20px;
+}
+
+/* 다크모드 토글과 겹치지 않게 조정 */
+.dark-mode-toggle {
+    top: 20px;
+    right: 20px;
+}
+
 /* Chart.js 다크모드 대응 */
 [data-theme="dark"] canvas {
     filter: brightness(0.9);
