@@ -127,6 +127,87 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // 투표 실패 모달 표시 함수 추가
+  function showVoteErrorModal(errorType, message) {
+    // 기존 모달 제거
+    const existingModal = document.getElementById('vote-error-modal');
+    if (existingModal) {
+      existingModal.remove();
+    }
+
+    let icon = '⚠️';
+    let title = '알림';
+    let buttonText = '확인';
+    let buttons = '';
+
+    if (errorType === 'alreadyVoted') {
+          icon = '✅';
+          title = '이미 투표하셨습니다';
+          buttons = `
+            <a href="/polls/${pollId}/result" class="btn btn-primary btn-lg">
+              📊 결과 보기
+            </a>
+            <a href="/polls" class="btn btn-outline-secondary">
+              목록으로
+            </a>
+          `;
+    } else if (errorTpye === 'ended') {
+      icon = '⏰';
+      title = '투표가 종료되었습니다';
+      buttons = `
+        <a href="/polls/${pollId}/result" class="btn btn-primary btn-lg">
+          📊 결과 보기
+        </a>
+        <a href="/polls" class="btn btn-outline-secondary">
+          목록으로
+        </a>
+      `;
+    } else if (errorType === 'blocked') {
+      icon = '🚫';
+      title = '투표 불가';
+      buttons = `
+        <a href="/polls" class="btn btn-primary">
+          목록으로 돌아가기
+        </a>
+      `;
+    } else {
+      // 기타 에러
+      icon = '❌';
+      title = '오류 발생';
+      buttons = `
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          닫기
+        </button>
+      `;
+    }
+    
+    const modalHTML = `
+      <div class="modal fade" id="vote-error-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+              <h5 class="modal-title">${icon} ${title}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+              <p class="mb-4">${message}</p>
+              <div class="d-grid gap-2">
+                ${buttons}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // 모달 추가
+    document.body.insertAdjacentElementHTML('beforeend', modalHTML);
+
+    // 모달 표시
+    const modal =  new bootstrap.Modal(document.getElementById('vote-error-modal'));
+    modal.show();
+  }
+
   // 옵션 영역 클릭 이벤트
   optionCards.forEach(card => {
     // 싱글 클릭 처리
@@ -158,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
     
-    // 더블 클릭으로 바로 투표
+    // 더블 클릭으로 바로 투표 
     card.addEventListener('dblclick', async () => {
       const optionId = card.getAttribute('data-option-id');
       
@@ -188,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
   
-  // 투표 제출 (버튼 클릭용)
+  // 투표 제출 (버튼 클릭용) - 수정(12.4)
   voteForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -207,16 +288,26 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       
       const data = await response.json();
+      console.log('서버 응답:', data); // 12.4 추가
       
       if (data.success) {
         // 모달 표시
         showVoteSuccessModal();
       } else {
-        alert('투표 처리 중 오류가 발생했습니다: ' + data.error);
+        // 에러 타입에 따라 다른 모달 표시
+        if (data.alreadyVoted) {
+          showVoteErrorModal('alreadyVoted', '이미 이 여론조사에 투표 하셨습니다.');
+        } else if (data.ended) {
+          showVoteErrorModal('ended', '투표 기간이 종료 되었습니다.');
+        } else if (data.blocked) {
+          showVoteErrorModal('blocked', data.error || '한국에서만 투표가 가능합니다');
+        } else {
+          showVoteErrorModal('error', data.error || '투표 처리 중 오류가 발생했습니다');
+        }
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('투표 처리 중 오류가 발생했습니다');
+      showVoteErrorModal('error', '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요');
     }
   });
   
