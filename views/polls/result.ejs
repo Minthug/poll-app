@@ -6,20 +6,16 @@
   <title><%= poll.title %> - 투표 결과</title>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
     :root {
       --bg-gradient-start: #667eea;
       --bg-gradient-end: #764ba2;
       --card-bg: white;
       --text-color: #333;
-      --secondary-bg: #f8f9fa;
-      --border-color: #dee2e6;
+      --secondary-text: #666;
+      --border-color: #e0e0e0;
     }
     
     [data-theme="dark"] {
@@ -27,7 +23,7 @@
       --bg-gradient-end: #16213e;
       --card-bg: #2d2d2d;
       --text-color: #e0e0e0;
-      --secondary-bg: #3a3a3a;
+      --secondary-text: #aaa;
       --border-color: #404040;
     }
     
@@ -35,36 +31,43 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
       min-height: 100vh;
-      padding: 20px;
+      padding: 40px 20px;
       transition: background 0.3s ease;
     }
-
+    
+    .result-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    /* 알림 배너 */
     .alert-banner {
       background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
       color: #2d3436;
-      padding: 15px 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 20px 25px;
+      border-radius: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
       display: flex;
       align-items: center;
       gap: 15px;
       animation: slideDown 0.5s ease-out;
     }
+    
     .alert-banner-icon {
-      font-size: 24px;
+      font-size: 28px;
     }
+    
     .alert-banner-content {
       flex: 1;
     }
+    
     .alert-banner-title {
-      font-weight: bold;
+      font-weight: 700;
+      font-size: 1.1rem;
       margin-bottom: 5px;
     }
-    .alert-banner-date {
-      font-size: 14px;
-      opacity: 0.8;
-    }
+    
     @keyframes slideDown {
       from {
         transform: translateY(-20px);
@@ -76,231 +79,380 @@
       }
     }
     
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
+    /* 헤더 카드 */
+    .result-header-card {
+      background: var(--card-bg);
+      border-radius: 30px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    
+    .poll-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    
+    .poll-badge {
+      padding: 6px 15px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    
+    .badge-category {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .badge-tag {
+      background: var(--border-color);
+      color: var(--text-color);
+    }
+    
+    [data-theme="dark"] .badge-tag {
+      background: #404040;
+    }
+    
+    .poll-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--text-color);
+      margin-bottom: 15px;
+      line-height: 1.3;
+    }
+    
+    .poll-description {
+      font-size: 1.2rem;
+      color: var(--secondary-text);
+      line-height: 1.6;
+    }
+    
+    /* 통계 카드 */
+    .stats-card {
       background: var(--card-bg);
       border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      overflow: hidden;
-      transition: background-color 0.3s ease;
-    }
-    .header {
-      background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
-      color: white;
       padding: 30px;
-      text-align: center;
-    }
-    .header h1 {
-      font-size: 28px;
-      margin-bottom: 10px;
-    }
-    .header p {
-      opacity: 0.9;
-      font-size: 16px;
-    }
-    .content {
-      padding: 40px;
-    }
-    .stats {
-      display: flex;
-      justify-content: space-around;
-      margin-bottom: 40px;
-      padding: 20px;
-      background: var(--secondary-bg);
-      border-radius: 10px;
-      transition: background-color 0.3s ease;
-    }
-    .stat-item {
-      text-align: center;
-    }
-    .stat-number {
-      font-size: 32px;
-      font-weight: bold;
-      color: #667eea;
-    }
-    .stat-label {
-      color: #666;
-      font-size: 14px;
-      margin-top: 5px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      margin-bottom: 30px;
     }
     
-    [data-theme="dark"] .stat-label {
-      color: #aaa;
-    }
-    
-    .charts-wrapper {
+    .stats-grid {
       display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 30px;
-      margin-bottom: 40px;
-      align-items: start;
-    }
-    .chart-container {
-      position: relative;
-      background: var(--secondary-bg);
-      padding: 20px;
-      border-radius: 10px;
-      transition: background-color 0.3s ease;
-    }
-    .chart-container.main-chart {
-      height: 400px;
-    }
-    .chart-container.location-chart {
-      height: 300px;
-    }
-    .chart-title {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
       text-align: center;
-      font-weight: bold;
-      color: var(--text-color);
-      margin-bottom: 15px;
-      font-size: 18px;
-    }
-    .chart-title.location-title {
-      font-size: 16px;
-      color: #666;
     }
     
-    [data-theme="dark"] .chart-title.location-title {
-      color: #aaa;
-    }
-    
-    @media (max-width: 768px) {
-      .charts-wrapper {
-        grid-template-columns: 1fr;
-      }
-    }
-    
-    .options-list {
-      margin-top: 30px;
-    }
-    .options-list h2 {
-      color: var(--text-color);
-    }
-    .option-item {
-      background: var(--secondary-bg);
-      padding: 15px 20px;
-      margin-bottom: 15px;
-      border-radius: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .stat-item {
+      padding: 20px;
+      background: var(--border-color);
+      border-radius: 15px;
       transition: all 0.3s ease;
     }
-    .option-item:hover {
-      transform: translateX(5px);
-      background: var(--border-color);
-    }
-    .option-name {
-      font-weight: 500;
-      color: var(--text-color);
-      display: flex;
-      align-items: center;
-    }
-    .color-dot {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      margin-right: 10px;
-    }
-    .option-stats {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-    .option-votes {
-      font-size: 18px;
-      font-weight: bold;
-      color: #667eea;
-    }
-    .option-percentage {
-      color: #666;
-      font-size: 14px;
+    
+    [data-theme="dark"] .stat-item {
+      background: #3a3a3a;
     }
     
-    [data-theme="dark"] .option-percentage {
-      color: #aaa;
+    .stat-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
     }
     
-    .action-buttons {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-top: 30px;
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
     }
-    .btn {
-      padding: 12px 30px;
-      color: white;
-      text-decoration: none;
-      border-radius: 25px;
-      transition: all 0.3s;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-      display: inline-block;
+    
+    .stat-label {
+      color: var(--secondary-text);
+      font-size: 0.95rem;
+      font-weight: 600;
     }
-    .btn-primary {
-      background: #667eea;
-    }
-    .btn-primary:hover {
-      background: #5568d3;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    }
-    .btn-secondary {
-      background: #6c757d;
-    }
-    .btn-secondary:hover {
-      background: #5a6268;
-    }
-    .live-indicator {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
+    
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 15px;
       background: #22c55e;
+      color: white;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: white;
       border-radius: 50%;
       animation: pulse 2s infinite;
-      margin-right: 8px;
     }
+    
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
     }
     
-    /* 다크모드 토글 버튼 */
-    .dark-mode-toggle {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 1050;
+    /* 차트 섹션 */
+    .charts-section {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
     }
     
-    .toggle-btn {
-      background-color: var(--card-bg);
-      border: 2px solid var(--border-color);
-      border-radius: 50px;
-      padding: 8px 15px;
-      cursor: pointer;
+    .chart-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .chart-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-color);
+      margin-bottom: 20px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      gap: 10px;
+    }
+    
+    .chart-container {
+      position: relative;
+      height: 400px;
+    }
+    
+    .location-chart-container {
+      position: relative;
+      height: 300px;
+    }
+    
+    /* 상세 결과 */
+    .details-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      margin-bottom: 30px;
+    }
+    
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 700;
       color: var(--text-color);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .option-result-item {
+      background: var(--border-color);
+      padding: 20px 25px;
+      margin-bottom: 15px;
+      border-radius: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       transition: all 0.3s ease;
     }
     
-    .toggle-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    [data-theme="dark"] .option-result-item {
+      background: #3a3a3a;
     }
     
-    .toggle-icon {
-      font-size: 20px;
+    .option-result-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
     }
+    
+    .option-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .option-rank {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      min-width: 40px;
+    }
+    
+    .option-name {
+      font-weight: 700;
+      color: var(--text-color);
+      font-size: 1.1rem;
+    }
+    
+    .option-stats {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .option-votes {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #667eea;
+    }
+    
+    .option-percentage {
+      color: var(--secondary-text);
+      font-weight: 600;
+    }
+    
+    /* 액션 버튼 */
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .action-btn {
+      padding: 15px 35px;
+      border: none;
+      border-radius: 50px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .btn-primary-action {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-primary-action:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+      color: white;
+    }
+    
+    .btn-secondary-action {
+      background: transparent;
+      color: var(--text-color);
+      border: 2px solid var(--border-color);
+    }
+    
+    .btn-secondary-action:hover {
+      background: var(--border-color);
+      transform: translateY(-3px);
+      color: var(--text-color);
+    }
+    
+    /* 반응형 */
+    @media (max-width: 768px) {
+      .poll-title {
+        font-size: 2rem;
+      }
+      
+      .charts-section {
+        grid-template-columns: 1fr;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+      
+      .action-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    /* 홈 버튼과 다크모드 토글 */
+.home-button {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1040;
+    background-color: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 50px;
+    padding: 10px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    color: var(--text-color);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.home-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    color: var(--text-color);
+}
+
+.home-icon {
+    font-size: 20px;
+}
+
+.dark-mode-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+}
+
+.toggle-btn {
+    background-color: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 50px;
+    padding: 10px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+.toggle-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.toggle-icon {
+    font-size: 20px;
+}
   </style>
 </head>
 <body>
+  <!-- 홈 버튼 -->
+  <a href="/" class="home-button">
+    <span class="home-icon">🏠</span>
+    <span>홈</span>
+  </a>
+
   <!-- 다크모드 토글 버튼 -->
   <div class="dark-mode-toggle">
     <button class="toggle-btn" onclick="toggleDarkMode()">
@@ -309,121 +461,148 @@
     </button>
   </div>
 
-  <% if (typeof alreadyVoted !== 'undefined' && alreadyVoted) { %>
-    <div class="container" style="margin-bottom: 20px;">
+  <!-- 알림 배너 -->
+  <div class="result-container">
+    <% if (typeof alreadyVoted !== 'undefined' && alreadyVoted) { %>
       <div class="alert-banner">
         <div class="alert-banner-icon">✅</div>
         <div class="alert-banner-content">
-          <div class="alert-banner-title">이미 투표하신 여론조사입니다</div>
-          <div class="alert-banner-date">
-            투표 생성일: <%= new Date(poll.createdAt).toLocaleDateString('ko-KR', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric',
-              weekday: 'long'
-            }) %>
-          </div>
+          <div class="alert-banner-title">이미 투표하셨습니다</div>
+          <div>투표해 주셔서 감사합니다!</div>
         </div>
       </div>
-    </div>
-  <% } %>
-
-  <div class="container">
-    <div class="header">
-      <h1><%= poll.title %></h1>
-      <% if (poll.description) { %>
-        <p style="font-size: 1.1rem; line-height: 1.6; margin-top: 15px;"><%= poll.description %></p>
-      <% } %>
-      
-      <!-- 카테고리/태그 추가 -->
-      <% if (poll.category || (poll.tags && poll.tags.length > 0)) { %>
-        <div style="margin-top: 15px;">
-          <% if (poll.category) { %>
-            <span style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; margin-right: 8px; font-size: 0.9rem;">
-              <%= poll.category %>
-            </span>
-          <% } %>
-          <% if (poll.tags && poll.tags.length > 0) { %>
-            <% poll.tags.forEach(tag => { %>
-              <span style="background: rgba(255,255,255,0.15); padding: 5px 12px; border-radius: 20px; margin-right: 5px; font-size: 0.85rem;">
-                #<%= tag %>
-              </span>
-            <% }); %>
-          <% } %>
+    <% } %>
+    
+    <% if (typeof ended !== 'undefined' && ended) { %>
+      <div class="alert-banner">
+        <div class="alert-banner-icon">⏰</div>
+        <div class="alert-banner-content">
+          <div class="alert-banner-title">투표가 종료되었습니다</div>
+          <div>최종 결과를 확인하세요</div>
         </div>
+      </div>
+    <% } %>
+
+    <!-- 헤더 -->
+    <div class="result-header-card">
+      <div class="poll-badges">
+        <% if (poll.category) { %>
+          <span class="poll-badge badge-category"><%= poll.category %></span>
+        <% } %>
+        <% if (poll.tags && poll.tags.length > 0) { %>
+          <% poll.tags.forEach(tag => { %>
+            <span class="poll-badge badge-tag">#<%= tag %></span>
+          <% }); %>
+        <% } %>
+      </div>
+      
+      <h1 class="poll-title"><%= poll.title %></h1>
+      
+      <% if (poll.description) { %>
+        <p class="poll-description"><%= poll.description %></p>
       <% } %>
     </div>
 
-    <div class="content">
-      <div class="stats">
+    <!-- 통계 -->
+    <div class="stats-card">
+      <div class="stats-grid">
         <div class="stat-item">
-          <div class="stat-number" id="total-votes"><%= poll.options.reduce((sum, opt) => sum + opt.votes, 0) %></div>
+          <div class="stat-number" id="total-votes">
+            <%= poll.options.reduce((sum, opt) => sum + opt.votes, 0) %>
+          </div>
           <div class="stat-label">총 투표수</div>
         </div>
+        
         <div class="stat-item">
           <div class="stat-number"><%= poll.options.length %></div>
           <div class="stat-label">선택지 수</div>
         </div>
+        
         <div class="stat-item">
-          <div class="stat-label">
-            <span class="live-indicator"></span>
-            실시간 업데이트
+          <div class="stat-number">
+            <%= new Date(poll.createdAt).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }) %>
           </div>
+          <div class="stat-label">생성일</div>
+        </div>
+        
+        <div class="stat-item">
+          <span class="live-badge">
+            <span class="live-dot"></span>
+            <span>실시간</span>
+          </span>
+          <div class="stat-label" style="margin-top: 10px;">자동 업데이트</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 차트 -->
+    <div class="charts-section">
+      <div class="chart-card">
+        <h3 class="chart-title">
+          <span>📊</span>
+          <span>투표 결과</span>
+        </h3>
+        <div class="chart-container">
+          <canvas id="pollChart"></canvas>
         </div>
       </div>
 
-      <div class="charts-wrapper">
-        <div class="chart-container main-chart">
-          <div class="chart-title">📊 투표 결과</div>
-          <canvas id="pollChart"></canvas>
-        </div>
-
-        <div class="chart-container location-chart">
-          <div class="chart-title location-title">🗺️ 지역별 투표</div>
+      <div class="chart-card">
+        <h3 class="chart-title">
+          <span>🗺️</span>
+          <span>지역별 분포</span>
+        </h3>
+        <div class="location-chart-container">
           <canvas id="locationChart"></canvas>
         </div>
       </div>
+    </div>
 
-      <div class="options-list">
-        <h2 style="margin-bottom: 20px;">상세 결과</h2>
-        <% 
-          const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
-          const colors = [
-            'rgba(102, 126, 234, 0.8)',
-            'rgba(118, 75, 162, 0.8)',
-            'rgba(237, 100, 166, 0.8)',
-            'rgba(255, 154, 158, 0.8)',
-            'rgba(250, 208, 196, 0.8)',
-            'rgba(155, 93, 229, 0.8)',
-            'rgba(237, 187, 153, 0.8)',
-            'rgba(34, 197, 94, 0.8)'
-          ];
-        %>
-        <% poll.options.forEach((option, index) => { %>
-          <div class="option-item" data-option-id="<%= option._id %>">
-            <div class="option-name">
-              <span class="color-dot" style="background: <%= colors[index % colors.length] %>;"></span>
-              <%= option.text %>
-            </div>
-            <div class="option-stats">
-              <span class="option-votes"><%= option.votes %>표</span>
-              <span class="option-percentage">
-                <%= totalVotes > 0 ? ((option.votes / totalVotes) * 100).toFixed(1) : 0 %>%
-              </span>
-            </div>
+    <!-- 상세 결과 -->
+    <div class="details-card">
+      <h3 class="section-title">
+        <span>📋</span>
+        <span>상세 결과</span>
+      </h3>
+      
+      <% 
+        const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+        const sortedOptions = [...poll.options].sort((a, b) => b.votes - a.votes);
+        sortedOptions.forEach((option, index) => { 
+          const percentage = totalVotes > 0 ? ((option.votes / totalVotes) * 100).toFixed(1) : 0;
+      %>
+        <div class="option-result-item" data-option-id="<%= option._id %>">
+          <div class="option-info">
+            <div class="option-rank">#<%= index + 1 %></div>
+            <div class="option-name"><%= option.text %></div>
           </div>
-        <% }); %>
-      </div>
+          <div class="option-stats">
+            <span class="option-votes"><%= option.votes %>표</span>
+            <span class="option-percentage"><%= percentage %>%</span>
+          </div>
+        </div>
+      <% }); %>
+    </div>
 
+    <!-- 액션 버튼 -->
+    <div class="stats-card">
       <div class="action-buttons">
-        <a href="/polls/<%= poll._id %>" class="btn btn-primary">투표하러 가기</a>
-        <a href="/polls" class="btn btn-secondary">목록으로</a>
+        <a href="/polls/<%= poll._id %>" class="action-btn btn-primary-action">
+          <span>🗳️</span>
+          <span>투표하러 가기</span>
+        </a>
+        <a href="/polls" class="action-btn btn-secondary-action">
+          <span>📋</span>
+          <span>목록으로</span>
+        </a>
       </div>
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
   <script>
-    // 다크모드 함수들 (맨 위에 배치)
+    // 다크모드 함수들
     function initDarkMode() {
       const savedTheme = localStorage.getItem('theme') || 'light';
       document.documentElement.setAttribute('data-theme', savedTheme);
@@ -457,6 +636,7 @@
     // 즉시 다크모드 초기화
     initDarkMode();
 
+    // 차트 데이터
     const pollId = '<%= poll._id %>';
     const socket = io();
 
@@ -482,6 +662,7 @@
       'rgba(160, 160, 160, 0.8)'
     ];
 
+    // 메인 차트
     const ctx = document.getElementById('pollChart').getContext('2d');
     let pollChart = new Chart(ctx, {
       type: 'pie',
@@ -510,9 +691,8 @@
             position: 'bottom',
             labels: {
               padding: 15,
-              font: {
-                size: 12
-              }
+              font: { size: 12 },
+              color: getComputedStyle(document.documentElement).getPropertyValue('--text-color')
             }
           },
           tooltip: {
@@ -530,8 +710,8 @@
       }
     });
 
+    // 지역 차트
     const locationCtx = document.getElementById('locationChart').getContext('2d');
-    
     let locationChart = new Chart(locationCtx, {
       type: 'pie',
       data: {
@@ -567,26 +747,15 @@
             position: 'bottom',
             labels: {
               padding: 10,
-              font: {
-                size: 11
-              }
-            }
-          },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                const label = context.label || '';
-                const value = context.parsed || 0;
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                return label + ': ' + value + '명 (' + percentage + '%)';
-              }
+              font: { size: 11 },
+              color: getComputedStyle(document.documentElement).getPropertyValue('--text-color')
             }
           }
         }
       }
     });
 
+    // Socket.io 실시간 업데이트
     socket.on('vote-update', (data) => {
       if (data.pollId === pollId) {
         console.log('투표 업데이트 수신:', data);
@@ -606,14 +775,6 @@
           }
         });
       }
-    });
-
-    socket.on('connect', () => {
-      console.log('Socket.IO 연결됨');
-    });
-
-    socket.on('disconnect', () => {
-      console.log('Socket.IO 연결 종료');
     });
   </script>
 </body>
