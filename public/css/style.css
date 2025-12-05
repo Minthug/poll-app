@@ -119,6 +119,27 @@ body {
     right: 20px;
 }
 
+.navbar {
+  padding: 0.5rem 1rem;
+  min-height: 30px;
+}
+
+.navbar-brand {
+  font-size: 1.1rem;
+  padding-top: 0.1rem;
+  padding-bottom: 0.3rem;
+}
+
+.navbar-nav .nav-link {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0.4rem 0.8rem;
+  }
+}
 /* Chart.js 다크모드 대응 */
 [data-theme="dark"] canvas {
     filter: brightness(0.9);
