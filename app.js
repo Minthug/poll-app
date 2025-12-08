@@ -26,6 +26,13 @@ const io = socketIo(server, {
 const Poll = require('./models/Poll');
 const Visitor = require('./models/Visitor')
 
+const {
+  cookieParser,
+  csrfProtection,
+  globalLimiter,
+  addCsrfToViews
+} = require('./middleware/security')
+
 // 미들웨어 설정
 app.set('view engine', 'ejs');
 app.use(express.json());
