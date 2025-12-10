@@ -74,6 +74,15 @@ app.use(session({
   cookie: { maxAge: 1000 * 60 * 60 * 24 }
 }));
 
+// 모든 뷰에 세션 정보 전달
+app.use((req, res, next) => {
+  res.locals.user = req.session.userId ? {
+    id: req.session.userId,
+    username: req.session.username
+  } : null;
+  next();
+});
+
 // ========================================
 // 5. MongoDB 연결
 // ========================================

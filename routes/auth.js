@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../modules/User');
+const User = require('../models/User');
 const { body, validationResult } = require('express-validator');
 
 // ========================================
@@ -50,6 +50,12 @@ async (req, res) => {
                 });
             }
         }
+        
+        const user = await User.create({
+            username,
+            email,
+            password
+        });
 
         console.log('✅ 회원가입 완료:', user.username);
 

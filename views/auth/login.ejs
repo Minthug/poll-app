@@ -1,0 +1,36 @@
+<!-- register.ejs와 거의 동일, form만 다름 -->
+<form action="/auth/login" method="POST">
+  <!-- ⭐ CSRF 토큰 추가 -->
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <div class="form-group">
+    <label for="email" class="form-label">이메일</label>
+    <input 
+      type="email" 
+      class="form-control" 
+      id="email" 
+      name="email"
+      required
+    >
+  </div>
+  
+  <div class="form-group">
+    <label for="password" class="form-label">비밀번호</label>
+    <input 
+      type="password" 
+      class="form-control" 
+      id="password" 
+      name="password"
+      required
+    >
+  </div>
+
+  
+  
+  <button type="submit" class="btn-submit">
+    로그인
+  </button>
+</form>
+
+<div class="auth-links">
+  계정이 없으신가요? <a href="/auth/register">회원가입</a>
+</div>
