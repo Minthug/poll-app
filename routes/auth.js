@@ -66,7 +66,71 @@ async (req, res) => {
 }
 );
 
-
 // ========================================
 // 로그인 페이지
 // ========================================
+router.get('/login', (req, res) => {
+    res.render('auth/login', { error: null });
+});
+
+// ========================================
+// 로그인 처리
+// ========================================
+router.post('/login', [
+    body('email').isEmail().withMessage('올바른 이메일을 입력하세요'),
+    body('password').notEmpty().withMessage('비밀번호를 입력하세요')
+],
+async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.render('auth/login', {
+            error: errors.array()[0].msg
+        });
+    }
+
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.render('auth/login', {
+                error: '이메일 또는 비밀번호가 일치하지 않습니다'
+            });
+        }
+
+        // 비밀번호 확인
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
+            return res.render('auth/login', {
+                error: '이메일 또는 비밀번호가 일치하지 않습니다'
+            });
+        }
+    
+        // 세션 저장
+        req.session.userId = user._id;
+        req.session.username = user.username;
+
+        console.log('✅ 로그인 성공:', user.username);
+        res.redirect('/polls');
+    } catch(error) {
+        console.error('로그인 오류:', error);
+        res.render('auth/login', {
+            error: '로그인 중 오류가 발생했습니다'
+        });
+    }
+}
+);
+
+// ========================================
+// 로그아웃
+// ========================================
+router.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('로그아웃 오류:', err);
+        }
+        res.redirect('/');
+    });
+});
+
+module.exports = router;
