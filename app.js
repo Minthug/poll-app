@@ -71,7 +71,11 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 1000 * 60 * 60 * 24 }
+  cookie: { 
+    maxAge: 1000 * 60 * 60, // 1시간 ()
+    httpOnly: true, // XSS 공격방지
+    secure: process.env.NODE_ENV === 'production' // https에서만 쿠키 전송
+   }
 }));
 
 // 모든 뷰에 세션 정보 전달
