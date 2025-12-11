@@ -110,7 +110,6 @@ mongoose.connect(process.env.MONGODB_URI)
 const pollRoutes = require('./routes/polls');
 const adminRoutes = require('./routes/admin');
 const authRoutes = require('./routes/auth');
-const { sessionActivity, checkSessionWarning } = require('./middleware/session');
 
 app.use('/polls', pollRoutes);
 app.use('/admin', adminRoutes);

@@ -1,0 +1,21 @@
+<!-- 홈 버튼 -->
+<a href="/" class="home-button">
+  <span class="home-icon">🏠</span>
+  <span>홈</span>
+</a>
+
+<!-- 다크모드 토글 -->
+<div class="dark-mode-toggle">
+  <button class="toggle-btn" onclick="toggleDarkMode()">
+    <span class="toggle-icon" id="themeIcon">🌙</span>
+    <span id="themeText">다크</span>
+  </button>
+</div>
+
+<!-- ⭐ 세션 만료 경고 (모든 페이지에 자동 적용) -->
+<% if (typeof sessionWarning !== 'undefined' && sessionWarning) { %>
+  <div class="session-warning-banner">
+    ⏰ 세션이 곧 만료됩니다. (<%= timeRemaining %>분 남음)
+    <button onclick="refreshSession()">세션 연장</button>
+  </div>
+<% } %>
