@@ -55,6 +55,11 @@ const {
   addCsrfToViews
 } = require('./middleware/security');
 
+const {
+  sessionActivity,
+  checkSessionWarning
+} = require('./middleware/session');
+
 // 기본 미들웨어
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -78,6 +83,10 @@ app.use(session({
    }
 }));
 
+// 세션 활동 체크 미들웨어
+app.use(sessionActivity);
+app.use(checkSessionWarning);
+
 // 모든 뷰에 세션 정보 전달
 app.use((req, res, next) => {
   res.locals.user = req.session.userId ? {
@@ -86,6 +95,7 @@ app.use((req, res, next) => {
   } : null;
   next();
 });
+
 
 // ========================================
 // 5. MongoDB 연결
@@ -100,6 +110,7 @@ mongoose.connect(process.env.MONGODB_URI)
 const pollRoutes = require('./routes/polls');
 const adminRoutes = require('./routes/admin');
 const authRoutes = require('./routes/auth');
+const { sessionActivity, checkSessionWarning } = require('./middleware/session');
 
 app.use('/polls', pollRoutes);
 app.use('/admin', adminRoutes);
