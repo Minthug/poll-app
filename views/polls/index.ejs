@@ -1,305 +1,311 @@
-<% layout = false %>
-
-<!-- 메인 콘텐츠만 남김 -->
-<div class="landing-container">
-  <!-- 히어로 섹션 -->
-  <div class="hero-section">
-    <div class="hero-badge">🎯 실시간 투표 시스템</div>
-    <h1 class="hero-title">빠르고 쉬운<br>여론조사</h1>
-    <p class="hero-subtitle">
-      누구나 쉽게 만들고, 실시간으로 결과를 확인할 수 있는<br>
-      스마트한 여론조사 플랫폼
-    </p>
-    
-    <a href="/polls/new" class="cta-button">
-      <span class="cta-icon">🚀</span>
-      <span>지금 시작하기</span>
-    </a>
-    
-    <% if (user) { %>
-      <div class="user-info">
-        <span class="user-welcome">👤 <strong><%= user.username %></strong>님 환영합니다!</span>
-        <a href="/auth/logout" class="btn-logout-small">로그아웃</a>
-      </div>
-    <% } else { %>
-      <div class="auth-buttons">
-        <a href="/auth/login" class="auth-link">로그인</a>
-        <span class="separator">|</span>
-        <a href="/auth/register" class="auth-link">회원가입</a>
-      </div>
-    <% } %>
-  </div>
-
-  <!-- 기능 섹션 -->
-  <div class="features-section">
-    <div class="feature-card">
-      <span class="feature-icon">⚡</span>
-      <h3 class="feature-title">실시간 결과</h3>
-      <p class="feature-desc">투표 결과가 실시간으로 업데이트되어 즉각적인 피드백을 받을 수 있어요</p>
-    </div>
-    
-    <div class="feature-card">
-      <span class="feature-icon">🔒</span>
-      <h3 class="feature-title">중복 방지</h3>
-      <p class="feature-desc">IP 기반 중복 투표 방지로 공정하고 정확한 투표 결과를 보장해요</p>
-    </div>
-    
-    <div class="feature-card">
-      <span class="feature-icon">📊</span>
-      <h3 class="feature-title">지역별 통계</h3>
-      <p class="feature-desc">투표자의 지역 정보를 자동으로 수집하여 상세한 통계를 제공해요</p>
-    </div>
-  </div>
-
-  <!-- 부가 액션 -->
-  <div class="secondary-actions">
-    <a href="/polls" class="secondary-btn">
-      <span>📋</span>
-      <span>여론조사 둘러보기</span>
+<!-- 메인 콘텐츠만 -->
+<div class="container">
+  <!-- 페이지 헤더 -->
+  <div class="page-header">
+    <h1 class="page-title">📊 여론조사 목록</h1>
+    <p class="page-subtitle">진행 중인 모든 여론조사를 확인하고 투표하세요</p>
+    <a href="/polls/new" class="create-btn">
+      <span>➕</span>
+      <span>새 여론조사 만들기</span>
     </a>
   </div>
+
+  <!-- 카테고리 필터 -->
+  <div class="category-filter">
+    <h3 class="filter-title">🏷️ 카테고리</h3>
+    <div class="category-buttons">
+      <a href="/polls" class="category-btn <%= !category ? 'active' : '' %>">전체</a>
+      <a href="/polls?category=일반" class="category-btn <%= category === '일반' ? 'active' : '' %>">일반</a>
+      <a href="/polls?category=정치" class="category-btn <%= category === '정치' ? 'active' : '' %>">정치</a>
+      <a href="/polls?category=경제" class="category-btn <%= category === '경제' ? 'active' : '' %>">경제</a>
+      <a href="/polls?category=사회" class="category-btn <%= category === '사회' ? 'active' : '' %>">사회</a>
+      <a href="/polls?category=문화" class="category-btn <%= category === '문화' ? 'active' : '' %>">문화</a>
+      <a href="/polls?category=스포츠" class="category-btn <%= category === '스포츠' ? 'active' : '' %>">스포츠</a>
+      <a href="/polls?category=게임" class="category-btn <%= category === '게임' ? 'active' : '' %>">게임</a>
+      <a href="/polls?category=음식" class="category-btn <%= category === '음식' ? 'active' : '' %>">음식</a>
+      <a href="/polls?category=기타" class="category-btn <%= category === '기타' ? 'active' : '' %>">기타</a>
+    </div>
+  </div>
+
+  <!-- 여론조사 목록 -->
+  <% if (polls && polls.length > 0) { %>
+    <div class="polls-grid">
+      <% polls.forEach(poll => { 
+        const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+      %>
+        <a href="/polls/<%= poll._id %>" class="poll-card">
+          <div class="poll-badges">
+            <% if (poll.category) { %>
+              <span class="poll-badge badge-category"><%= poll.category %></span>
+            <% } %>
+            <% if (poll.tags && poll.tags.length > 0) { %>
+              <% poll.tags.slice(0, 3).forEach(tag => { %>
+                <span class="poll-badge badge-tag">#<%= tag %></span>
+              <% }); %>
+            <% } %>
+          </div>
+          
+          <h2 class="poll-card-title"><%= poll.title %></h2>
+          
+          <% if (poll.description) { %>
+            <p class="poll-card-description"><%= poll.description %></p>
+          <% } %>
+          
+          <div class="poll-card-meta">
+            <div class="meta-item">
+              <span>👥</span>
+              <span><%= totalVotes %>명 참여</span>
+            </div>
+            <div class="meta-item">
+              <span>📋</span>
+              <span><%= poll.options.length %>개 선택지</span>
+            </div>
+            <div class="meta-item">
+              <span>📅</span>
+              <span><%= new Date(poll.createdAt).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }) %></span>
+            </div>
+          </div>
+        </a>
+      <% }); %>
+    </div>
+  <% } else { %>
+    <!-- 빈 상태 -->
+    <div class="empty-state">
+      <div class="empty-icon">📭</div>
+      <h2 class="empty-title">아직 여론조사가 없습니다</h2>
+      <p class="empty-subtitle">첫 번째 여론조사를 만들어보세요!</p>
+      <a href="/polls/new" class="create-btn">
+        <span>➕</span>
+        <span>여론조사 만들기</span>
+      </a>
+    </div>
+  <% } %>
 </div>
 
 <!-- 이 페이지만의 스타일 -->
 <style>
-  .landing-container {
-    max-width: 700px;
+  .container {
+    max-width: 1200px;
     margin: 0 auto;
   }
   
-  .hero-section {
-    text-align: center;
+  /* 헤더 */
+  .page-header {
     background: var(--card-bg);
     border-radius: 30px;
-    padding: 60px 40px;
+    padding: 40px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     margin-bottom: 30px;
-    transition: all 0.3s ease;
+    text-align: center;
   }
   
-  .hero-badge {
-    display: inline-block;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 8px 20px;
-    border-radius: 50px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-  }
-  
-  .hero-title {
-    font-size: 3rem;
+  .page-title {
+    font-size: 2.5rem;
     font-weight: 800;
     color: var(--text-color);
-    margin-bottom: 20px;
-    line-height: 1.2;
-    letter-spacing: -1px;
+    margin-bottom: 15px;
   }
   
-  .hero-subtitle {
-    font-size: 1.3rem;
+  .page-subtitle {
+    font-size: 1.1rem;
     color: var(--secondary-text);
-    margin-bottom: 40px;
-    line-height: 1.6;
+    margin-bottom: 25px;
   }
   
-  .cta-button {
+  .create-btn {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    padding: 18px 45px;
-    font-size: 1.2rem;
-    font-weight: 700;
+    padding: 15px 35px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
     border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.3s ease;
     text-decoration: none;
     box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
   }
   
-  .cta-button:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+  .create-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
     color: white;
   }
   
-  .cta-icon {
-    font-size: 1.5rem;
-    animation: bounce 2s infinite;
-  }
-  
-  @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-  }
-  
-  .auth-buttons {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-  }
-
-  .auth-link {
-    color: var(--text-color);
-    text-decoration: none;
-    font-weight: 600;
-    padding: 8px 20px;
-    border-radius: 20px;
-    transition: all 0.3s ease;
-  }
-
-  .auth-link:hover {
-    color: #667eea;
-    background: rgba(102, 126, 234, 0.1);
-  }
-
-  .separator {
-    color: var(--secondary-text);
-  }
-  
-  .user-info {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-top: 20px;
-    padding: 12px 25px;
-    background: var(--border-color);
-    border-radius: 50px;
-    display: inline-flex;
-  }
-  
-  [data-theme="dark"] .user-info {
-    background: #3a3a3a;
-  }
-  
-  .user-welcome {
-    color: var(--text-color);
-    font-weight: 600;
-  }
-  
-  .btn-logout-small {
-    padding: 6px 15px;
-    background: #dc3545;
-    color: white;
-    border-radius: 20px;
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
-  }
-  
-  .btn-logout-small:hover {
-    background: #c82333;
-    color: white;
-    transform: translateY(-2px);
-  }
-  
-  .features-section {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-top: 30px;
-  }
-  
-  .feature-card {
+  /* 카테고리 필터 */
+  .category-filter {
     background: var(--card-bg);
     border-radius: 20px;
-    padding: 35px 30px;
-    text-align: center;
-    transition: all 0.3s ease;
+    padding: 25px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    margin-bottom: 30px;
   }
   
-  .feature-card:hover {
+  .filter-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 15px;
+  }
+  
+  .category-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .category-btn {
+    padding: 10px 20px;
+    border: 2px solid var(--border-color);
+    background: transparent;
+    color: var(--text-color);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  
+  .category-btn:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: transparent;
+  }
+  
+  .category-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: transparent;
+  }
+  
+  /* 여론조사 카드 그리드 */
+  .polls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+  }
+  
+  .poll-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+  }
+  
+  .poll-card:hover {
     transform: translateY(-8px);
     box-shadow: 0 15px 40px rgba(0,0,0,0.3);
   }
   
-  .feature-icon {
-    font-size: 3rem;
+  .poll-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
     margin-bottom: 15px;
-    display: block;
   }
   
-  .feature-title {
-    font-size: 1.3rem;
+  .poll-badge {
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  
+  .badge-category {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+  
+  .badge-tag {
+    background: var(--border-color);
+    color: var(--text-color);
+  }
+  
+  [data-theme="dark"] .badge-tag {
+    background: #404040;
+  }
+  
+  .poll-card-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+  
+  .poll-card-description {
+    color: var(--secondary-text);
+    margin-bottom: 20px;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .poll-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 2px solid var(--border-color);
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+  }
+  
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  /* 빈 상태 */
+  .empty-state {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 60px 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    text-align: center;
+  }
+  
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+  }
+  
+  .empty-title {
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--text-color);
     margin-bottom: 10px;
   }
   
-  .feature-desc {
-    font-size: 1rem;
+  .empty-subtitle {
     color: var(--secondary-text);
-    line-height: 1.6;
+    margin-bottom: 25px;
   }
   
-  .secondary-actions {
-    text-align: center;
-    margin-top: 30px;
-  }
-  
-  .secondary-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 30px;
-    font-size: 1rem;
-    font-weight: 600;
-    background: transparent;
-    color: white;
-    border: 2px solid white;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    margin: 0 10px;
-  }
-  
-  .secondary-btn:hover {
-    background: white;
-    color: var(--bg-gradient-start);
-    transform: translateY(-3px);
-  }
-  
+  /* 반응형 */
   @media (max-width: 768px) {
-    .hero-title {
-      font-size: 2.2rem;
+    .page-title {
+      font-size: 2rem;
     }
     
-    .hero-subtitle {
-      font-size: 1.1rem;
-    }
-    
-    .hero-section {
-      padding: 40px 25px;
-    }
-    
-    .cta-button {
-      padding: 15px 35px;
-      font-size: 1.1rem;
-    }
-    
-    .features-section {
+    .polls-grid {
       grid-template-columns: 1fr;
     }
     
-    .secondary-btn {
-      display: flex;
-      margin: 10px 0;
-    }
-    
-    .auth-buttons {
-      flex-direction: column;
-      gap: 10px;
+    .category-buttons {
+      justify-content: center;
     }
   }
 </style>
