@@ -329,19 +329,27 @@
   <!-- 메인 콘텐츠 -->
   <div class="landing-container">
     <!-- 히어로 섹션 -->
-    <div class="hero-section">
-      <div class="hero-badge">🎯 실시간 투표 시스템</div>
-      <h1 class="hero-title">빠르고 쉬운<br>여론조사</h1>
-      <p class="hero-subtitle">
-        누구나 쉽게 만들고, 실시간으로 결과를 확인할 수 있는<br>
-        스마트한 여론조사 플랫폼
-      </p>
-      
-      <a href="/polls/new" class="cta-button">
-        <span class="cta-icon">🚀</span>
-        <span>지금 시작하기</span>
-      </a>
-      
+<div class="hero-section">
+  <div class="hero-badge">🎯 실시간 투표 시스템</div>
+  <h1 class="hero-title">빠르고 쉬운<br>여론조사</h1>
+  <p class="hero-subtitle">
+    누구나 쉽게 만들고, 실시간으로 결과를 확인할 수 있는<br>
+    스마트한 여론조사 플랫폼
+  </p>
+  
+  <!-- ⭐ 여론조사 둘러보기 (메인 버튼) -->
+  <a href="/polls" class="cta-button">
+    <span class="cta-icon">📋</span>
+    <span>여론조사 둘러보기</span>
+  </a>
+  
+  <!-- ⭐ 투표 만들기 (서브 버튼) -->
+  <div class="secondary-actions" style="margin-top: 20px;">
+    <a href="/polls/new" class="secondary-btn">
+      <span>➕</span>
+      <span>투표 만들기</span>
+    </a>
+  </div>
       <!-- ⭐⭐⭐ 여기에 추가! 로그인/회원가입 버튼 ⭐⭐⭐ -->
       <% if (user) { %>
         <!-- 로그인한 경우 -->
