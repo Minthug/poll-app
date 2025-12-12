@@ -239,19 +239,22 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
     
-    // 더블 클릭으로 바로 투표 
+    // 더블 클릭으로 바로 투표 - 12.4 수정
     card.addEventListener('dblclick', async () => {
       const optionId = card.getAttribute('data-option-id');
       
       if (!optionId) return;
       
+      const csrfToken = document.getElementById('csrf-token').value;
+
       try {
         const response = await fetch(`/polls/${pollId}/vote`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'CSRF-Token': csrfToken
           },
-          body: JSON.stringify({ optionId })
+          body: JSON.stringify({ optionId, _csrf: csrfToken })
         });
         
         const data = await response.json();
@@ -278,13 +281,19 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     
+    // CSRF 토큰 가져오기
+    const csrfToken = document.getElementById('csrf-token').value;
+
     try {
       const response = await fetch(`/polls/${pollId}/vote`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'CSRF-Token': csrfToken
         },
-        body: JSON.stringify({ optionId: optionIdInput.value })
+        body: JSON.stringify({ 
+          optionId: optionIdInput.value,
+          _csrf: csrfToken })
       });
       
       const data = await response.json();

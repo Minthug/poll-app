@@ -289,6 +289,7 @@
       </p>
       
       <form id="vote-form" data-poll-id="<%= poll._id %>">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" id="csrf-token">
         <!-- 선택 알림 (숨김 상태) -->
         <div class="selected-alert d-none" id="selected-alert">
           선택: <span id="selected-option-text"></span>
