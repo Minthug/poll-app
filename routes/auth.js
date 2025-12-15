@@ -7,7 +7,7 @@ const { body, validationResult } = require('express-validator');
 // 회원가입 페이지
 // ========================================
 router.get('/register', (req, res) => {
-    res.render('auth/register', { error: null })
+    res.render('auth/register', { error: null, csrtToken: req.csrfToken() })
 });
 
 // ========================================
@@ -28,7 +28,8 @@ async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.render('auth/register', {
-            error: errors.array()[0].msg
+            error: errors.array()[0].msg,
+            csrfToken: req.csrtToken()
         });
     }
     try {
@@ -41,12 +42,14 @@ async (req, res) => {
         if (existingUser) {
             if (existingUser.email === email) {
                 return res.render('auth/register', {
-                    error: '이미 사용 중인 이메일입니다'
+                    error: '이미 사용 중인 이메일입니다',
+                    csrfToken: req.csrfToken()
                 });
             }
             if (existingUser.username === username) {
                 return res.render('auth/register', {
-                    error: '이미 사용 중인 사용자명입니다'
+                    error: '이미 사용 중인 사용자명입니다',
+                    csrfToken: req.csrfToken()
                 });
             }
         }
@@ -66,7 +69,8 @@ async (req, res) => {
     } catch(error) {
         console.error('회원가입 오류:', error);
         res.render('auth/register', {
-            error: '회원가입 중 오류가 발생했습니다'
+            error: '회원가입 중 오류가 발생했습니다',
+            csrfToken: req.csrfToken()
         });
     }
 }
@@ -76,7 +80,11 @@ async (req, res) => {
 // 로그인 페이지
 // ========================================
 router.get('/login', (req, res) => {
-    res.render('auth/login', { error: null });
+    res.render('auth/login', { 
+        error: null,
+        timeout: req.query.timeout === 'true',
+        csrfToken: req.csrfToken()
+    });
 });
 
 // ========================================
@@ -90,7 +98,8 @@ async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.render('auth/login', {
-            error: errors.array()[0].msg
+            error: errors.array()[0].msg,
+            csrfToken: req.csrfToken()
         });
     }
 
@@ -100,7 +109,9 @@ async (req, res) => {
 
         if (!user) {
             return res.render('auth/login', {
-                error: '이메일 또는 비밀번호가 일치하지 않습니다'
+                error: '이메일 또는 비밀번호가 일치하지 않습니다',
+                timeout: false,
+                csrfToken: req.csrfToken()
             });
         }
 
@@ -108,7 +119,9 @@ async (req, res) => {
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
             return res.render('auth/login', {
-                error: '이메일 또는 비밀번호가 일치하지 않습니다'
+                error: '이메일 또는 비밀번호가 일치하지 않습니다',
+                timeout: false,
+                csrfToken: req.csrfToken()
             });
         }
     
