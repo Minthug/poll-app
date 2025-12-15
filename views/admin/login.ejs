@@ -93,6 +93,10 @@
     <% } %>
     
     <form method="POST" action="/admin/login">
+
+      <!-- CSRF 토큰 추가 -->
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      
       <div class="form-group">
         <label>아이디</label>
         <input type="text" name="username" required autofocus>

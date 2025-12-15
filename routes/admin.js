@@ -5,7 +5,7 @@ const Poll = require('../models/Poll');
 const { checkAuth } = require('../middleware/auth');
 
 router.get('/login', (req, res) => {
-    res.render('admin/login', { error: null });
+    res.render('admin/login', { error: null, csrfToken: req.csrfToken() });
 });
 
 router.post('/login', (req, res) => {
@@ -17,7 +17,9 @@ router.post('/login', (req, res) => {
             req.session.isAdmin = true;
             res.redirect('/admin');
         } else {
-            res.render('admin/login', { error: '아이디 또는 비밀번호가 틀렸습니다.' });
+            res.render('admin/login', { error: '아이디 또는 비밀번호가 틀렸습니다.',
+                csrfToken: req.csrfToken()
+             });
         }
 });
 
