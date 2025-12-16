@@ -36,6 +36,7 @@ const pollSchema = new mongoose.Schema({
 
     // 최대 5개의 옵션을 가질 수 있음
     options: [optionSchema],
+    views: { type: Number, default: 0 },
     createdAt: {
         type: Date,
         default: Date.now
