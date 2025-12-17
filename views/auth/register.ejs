@@ -170,9 +170,9 @@
       
       <form action="/auth/register" method="POST">
 
-        <!-- ⭐ CSRF 토큰 추가 -->
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        
+    <!-- ⭐ CSRF 토큰 추가 -->
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    
         <div class="form-group">
           <label for="username" class="form-label">사용자명</label>
           <input 

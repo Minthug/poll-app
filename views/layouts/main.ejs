@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="/css/style.css">
   
-  <!-- 공통 CSS -->
   <style>
     :root {
       --bg-gradient-start: #667eea;
@@ -66,7 +65,6 @@
       font-size: 20px;
     }
     
-    /* 다크모드 토글 */
     .dark-mode-toggle {
       position: fixed;
       top: 20px;
@@ -97,59 +95,114 @@
       font-size: 20px;
     }
     
-    /* 세션 경고 배너 */
-    .session-warning-banner {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: #ff9800;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      font-weight: 600;
-      z-index: 9999;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-      animation: slideDown 0.5s ease;
+    /* ⭐ 레이아웃 그리드 */
+    .layout-with-sidebar {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 30px;
+      align-items: start;
+      padding: 0 20px;
     }
     
-    @keyframes slideDown {
-      from { transform: translateY(-100%); }
-      to { transform: translateY(0); }
+    .main-content {
+      min-width: 0;
     }
     
-    .session-warning-banner button {
-      background: white;
-      color: #ff9800;
-      border: none;
-      padding: 8px 20px;
-      border-radius: 20px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-left: 15px;
-      transition: all 0.3s ease;
+    .layout-sidebar {
+      position: sticky;
+      top: 80px;
     }
     
-    .session-warning-banner button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    /* 랭킹이 필요 없는 페이지용 */
+    .layout-full-width {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    @media (max-width: 992px) {
+      .layout-with-sidebar {
+        grid-template-columns: 1fr;
+      }
+      
+      .layout-sidebar {
+        order: -1;
+        position: static;
+      }
     }
   </style>
   
-  <!-- ⭐ 각 페이지의 <style> 태그가 여기 삽입됨 -->
   <%- style %>
 </head>
 <body>
-  <%- include('../partials/header') %>
+  <!-- 홈 버튼 -->
+  <a href="/" class="home-button">
+    <span class="home-icon">🏠</span>
+    <span>홈</span>
+  </a>
+
+  <!-- 다크모드 토글 -->
+  <div class="dark-mode-toggle">
+    <button class="toggle-btn" onclick="toggleDarkMode()">
+      <span class="toggle-icon" id="themeIcon">🌙</span>
+      <span id="themeText">다크</span>
+    </button>
+  </div>
   
-  <!-- ⭐ 각 페이지의 body 내용이 여기 삽입됨 -->
-  <%- body %>
-  
-  <%- include('../partials/footer') %>
+  <!-- ⭐ 레이아웃 선택 -->
+  <% if (typeof showRanking !== 'undefined' && showRanking) { %>
+    <div class="layout-with-sidebar">
+      <div class="main-content">
+        <%- body %>
+      </div>
+      <aside class="layout-sidebar">
+        <%- include('../partials/ranking-widget') %>
+      </aside>
+    </div>
+  <% } else { %>
+    <div class="layout-full-width">
+      <%- body %>
+    </div>
+  <% } %>
 
   <script src="/js/common.js"></script>
   
-  <!-- ⭐ 각 페이지의 <script> 태그가 여기 삽입됨 -->
+  <script>
+    function initDarkMode() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      updateThemeIcon(savedTheme);
+    }
+
+    function toggleDarkMode() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeIcon(newTheme);
+    }
+
+    function updateThemeIcon(theme) {
+      const icon = document.getElementById('themeIcon');
+      const text = document.getElementById('themeText');
+      
+      if (icon && text) {
+        if (theme === 'dark') {
+          icon.textContent = '☀️';
+          text.textContent = '라이트';
+        } else {
+          icon.textContent = '🌙';
+          text.textContent = '다크';
+        }
+      }
+    }
+
+    initDarkMode();
+  </script>
+  
   <%- script %>
 </body>
 </html>
