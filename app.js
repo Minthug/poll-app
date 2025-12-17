@@ -17,7 +17,6 @@ app.set('trust proxy', true);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-
 app.use(expressLayouts);
 app.set('layout', 'layouts/main');  // ⭐ layouts/main.ejs 파일을 찾음
 app.set('layout extractScripts', true);
@@ -102,6 +101,25 @@ app.use((req, res, next) => {
   next();
 });
 
+// 모든 페이지에서 topPolls 사용
+app.use(async (req, res, next) => {
+  try {
+    const topPolls = await Poll.find()
+      .sort({ views: -1 })
+      .limit(5)
+      .lean();
+
+      topPolls.forEach(poll => {
+        poll.totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+      });
+
+      res.locals.topPolls = topPolls;
+  } catch (error) {
+      console.error('TOP 5 로딩 에러', error);
+      res.locals.topPolls = [];
+  }
+  next();
+});
 
 // ========================================
 // 5. MongoDB 연결
@@ -130,7 +148,8 @@ app.get('/', async (req, res) => {
     
     res.render('index', { 
       title: '여론조사 사이트',
-      recentPolls
+      recentPolls,
+      showRanking: true
     });
   } catch (error) {
     console.error('홈페이지 로딩 오류:', error);

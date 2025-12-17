@@ -7,7 +7,7 @@ const { body, validationResult } = require('express-validator');
 // 회원가입 페이지
 // ========================================
 router.get('/register', (req, res) => {
-    res.render('auth/register', { error: null, csrtToken: req.csrfToken() })
+    res.render('auth/register', { error: null, csrtToken: req.csrfToken(), showRanking: false })
 });
 
 // ========================================
@@ -83,7 +83,8 @@ router.get('/login', (req, res) => {
     res.render('auth/login', { 
         error: null,
         timeout: req.query.timeout === 'true',
-        csrfToken: req.csrfToken()
+        csrfToken: req.csrfToken(),
+        showRanking: false
     });
 });
 

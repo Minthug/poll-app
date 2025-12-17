@@ -32,7 +32,7 @@
 
 
             res.render('polls/index', { polls: polls, category: category || null,
-                topPolls: topPolls 
+                topPolls: topPolls,  showRanking: true 
              });
         } catch (error) {
             console.error(error);
@@ -42,7 +42,9 @@
 
     // 새 여론조사 폼   
     router.get('/new', (req, res) => {
-        res.render('polls/new');
+        res.render('polls/new', {
+             showRanking: true 
+        });
     });
 
 
@@ -119,7 +121,7 @@
             }
 
             // 투표 안 했으면 투표 페이지 표시
-            res.render('polls/show', { poll });
+            res.render('polls/show', { poll,  showRanking: true  });
         } catch (error) {
             console.error(error);
             res.status(500).send('서버 오류');
@@ -150,7 +152,8 @@
                 poll, 
                 locationStats,
                 alreadyVoted,  // ⭐ 추가
-                ended          // ⭐ 추가
+                ended,          // ⭐ 추가
+                showRanking: true 
             });
         } catch (error) {
             console.error('결과 페이지 로딩 오류:', error);
@@ -358,7 +361,7 @@
             res.json({
                 success: true,
                 poll: pollObj
-            });
+                });
         } catch (error) {
             console.error('결과 조회 오류', error);
             res.status(500).json({ success: false, error: '결과를 불러오는 중 오류가 발생 했습니다.'})
@@ -372,7 +375,7 @@
                 return res.status(404).send('여론조사를 찾을 수 없습니다');
             }
 
-            res.render('polls/voted-ips', { poll });
+            res.render('polls/voted-ips', { poll, showRanking: true });
         } catch (error) {
             console.error(error)
             res.render(500).send('서버 오류');
