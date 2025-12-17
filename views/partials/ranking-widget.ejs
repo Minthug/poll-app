@@ -1,0 +1,163 @@
+<div class="ranking-widget">
+  <h3 class="ranking-title">🔥 인기 투표 TOP 5</h3>
+  
+  <div class="ranking-list">
+    <% if (topPolls && topPolls.length > 0) { %>
+      <% topPolls.forEach((poll, index) => { %>
+        <a href="/polls/<%= poll._id %>" class="ranking-item">
+          <div class="rank-badge rank-<%= index + 1 %>">
+            <%= index + 1 %>
+          </div>
+          <div class="rank-content">
+            <div class="rank-title"><%= poll.title %></div>
+            <div class="rank-stats">
+              <span class="views">👁️ <%= poll.views || 0 %></span>
+              <span class="votes">🗳️ <%= poll.totalVotes || 0 %></span>
+            </div>
+          </div>
+        </a>
+      <% }) %>
+    <% } else { %>
+      <div class="no-ranking">아직 투표가 없습니다</div>
+    <% } %>
+  </div>
+</div>
+
+<style>
+  .ranking-widget {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 20px;
+  }
+  
+  [data-theme="dark"] .ranking-widget {
+    background: #2d2d2d;
+  }
+  
+  .ranking-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  [data-theme="dark"] .ranking-title {
+    color: #e0e0e0;
+  }
+  
+  .ranking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .ranking-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+  }
+  
+  [data-theme="dark"] .ranking-item {
+    background: #3a3a3a;
+  }
+  
+  .ranking-item:hover {
+    transform: translateX(5px);
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  }
+  
+  .rank-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  }
+  
+  .rank-1 {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: white;
+  }
+  
+  .rank-2 {
+    background: linear-gradient(135deg, #C0C0C0, #808080);
+    color: white;
+  }
+  
+  .rank-3 {
+    background: linear-gradient(135deg, #CD7F32, #8B4513);
+    color: white;
+  }
+  
+  .rank-4, .rank-5 {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+  }
+  
+  .rank-content {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .rank-title {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.95rem;
+  }
+  
+  [data-theme="dark"] .rank-title {
+    color: #e0e0e0;
+  }
+  
+  .rank-stats {
+    display: flex;
+    gap: 12px;
+    font-size: 0.85rem;
+    color: #7f8c8d;
+  }
+  
+  [data-theme="dark"] .rank-stats {
+    color: #aaa;
+  }
+  
+  .rank-stats span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .no-ranking {
+    text-align: center;
+    padding: 30px 20px;
+    color: #95a5a6;
+    font-size: 0.95rem;
+  }
+  
+  /* 반응형 */
+  @media (max-width: 992px) {
+    .ranking-widget {
+      position: static;
+      margin-top: 30px;
+    }
+  }
+</style>

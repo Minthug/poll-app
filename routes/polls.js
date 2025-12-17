@@ -92,7 +92,7 @@
         try {
             const poll = await Poll.findById(req.params.id);
             
-            await Poll.findByIdAndUpdate(req.params.id, { $inc: { view: 1 }});
+            await Poll.findByIdAndUpdate(req.params.id, { $inc: { views: 1 }});
 
             if (!poll) {
                 return res.status(404).send('여론조사를 찾을 수 없습니다');
