@@ -17,9 +17,23 @@
 
             const polls = await Poll.find().sort({ createdAt: -1 });
 
-            console.log('📋 여론조사 목록 조회:', polls.length, '개');  // ⭐ 디버깅용
+            const topPolls = await Poll.find()
+                .sort({ views: -1 })
+                .limit(5)
+                .lean();
 
-            res.render('polls/index', { polls: polls, category: category || null });
+            topPolls.forEach(poll => {
+                poll.totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+            });
+
+
+            console.log('📋 여론조사 목록 조회:', polls.length, '개');  // ⭐ 디버깅용
+            console.log('🔥 TOP 5 투표:', topPolls.length, '개');
+
+
+            res.render('polls/index', { polls: polls, category: category || null,
+                topPolls: topPolls 
+             });
         } catch (error) {
             console.error(error);
             res.status(500).send('서버 오류');
