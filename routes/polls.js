@@ -4,8 +4,9 @@
     const Visitor = require('../models/Visitor');
     const geoip = require('geoip-lite');
     const axios = require('axios');
+    const { requireLogin } = require('../middleware/auth');
 
-    // 모든 여론 조사 목록
+    // 모든 여론 조사 목록 - 비로그인 사용자도 목록 확인 가능
     router.get('/', async (req, res) => {
         try {
             const { category } = req.query;
@@ -40,15 +41,15 @@
         }
     });
 
-    // 새 여론조사 폼   
-    router.get('/new', (req, res) => {
+    // 새 여론조사 폼 - 로그인 필수 <- 미들웨어
+    router.get('/new', requireLogin, (req, res) => {
         res.render('polls/new', {
              showRanking: true 
         });
     });
 
 
-    // 여론조사 생성
+    // 여론조사 생성 - 로그인 필수 
     router.post('/', async (req, res) => {
         try {
             const { title, description, options, endDate, category, tags } = req.body;
@@ -76,7 +77,8 @@
                 category: category || '일반',
                 tags: tagArray,
                 options: pollOptions,
-                endDate: endDate ? new Date(endDate) : null // 종료 시간이 있으면 Date 객체로 변환 
+                endDate: endDate ? new Date(endDate) : null, // 종료 시간이 있으면 Date 객체로 변환 
+                createdBy: req.session.userId
             });
 
             await poll.save();
@@ -89,7 +91,7 @@
         }
     });
 
-    // 여론조사 상세 - 투표 페이지// 투표 페이지
+    // 여론조사 상세 - 투표 페이지 (비로그인 사용자도 볼 수 있음)
     router.get('/:id', async (req, res) => {
         try {
             const poll = await Poll.findById(req.params.id);
