@@ -13,7 +13,8 @@ function requireLogin(req, res, next) {
     } else {
         // 로그인 페이지로 리다이렉션하면서 원래 가려던 URL 저장
         req.session.returnTo = req.originalUrl;
+        res.redirect('/auth/login?=message=여론조사를 만들려면 로그인이 필요합니다');
     }
 }
 
-module.exports = { checkAuth };
+module.exports = { checkAuth, requireLogin };

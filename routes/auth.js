@@ -7,7 +7,12 @@ const { body, validationResult } = require('express-validator');
 // 회원가입 페이지
 // ========================================
 router.get('/register', (req, res) => {
-    res.render('auth/register', { error: null, csrtToken: req.csrfToken(), showRanking: false })
+    res.render('auth/register', { 
+        error: null,
+        message: message,
+        timeout: req.query.timeout === true, 
+        csrtToken: req.csrfToken(), 
+        showRanking: false });
 });
 
 // ========================================
@@ -89,7 +94,7 @@ router.get('/login', (req, res) => {
 });
 
 // ========================================
-// 로그인 처리
+// 로그인 처리 - 로그인 성공 후 원래 페이지로 돌아가기 
 // ========================================
 router.post('/login', [
     body('email').isEmail().withMessage('올바른 이메일을 입력하세요'),
@@ -100,7 +105,10 @@ async (req, res) => {
     if (!errors.isEmpty()) {
         return res.render('auth/login', {
             error: errors.array()[0].msg,
-            csrfToken: req.csrfToken()
+            message: null,
+            timeout: false,
+            csrfToken: req.csrfToken(),
+            showRanking: false
         });
     }
 
@@ -111,8 +119,10 @@ async (req, res) => {
         if (!user) {
             return res.render('auth/login', {
                 error: '이메일 또는 비밀번호가 일치하지 않습니다',
+                messag: null,
                 timeout: false,
-                csrfToken: req.csrfToken()
+                csrfToken: req.csrfToken(),
+                showRanking: false
             });
         }
 
@@ -121,8 +131,10 @@ async (req, res) => {
         if (!isMatch) {
             return res.render('auth/login', {
                 error: '이메일 또는 비밀번호가 일치하지 않습니다',
+                message: null,
                 timeout: false,
-                csrfToken: req.csrfToken()
+                csrfToken: req.csrfToken(),
+                showRanking: false
             });
         }
     
@@ -131,11 +143,19 @@ async (req, res) => {
         req.session.username = user.username;
 
         console.log('✅ 로그인 성공:', user.username);
+
+        // 원래 가려던 페이지로 돌아가기
+        const returnTo = req.session.returnTo || '/polls';
+        delete req.session.returnTo;
         res.redirect('/polls');
     } catch(error) {
         console.error('로그인 오류:', error);
         res.render('auth/login', {
-            error: '로그인 중 오류가 발생했습니다'
+            error: '로그인 중 오류가 발생했습니다',
+            message: null,
+            timeout: false,
+            csrfToken: req.csrfToken(),
+            showRanking: false
         });
     }
 }

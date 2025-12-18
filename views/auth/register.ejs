@@ -1,270 +1,192 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>회원가입 | 여론조사</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="/css/style.css">
+<style>
+  /* 회원가입 페이지 전용 스타일 */
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   
-  <style>
-    :root {
-      --bg-gradient-start: #667eea;
-      --bg-gradient-end: #764ba2;
-      --card-bg: white;
-      --text-color: #333;
-      --secondary-text: #666;
-      --border-color: #e0e0e0;
-    }
-    
-    [data-theme="dark"] {
-      --bg-gradient-start: #1a1a2e;
-      --bg-gradient-end: #16213e;
-      --card-bg: #2d2d2d;
-      --text-color: #e0e0e0;
-      --secondary-text: #aaa;
-      --border-color: #404040;
-    }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    
-    .auth-container {
-      max-width: 450px;
-      width: 100%;
-    }
-    
-    .auth-card {
-      background: var(--card-bg);
-      border-radius: 30px;
-      padding: 50px 40px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    }
-    
-    .auth-title {
-      font-size: 2rem;
-      font-weight: 800;
-      color: var(--text-color);
-      text-align: center;
-      margin-bottom: 10px;
-    }
-    
-    .auth-subtitle {
-      text-align: center;
-      color: var(--secondary-text);
-      margin-bottom: 30px;
-    }
-    
-    .form-group {
-      margin-bottom: 20px;
-    }
-    
-    .form-label {
-      font-weight: 600;
-      color: var(--text-color);
-      margin-bottom: 8px;
-    }
-    
-    .form-control {
-      background: var(--border-color);
-      border: 2px solid var(--border-color);
-      color: var(--text-color);
-      border-radius: 12px;
-      padding: 12px 15px;
-      transition: all 0.3s ease;
-    }
-    
-    .form-control:focus {
-      background: var(--card-bg);
-      border-color: #667eea;
-      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-      color: var(--text-color);
-    }
-    
-    [data-theme="dark"] .form-control {
-      background: #3a3a3a;
-    }
-    
-    [data-theme="dark"] .form-control:focus {
-      background: #3a3a3a;
-    }
-    
-    .btn-submit {
-      width: 100%;
-      padding: 15px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      border-radius: 50px;
-      font-size: 1.1rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin-top: 10px;
-    }
-    
-    .btn-submit:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-    }
-    
-    .error-message {
-      background: #fee;
-      color: #c00;
-      padding: 12px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      text-align: center;
-      font-weight: 600;
-    }
-    
-    .auth-links {
-      text-align: center;
-      margin-top: 20px;
-      color: var(--secondary-text);
-    }
-    
-    .auth-links a {
-      color: #667eea;
-      text-decoration: none;
-      font-weight: 600;
-    }
-    
-    .auth-links a:hover {
-      text-decoration: underline;
-    }
-  </style>
-</head>
-<body>
-  <!-- 홈 버튼 -->
-  <a href="/" class="home-button">
-    <span class="home-icon">🏠</span>
-    <span>홈</span>
-  </a>
+  .auth-container {
+    max-width: 450px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  
+  .auth-card {
+    background: var(--card-bg);
+    border-radius: 30px;
+    padding: 50px 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  
+  .auth-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-color);
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  
+  .auth-subtitle {
+    text-align: center;
+    color: var(--secondary-text);
+    margin-bottom: 30px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-label {
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 8px;
+  }
+  
+  .form-control {
+    background: var(--border-color);
+    border: 2px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: 12px;
+    padding: 12px 15px;
+    transition: all 0.3s ease;
+    width: 100%;
+  }
+  
+  .form-control:focus {
+    background: var(--card-bg);
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    color: var(--text-color);
+    outline: none;
+  }
+  
+  [data-theme="dark"] .form-control {
+    background: #3a3a3a;
+  }
+  
+  [data-theme="dark"] .form-control:focus {
+    background: #3a3a3a;
+  }
+  
+  .btn-submit {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+  }
+  
+  .btn-submit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  }
+  
+  .error-message {
+    background: #fee;
+    color: #c00;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 600;
+  }
+  
+  .auth-links {
+    text-align: center;
+    margin-top: 20px;
+    color: var(--secondary-text);
+  }
+  
+  .auth-links a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  
+  .auth-links a:hover {
+    text-decoration: underline;
+  }
+</style>
 
-  <!-- 다크모드 토글 -->
-  <div class="dark-mode-toggle">
-    <button class="toggle-btn" onclick="toggleDarkMode()">
-      <span class="toggle-icon" id="themeIcon">🌙</span>
-      <span id="themeText">다크</span>
-    </button>
-  </div>
-
-  <div class="auth-container">
-    <div class="auth-card">
-      <h1 class="auth-title">회원가입</h1>
-      <p class="auth-subtitle">여론조사에 참여하고 의견을 나눠보세요</p>
-      
-      <% if (error) { %>
-        <div class="error-message">
-          <%= error %>
-        </div>
-      <% } %>
-      
-      <form action="/auth/register" method="POST">
-
-    <!-- ⭐ CSRF 토큰 추가 -->
-    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<div class="auth-container">
+  <div class="auth-card">
+    <h1 class="auth-title">회원가입</h1>
+    <p class="auth-subtitle">여론조사에 참여하고 의견을 나눠보세요</p>
     
-        <div class="form-group">
-          <label for="username" class="form-label">사용자명</label>
-          <input 
-            type="text" 
-            class="form-control" 
-            id="username" 
-            name="username"
-            placeholder="2-20자 이내"
-            required
-          >
-        </div>
-        
-        <div class="form-group">
-          <label for="email" class="form-label">이메일</label>
-          <input 
-            type="email" 
-            class="form-control" 
-            id="email" 
-            name="email"
-            placeholder="example@email.com"
-            required
-          >
-        </div>
-        
-        <div class="form-group">
-          <label for="password" class="form-label">비밀번호</label>
-          <input 
-            type="password" 
-            class="form-control" 
-            id="password" 
-            name="password"
-            placeholder="최소 6자 이상"
-            required
-          >
-        </div>
-        
-        <div class="form-group">
-          <label for="passwordConfirm" class="form-label">비밀번호 확인</label>
-          <input 
-            type="password" 
-            class="form-control" 
-            id="passwordConfirm" 
-            name="passwordConfirm"
-            placeholder="비밀번호를 다시 입력하세요"
-            required
-          >
-        </div>
-        
-        <button type="submit" class="btn-submit">
-          가입하기
-        </button>
-      </form>
-      
-      <div class="auth-links">
-        이미 계정이 있으신가요? <a href="/auth/login">로그인</a>
+    <!-- 에러 메시지 -->
+    <% if (error) { %>
+      <div class="error-message">
+        <%= error %>
       </div>
+    <% } %>
+    
+    <!-- 회원가입 폼 -->
+    <form action="/auth/register" method="POST">
+      <!-- CSRF 토큰 -->
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      
+      <div class="form-group">
+        <label for="username" class="form-label">사용자명</label>
+        <input 
+          type="text" 
+          class="form-control" 
+          id="username" 
+          name="username"
+          placeholder="2-20자 이내"
+          required
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="email" class="form-label">이메일</label>
+        <input 
+          type="email" 
+          class="form-control" 
+          id="email" 
+          name="email"
+          placeholder="example@email.com"
+          required
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="password" class="form-label">비밀번호</label>
+        <input 
+          type="password" 
+          class="form-control" 
+          id="password" 
+          name="password"
+          placeholder="최소 6자 이상"
+          required
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="passwordConfirm" class="form-label">비밀번호 확인</label>
+        <input 
+          type="password" 
+          class="form-control" 
+          id="passwordConfirm" 
+          name="passwordConfirm"
+          placeholder="비밀번호를 다시 입력하세요"
+          required
+        >
+      </div>
+      
+      <button type="submit" class="btn-submit">
+        가입하기
+      </button>
+    </form>
+    
+    <div class="auth-links">
+      이미 계정이 있으신가요? <a href="/auth/login">로그인</a>
     </div>
   </div>
-  
-
-  <script>
-    function initDarkMode() {
-      const savedTheme = localStorage.getItem('theme') || 'light';
-      document.documentElement.setAttribute('data-theme', savedTheme);
-      updateThemeIcon(savedTheme);
-    }
-
-    function toggleDarkMode() {
-      const currentTheme = document.documentElement.getAttribute('data-theme');
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      
-      document.documentElement.setAttribute('data-theme', newTheme);
-      localStorage.setItem('theme', newTheme);
-      updateThemeIcon(newTheme);
-    }
-
-    function updateThemeIcon(theme) {
-      const icon = document.getElementById('themeIcon');
-      const text = document.getElementById('themeText');
-      
-      if (icon && text) {
-        if (theme === 'dark') {
-          icon.textContent = '☀️';
-          text.textContent = '라이트';
-        } else {
-          icon.textContent = '🌙';
-          text.textContent = '다크';
-        }
-      }
-    }
-
-    initDarkMode();
-  </script>
-</body>
-</html>
+</div>
