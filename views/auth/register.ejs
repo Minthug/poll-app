@@ -1,9 +1,10 @@
 <style>
   /* 회원가입 페이지 전용 스타일 */
-  body {
+  .layout-full-width {
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: calc(100vh - 100px);
   }
   
   .auth-container {
@@ -31,6 +32,7 @@
     text-align: center;
     color: var(--secondary-text);
     margin-bottom: 30px;
+    font-size: 1rem;
   }
   
   .form-group {
@@ -38,19 +40,22 @@
   }
   
   .form-label {
+    display: block;
     font-weight: 600;
     color: var(--text-color);
     margin-bottom: 8px;
+    font-size: 0.95rem;
   }
   
   .form-control {
-    background: var(--border-color);
-    border: 2px solid var(--border-color);
+    background: var(--border-color, #e0e0e0);
+    border: 2px solid var(--border-color, #e0e0e0);
     color: var(--text-color);
     border-radius: 12px;
     padding: 12px 15px;
     transition: all 0.3s ease;
     width: 100%;
+    font-size: 1rem;
   }
   
   .form-control:focus {
@@ -63,10 +68,12 @@
   
   [data-theme="dark"] .form-control {
     background: #3a3a3a;
+    border-color: #3a3a3a;
   }
   
   [data-theme="dark"] .form-control:focus {
     background: #3a3a3a;
+    border-color: #667eea;
   }
   
   .btn-submit {
@@ -102,6 +109,7 @@
     text-align: center;
     margin-top: 20px;
     color: var(--secondary-text);
+    font-size: 0.95rem;
   }
   
   .auth-links a {

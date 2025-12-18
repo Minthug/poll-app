@@ -7,6 +7,7 @@ const { body, validationResult } = require('express-validator');
 // 회원가입 페이지
 // ========================================
 router.get('/register', (req, res) => {
+    const message = req.query.message || null;
     res.render('auth/register', { 
         error: null,
         message: message,
@@ -85,6 +86,10 @@ async (req, res) => {
 // 로그인 페이지
 // ========================================
 router.get('/login', (req, res) => {
+    const message = req.query.message || null;
+
+    console.log('로그인 페이지 - message', message);
+
     res.render('auth/login', { 
         error: null,
         timeout: req.query.timeout === 'true',
