@@ -1,10 +1,10 @@
 const express = require('express');
-const router = express.router;
+const router = express.Router();
 const IPConsent = require('../models/IPConsent');
 const geoip = require('geoip-lite');
 
 // IP 동의 여부 확인
-router.get('/check', async(req, res) => {
+router.get('/check', async (req, res) => {
     try {
         let clientIp = req.headers['x-forwarded-for']
         ? req.headers['x-forwarded-for'].split(',')[0].trim()

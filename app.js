@@ -48,7 +48,7 @@ io.on('connection', (socket) => {
 const Poll = require('./models/Poll');
 const Visitor = require('./models/Visitor');
 const User = require('./models/User');
-
+const IPConsent = require('./models/IPConsent');
 
 // ========================================
 // 4. 미들웨어
@@ -134,10 +134,12 @@ mongoose.connect(process.env.MONGODB_URI)
 const pollRoutes = require('./routes/polls');
 const adminRoutes = require('./routes/admin');
 const authRoutes = require('./routes/auth');
+const consentRoutes = require('./routes/consent');
 
 app.use('/polls', pollRoutes);
 app.use('/admin', adminRoutes);
 app.use('/auth', authRoutes);
+app.use('/admin/consent', consentRoutes);
 
 // ========================================
 // 7. 홈 라우트
