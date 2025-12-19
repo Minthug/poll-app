@@ -385,14 +385,14 @@
     })
 
     router.get('/debug/ip', (req, res) => {
-        const clientIP = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-        const geo = geoip.lookup(clientIP);
+        const clientIp = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const geo = geoip.lookup(clientIp);
 
         res.json({
             rawIp: req.ip,
             forwardedFor: req.headers['x-forwarded-for'],
             socketAddress: req.socket.remoteAddress,
-            finalIp: clientIP,
+            finalIp: clientIp,
             geoipResult: geo,
             isKorea: geo ? geo.country === 'KR' : false
         });
