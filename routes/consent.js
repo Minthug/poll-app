@@ -45,7 +45,7 @@ router.post('/accept', async (req, res) => {
             }
         });
 
-        await consent.svae();
+        await consent.save();
 
         console.log('✅ IP 동의 저장:', clientIp);
         res.json({ success: true, message: '동의가 저장되었습니다' });

@@ -18,9 +18,10 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 app.use(expressLayouts);
-app.set('layout', 'layouts/main');  // ⭐ layouts/main.ejs 파일을 찾음
+app.set('layout', 'layouts/main');
 app.set('layout extractScripts', true);
 app.set('layout extractStyles', true);
+
 // ========================================
 // 2. Socket.IO 설정
 // ========================================
@@ -70,11 +71,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ⭐ 보안 미들웨어 적용 (순서 중요!)
-app.use(cookieParser());        // 1. 쿠키 파서
-app.use(globalLimiter);         // 2. 속도 제한
-app.use(csrfProtection);        // 3. CSRF 보호
-app.use(addCsrfToViews);        // 4. CSRF 토큰을 뷰에 전달
+// 보안 미들웨어 (순서 중요!)
+app.use(cookieParser());
+app.use(globalLimiter);
+
+// ⬇️⬇️⬇️ consent 라우터를 CSRF 보호 전에 등록 ⬇️⬇️⬇️
+const consentRoutes = require('./routes/consent');
+app.use('/admin/consent', consentRoutes);
+
+// ⬇️⬇️⬇️ 그 다음 CSRF 보호 적용 ⬇️⬇️⬇️
+app.use(csrfProtection);
+app.use(addCsrfToViews);
 
 // 세션
 app.use(session({
@@ -82,13 +89,13 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: { 
-    maxAge: 1000 * 60 * 60, // 1시간 ()
-    httpOnly: true, // XSS 공격방지
-    secure: process.env.NODE_ENV === 'production' // https에서만 쿠키 전송
+    maxAge: 1000 * 60 * 60,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production'
    }
 }));
 
-// 세션 활동 체크 미들웨어
+// 세션 활동 체크
 app.use(sessionActivity);
 app.use(checkSessionWarning);
 
@@ -101,7 +108,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// 모든 페이지에서 topPolls 사용
+// TOP 5 투표
 app.use(async (req, res, next) => {
   try {
     const topPolls = await Poll.find()
@@ -109,14 +116,14 @@ app.use(async (req, res, next) => {
       .limit(5)
       .lean();
 
-      topPolls.forEach(poll => {
-        poll.totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
-      });
+    topPolls.forEach(poll => {
+      poll.totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+    });
 
-      res.locals.topPolls = topPolls;
+    res.locals.topPolls = topPolls;
   } catch (error) {
-      console.error('TOP 5 로딩 에러', error);
-      res.locals.topPolls = [];
+    console.error('TOP 5 로딩 에러', error);
+    res.locals.topPolls = [];
   }
   next();
 });
@@ -129,17 +136,16 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch(err => console.error('❌ MongoDB 연결 오류:', err));
 
 // ========================================
-// 6. 라우터
+// 6. 나머지 라우터
 // ========================================
 const pollRoutes = require('./routes/polls');
 const adminRoutes = require('./routes/admin');
 const authRoutes = require('./routes/auth');
-const consentRoutes = require('./routes/consent');
 
 app.use('/polls', pollRoutes);
 app.use('/admin', adminRoutes);
 app.use('/auth', authRoutes);
-app.use('/admin/consent', consentRoutes);
+// consent 라우터는 위에서 이미 등록했으므로 여기서는 제거됨
 
 // ========================================
 // 7. 홈 라우트
@@ -157,7 +163,8 @@ app.get('/', async (req, res) => {
     console.error('홈페이지 로딩 오류:', error);
     res.render('index', {
       title: '여론조사 사이트',
-      recentPolls: []
+      recentPolls: [],
+      showRanking: true
     });
   }
 });
