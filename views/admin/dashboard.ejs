@@ -256,6 +256,13 @@
       .poll-table td {
         padding: 10px;
       }
+
+
+      /* 카드 호버 효과 추가 */
+      .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      }
     }
   </style>
 </head>
@@ -359,5 +366,33 @@
       <% } %>
     </div>
   </div>
+
+
+<div class="stats-grid">
+  <!-- 총 투표 수 -->
+  <div class="stat-card">
+    <div class="stat-label">총 투표 수</div>
+    <div class="stat-value"><%= totalPolls %></div>
+  </div>
+  
+  <!-- 총 조회수 -->
+  <div class="stat-card">
+    <div class="stat-label">총 조회수</div>
+    <div class="stat-value"><%= totalViews %></div>
+  </div>
+  
+  <!-- 약관 동의 IP (클릭 가능하게 변경) -->
+  <a href="/admin/consents" class="stat-card" style="text-decoration: none; color: inherit; cursor: pointer; transition: all 0.3s ease;">
+    <div class="stat-label">약관 동의 IP</div>
+    <div class="stat-value"><%= agreeTermsCount %></div>
+  </a>
+  
+  <!-- 투표 참여 IP -->
+  <div class="stat-card">
+    <div class="stat-label">투표 참여 IP</div>
+    <div class="stat-value"><%= voteIpCount %></div>
+  </div>
+</div>
+
 </body>
 </html>

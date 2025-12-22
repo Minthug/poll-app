@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Visitor = require('../models/Visitor');
 const Poll = require('../models/Poll');
+const IPConsent = require('../models/IPConsent');
 const { checkAuth } = require('../middleware/auth');
 
 router.get('/login', (req, res) => {
@@ -62,7 +63,7 @@ router.get('/', async (req, res) => {
             .lean();
 
         // 최근 활동 (100개)
-        const recentActivities = await Visitor.find()
+        const recentActivities = await Visitor.find()   
             .populate('pollId', 'title')
             .sort({ timestamp: -1 })
             .limit(100);
@@ -85,16 +86,24 @@ router.get('/', async (req, res) => {
             { $limit: 100 }
         ]);
 
+        const ipConsents = await IPConsent.find()
+            .sort({ consentDate: -1 })
+            .lean();
+
         res.render('admin/dashboard', {
             polls,
+            totalPolls: polls.length,  // ⬅️ 추가
             totalVotes,
             totalViews,
-            agreeIPCount: agreeIPs.length,
-            voteIPCount: voteIPs.length,
+            agreeTermsCount: agreeIPs.length,  // ⬅️ 이름 변경
+            voteIpCount: voteIPs.length,  // ⬅️ 이름 변경
             totalAgrees,
-            topPollsByViews,
+            topPolls: topPollsByViews,  // ⬅️ 이름 변경
             recentActivities,
-            ipStats
+            ipStats,
+            ipConsents,  // ⬇️⬇️⬇️ 추가 ⬇️⬇️⬇️
+            showRanking: false,  // ⬅️ 추가
+            csrfToken: req.csrfToken()  // ⬅️ 추가
         });
     } catch (error) {
         console.error('대시보드 로딩 에러:', error);
@@ -162,5 +171,23 @@ router.post('/poll/:id/delete', async (req, res) => {
         res.status(500).send('서버 에러');
     }
 });
+
+router.get('/consents', checkAuth, async (req, res) => {
+    try {
+        const consents = await IPConsent.find()
+            .sort({ consentDate: -1 })
+            .lean();
+
+        res.router('/admin/consents', {
+            consents,
+            showRanking: false,
+            csrfToken: req.csrfToken()
+        });
+    } catch (error) {
+        console.error('동의 목록 조회 오류:', error);
+        res.status(500).send('서버 오류');
+    }
+});
+
 
 module.exports = router;
