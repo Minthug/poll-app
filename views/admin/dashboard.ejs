@@ -67,21 +67,26 @@
       border-radius: 15px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
       transition: transform 0.3s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
     }
 
     .stat-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     }
 
-    .stat-card h3 {
+    .stat-card h3,
+    .stat-card .stat-label {
       font-size: 0.95rem;
       color: #7f8c8d;
       margin-bottom: 10px;
       font-weight: 600;
     }
 
-    .stat-card .number {
+    .stat-card .number,
+    .stat-card .stat-value {
       font-size: 2.5rem;
       font-weight: 700;
       color: #667eea;
@@ -180,12 +185,104 @@
       gap: 5px;
     }
 
+    /* IP 동의 목록 섹션 */
+    .ip-consents-section {
+      margin-top: 30px;
+    }
+
+    .section-header {
+      background: white;
+      border-radius: 15px;
+      padding: 25px 35px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #2c3e50;
+      margin: 0;
+    }
+
+    .consents-card {
+      background: white;
+      border-radius: 15px;
+      padding: 35px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .consents-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .consents-table thead {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    }
+
+    .consents-table th {
+      padding: 15px 20px;
+      text-align: left;
+      font-weight: 700;
+      color: #2c3e50;
+      font-size: 0.95rem;
+      border-bottom: 2px solid #e9ecef;
+    }
+
+    .consents-table td {
+      padding: 15px 20px;
+      border-bottom: 1px solid #e9ecef;
+      color: #34495e;
+      font-size: 0.9rem;
+    }
+
+    .consents-table tbody tr:hover {
+      background: rgba(102, 126, 234, 0.05);
+    }
+
+    .ip-badge {
+      display: inline-block;
+      padding: 5px 12px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 15px;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .region-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .country-flag {
+      font-size: 1.3rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #95a5a6;
+      font-size: 1.1rem;
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+    }
+
     /* 전체 투표 목록 테이블 */
     .table-section {
       background: white;
       padding: 30px;
       border-radius: 15px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 30px;
     }
 
     .table-section h2 {
@@ -248,20 +345,18 @@
         grid-template-columns: 1fr;
       }
 
-      .poll-table {
+      .poll-table,
+      .consents-table {
         font-size: 0.9rem;
+        display: block;
+        overflow-x: auto;
       }
 
       .poll-table th,
-      .poll-table td {
+      .poll-table td,
+      .consents-table th,
+      .consents-table td {
         padding: 10px;
-      }
-
-
-      /* 카드 호버 효과 추가 */
-      .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
       }
     }
   </style>
@@ -278,7 +373,7 @@
     <div class="stats-grid">
       <div class="stat-card">
         <h3>총 투표 수</h3>
-        <div class="number"><%= totalVotes %></div>
+        <div class="number"><%= totalPolls %></div>
       </div>
       
       <div class="stat-card">
@@ -288,20 +383,20 @@
       
       <div class="stat-card">
         <h3>약관 동의 IP</h3>
-        <div class="number"><%= agreeIPCount || 0 %></div>
+        <div class="number"><%= agreeTermsCount || 0 %></div>
       </div>
       
       <div class="stat-card">
         <h3>투표 참여 IP</h3>
-        <div class="number"><%= voteIPCount || 0 %></div>
+        <div class="number"><%= voteIpCount || 0 %></div>
       </div>
     </div>
     
     <!-- TOP 5 인기 투표 -->
-    <% if (topPollsByViews && topPollsByViews.length > 0) { %>
+    <% if (topPolls && topPolls.length > 0) { %>
     <div class="top-polls-section">
       <h2>🔥 인기 투표 TOP 5 (조회수 기준)</h2>
-      <% topPollsByViews.forEach((poll, index) => { 
+      <% topPolls.forEach((poll, index) => { 
         const totalPollVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
       %>
         <div class="top-poll-item">
@@ -365,34 +460,69 @@
         <div class="no-data">아직 투표가 없습니다</div>
       <% } %>
     </div>
-  </div>
 
-
-<div class="stats-grid">
-  <!-- 총 투표 수 -->
-  <div class="stat-card">
-    <div class="stat-label">총 투표 수</div>
-    <div class="stat-value"><%= totalPolls %></div>
+    <!-- IP 동의 목록 섹션 -->
+    <div class="ip-consents-section">
+      <div class="section-header">
+        <h2 class="section-title">🔒 IP 동의 목록</h2>
+        <span style="color: #7f8c8d; font-size: 0.9rem;">
+          총 <%= ipConsents.length %>개
+        </span>
+      </div>
+      
+      <div class="consents-card">
+        <% if (ipConsents && ipConsents.length > 0) { %>
+          <table class="consents-table">
+            <thead>
+              <tr>
+                <th>번호</th>
+                <th>IP 주소</th>
+                <th>지역</th>
+                <th>동의 날짜</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% ipConsents.forEach((consent, index) => { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td>
+                    <span class="ip-badge"><%= consent.ip %></span>
+                  </td>
+                  <td>
+                    <div class="region-info">
+                      <span class="country-flag">
+                        <%= consent.region.country === 'KR' ? '🇰🇷' : '🌍' %>
+                      </span>
+                      <span>
+                        <%= consent.region.country %> 
+                        <% if (consent.region.city && consent.region.city !== 'Unknown') { %>
+                          - <%= consent.region.city %>
+                        <% } %>
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <%= new Date(consent.consentDate).toLocaleString('ko-KR', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    }) %>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        <% } else { %>
+          <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <h3>아직 동의한 IP가 없습니다</h3>
+            <p>사용자가 약관에 동의하면 여기에 표시됩니다.</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
   </div>
-  
-  <!-- 총 조회수 -->
-  <div class="stat-card">
-    <div class="stat-label">총 조회수</div>
-    <div class="stat-value"><%= totalViews %></div>
-  </div>
-  
-  <!-- 약관 동의 IP (클릭 가능하게 변경) -->
-  <a href="/admin/consents" class="stat-card" style="text-decoration: none; color: inherit; cursor: pointer; transition: all 0.3s ease;">
-    <div class="stat-label">약관 동의 IP</div>
-    <div class="stat-value"><%= agreeTermsCount %></div>
-  </a>
-  
-  <!-- 투표 참여 IP -->
-  <div class="stat-card">
-    <div class="stat-label">투표 참여 IP</div>
-    <div class="stat-value"><%= voteIpCount %></div>
-  </div>
-</div>
-
 </body>
 </html>
