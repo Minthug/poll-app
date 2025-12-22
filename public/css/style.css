@@ -1,124 +1,157 @@
+/* ========================================
+   CSS 변수 정의
+   ======================================== */
+:root {
+  --bg-color: #f8f9fa;
+  --card-bg: white;
+  --text-color: #2c3e50;  /* ⬅️ 진한 색 */
+  --secondary-text: #34495e;  /* ⬅️ 진한 색 */
+  --border-color: #dee2e6;
+  --hover-bg: #f8f9fa;
+}
 
+[data-theme="dark"] {
+  --bg-color: #1a1a1a;
+  --card-bg: #2d2d2d;
+  --text-color: #e0e0e0;
+  --secondary-text: #aaa;
+  --border-color: #404040;
+  --hover-bg: #3a3a3a;
+}
 
+/* ========================================
+   기본 스타일
+   ======================================== */
 body {
-  background-color: #f8f9fa;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  font-weight: 500;  /* ⬅️ 기본 폰트 굵기 증가 */
 }
 
 .container {
   max-width: 1200px;
+  background-color: var(--card-bg);
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: background-color 0.3s ease;
 }
 
-
-/* 기존 CSS는 유지하고, 아래 내용을 추가 */
-
-/* 다크모드 변수 */
-:root {
-    --bg-color: #f8f9fa;
-    --card-bg: white;
-    --text-color: #333;
-    --border-color: #dee2e6;
-    --hover-bg: #f8f9fa;
-}
-
-[data-theme="dark"] {
-    --bg-color: #1a1a1a;
-    --card-bg: #2d2d2d;
-    --text-color: #e0e0e0;
-    --border-color: #404040;
-    --hover-bg: #3a3a3a;
-}
-
-body {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.container {
-    background-color: var(--card-bg);
-    border-radius: 15px;
-    padding: 30px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    transition: background-color 0.3s ease;
-}
-
+/* ========================================
+   카드 스타일
+   ======================================== */
 .card {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    transition: all 0.3s ease;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+  color: var(--text-color);  /* ⬅️ 추가 */
 }
 
 .card:hover {
-    background-color: var(--hover-bg);
+  background-color: var(--hover-bg);
 }
 
-/* 다크모드 토글 버튼 스타일 */
+.card-title {
+  color: #2c3e50;  /* ⬅️ 라이트 모드 진한 색 */
+  font-weight: 700;  /* ⬅️ 굵게 */
+}
+
+[data-theme="dark"] .card-title {
+  color: #e0e0e0;
+}
+
+.card-text {
+  color: #34495e;  /* ⬅️ 라이트 모드 진한 색 */
+  font-weight: 500;  /* ⬅️ 조금 굵게 */
+}
+
+[data-theme="dark"] .card-text {
+  color: #aaa;
+}
+
+/* ========================================
+   다크모드 토글 버튼
+   ======================================== */
 .dark-mode-toggle {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
 }
 
 .toggle-btn {
-    background-color: var(--card-bg);
-    border: 2px solid var(--border-color);
-    border-radius: 50px;
-    padding: 8px 15px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  background-color: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 50px;
+  padding: 8px 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  color: #2c3e50;  /* ⬅️ 라이트 모드 진한 색 */
+  font-weight: 700;  /* ⬅️ 굵게 */
+}
+
+[data-theme="dark"] .toggle-btn {
+  color: #e0e0e0;
 }
 
 .toggle-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .toggle-icon {
-    font-size: 20px;
+  font-size: 20px;
 }
 
-/* 홈 버튼 스타일*/
+/* ========================================
+   홈 버튼
+   ======================================== */
 .home-button {
   position: fixed;
-   top: 20px;
-    left: 20px;
-    z-index: 1040;
-    background-color: var(--card-bg);
-    border: 2px solid var(--border-color);
-    border-radius: 50px;
-    padding: 10px 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    color: var(--text-color);
-    text-decoration: none;
-    transition: all 0.3s ease;
-    font-weight: 500;
+  top: 20px;
+  left: 20px;
+  z-index: 1040;
+  background-color: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 50px;
+  padding: 10px 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  color: #2c3e50;  /* ⬅️ 라이트 모드 진한 색 */
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-weight: 700;  /* ⬅️ 굵게 */
 }
 
 .home-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    color: var(--text-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  color: #2c3e50;
+}
+
+[data-theme="dark"] .home-button {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .home-button:hover {
+  color: #e0e0e0;
 }
 
 .home-icon {
-    font-size: 20px;
+  font-size: 20px;
 }
 
-/* 다크모드 토글과 겹치지 않게 조정 */
-.dark-mode-toggle {
-    top: 20px;
-    right: 20px;
-}
-
+/* ========================================
+   네비게이션 바
+   ======================================== */
 .navbar {
   padding: 0.5rem 1rem;
   min-height: 30px;
@@ -128,11 +161,23 @@ body {
   font-size: 1.1rem;
   padding-top: 0.1rem;
   padding-bottom: 0.3rem;
+  color: #2c3e50;  /* ⬅️ 라이트 모드 진한 색 */
+  font-weight: 700;  /* ⬅️ 굵게 */
+}
+
+[data-theme="dark"] .navbar-brand {
+  color: #e0e0e0;
 }
 
 .navbar-nav .nav-link {
   padding: 0.3rem 0.8rem;
   font-size: 0.95rem;
+  color: #34495e;  /* ⬅️ 라이트 모드 진한 색 */
+  font-weight: 600;  /* ⬅️ 굵게 */
+}
+
+[data-theme="dark"] .navbar-nav .nav-link {
+  color: #aaa;
 }
 
 @media (max-width: 768px) {
@@ -140,23 +185,79 @@ body {
     padding: 0.4rem 0.8rem;
   }
 }
-/* Chart.js 다크모드 대응 */
+
+/* ========================================
+   Chart.js 다크모드 대응
+   ======================================== */
 [data-theme="dark"] canvas {
-    filter: brightness(0.9);
+  filter: brightness(0.9);
 }
 
-/* 진행바 다크모드 */
+/* ========================================
+   진행바 다크모드
+   ======================================== */
 [data-theme="dark"] .progress {
-    background-color: #404040;
+  background-color: #404040;
 }
 
-/* 버튼 다크모드 */
+.progress-bar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 700;  /* ⬅️ 굵게 */
+}
+
+/* ========================================
+   버튼 스타일
+   ======================================== */
+.btn {
+  font-weight: 600;  /* ⬅️ 굵게 */
+}
+
 [data-theme="dark"] .btn-primary {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
+  background-color: #0d6efd;
+  border-color: #0d6efd;
 }
 
 [data-theme="dark"] .btn-primary:hover {
-    background-color: #0b5ed7;
-    border-color: #0a58ca;
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+}
+
+/* ========================================
+   제목 및 텍스트 스타일
+   ======================================== */
+h1, h2, h3, h4, h5, h6 {
+  color: #1a1a2e;  /* ⬅️ 매우 진한 색 */
+  font-weight: 700;  /* ⬅️ 굵게 */
+}
+
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6 {
+  color: #e0e0e0;
+}
+
+p {
+  color: #34495e;  /* ⬅️ 진한 색 */
+  font-weight: 500;  /* ⬅️ 조금 굵게 */
+}
+
+[data-theme="dark"] p {
+  color: #aaa;
+}
+
+a {
+  color: #2c3e50;  /* ⬅️ 진한 색 */
+  font-weight: 600;  /* ⬅️ 굵게 */
+}
+
+[data-theme="dark"] a {
+  color: #e0e0e0;
+}
+
+a:hover {
+  color: #667eea;
 }

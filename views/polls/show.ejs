@@ -255,16 +255,15 @@
       color: #667eea;
       transform: translateY(-2px);
     }
-    
     /* ========================================
-       모달 커스터마이징 (공지사항 팝업)
-       ======================================== */
-    
+    모달 커스터마이징 (공지사항 팝업)
+    ======================================== */
+
     /* 모달 배경 (어두운 오버레이) */
     .modal-backdrop {
       background-color: rgba(0, 0, 0, 0.7);
     }
-    
+
     /* 모달 전체 컨텐츠 영역 */
     .modal-content {
       background: var(--card-bg);
@@ -272,11 +271,11 @@
       border-radius: 20px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     }
-    
+
     [data-theme="dark"] .modal-content {
       background: #2d2d2d;
     }
-    
+
     /* 모달 헤더 (제목 영역) */
     .modal-header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -285,102 +284,116 @@
       border-bottom: none;
       padding: 20px 25px;
     }
-    
+
     /* 모달 제목 */
     .modal-title {
       font-weight: 700;
       font-size: 1.3rem;
+      color: white !important;  /* ⬅️ 흰색 강제 */
     }
-    
+
     /* 닫기 버튼 (X 버튼) */
     .btn-close {
-      filter: brightness(0) invert(1); /* 흰색으로 변경 */
+      filter: brightness(0) invert(1);
       opacity: 0.8;
     }
-    
+
     .btn-close:hover {
       opacity: 1;
     }
-    
+
     /* 모달 본문 영역 */
     .modal-body {
       padding: 30px;
-      color: var(--text-color);
+      color: #2c3e50;  /* ⬅️ 진한 색 */
     }
-    
+
     [data-theme="dark"] .modal-body {
       color: #e0e0e0;
     }
-    
+
     /* 모달 본문 소제목 */
     .modal-body h6 {
       font-weight: 700;
       font-size: 1.1rem;
       margin-bottom: 15px;
-      color: var(--text-color);
+      color: #1a1a2e;  /* ⬅️ 매우 진한 색 */
     }
-    
+
     [data-theme="dark"] .modal-body h6 {
       color: #e0e0e0;
     }
-    
+
+    /* 모달 본문 텍스트 */
+    .modal-body p,
+    .modal-body li {
+      color: #2c3e50;  /* ⬅️ 진한 색 */
+      font-weight: 500;
+    }
+
+    [data-theme="dark"] .modal-body p,
+    [data-theme="dark"] .modal-body li {
+      color: #aaa;
+    }
+
     /* 모달 본문 리스트 */
     .modal-body ul {
       margin-bottom: 20px;
       padding-left: 20px;
     }
-    
+
     .modal-body ul li {
       margin-bottom: 8px;
       line-height: 1.6;
     }
-    
+
     /* 안내 박스 (실시간 업데이트 메시지) */
     .alert-info {
       background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
       border: 2px solid #667eea;
-      color: var(--text-color);
+      color: #2c3e50;  /* ⬅️ 진한 색 */
       border-radius: 12px;
       padding: 15px;
       font-weight: 600;
     }
-    
+
     [data-theme="dark"] .alert-info {
       background: linear-gradient(135deg, rgba(102, 126, 234, 0.25) 0%, rgba(118, 75, 162, 0.25) 100%);
       color: #e0e0e0;
     }
-    
-    /* "오늘 하루 보지 않기" 체크박스 영역 - 모달 본문 배경색과 동일하게 */
+
+    /* "오늘 하루 보지 않기" 체크박스 영역 */
     .form-check {
       padding: 15px;
-      background: transparent; /* 배경 투명으로 변경 */
-      border: none; /* 테두리 제거 */
+      background: transparent;
+      border: none;
       border-radius: 12px;
     }
 
     [data-theme="dark"] .form-check {
-      background: transparent; /* 다크모드에서도 투명 */
+      background: transparent;
     }
 
     /* 체크박스 레이블 */
     .form-check-label {
-      color: var(--text-color);
+      color: #2c3e50;  /* ⬅️ 진한 색 */
       font-weight: 600;
     }
 
     [data-theme="dark"] .form-check-label {
       color: #e0e0e0;
     }
+
     /* 모달 푸터 (버튼 영역) */
     .modal-footer {
       border-top: 1px solid var(--border-color);
       padding: 20px 25px;
     }
-    
+
     [data-theme="dark"] .modal-footer {
       border-top-color: #404040;
     }
-    
+
     /* 확인 버튼 */
     .modal-footer .btn-primary {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -389,8 +402,9 @@
       border-radius: 50px;
       font-weight: 700;
       transition: all 0.3s ease;
+      color: white !important;  /* ⬅️ 흰색 강제 */
     }
-    
+
     .modal-footer .btn-primary:hover {
       transform: translateY(-2px);
       box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);

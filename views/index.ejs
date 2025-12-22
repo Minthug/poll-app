@@ -29,17 +29,26 @@
   .hero-title {
     font-size: 3rem;
     font-weight: 800;
-    color: var(--text-color);
+    color: #1a1a2e;  /* ⬅️ 매우 진한 색 */
     margin-bottom: 20px;
     line-height: 1.2;
     letter-spacing: -1px;
   }
+
+  [data-theme="dark"] .hero-title {
+    color: var(--text-color);
+  }
   
   .hero-subtitle {
     font-size: 1.3rem;
-    color: var(--secondary-text);
+    color: #2c3e50;  /* ⬅️ 진한 색 */
     margin-bottom: 40px;
     line-height: 1.6;
+    font-weight: 600;
+  }
+
+  [data-theme="dark"] .hero-subtitle {
+    color: var(--secondary-text);
   }
   
   .cta-button {
@@ -84,12 +93,16 @@
   }
 
   .auth-link {
-    color: var(--text-color);
+    color: #2c3e50;  /* ⬅️ 진한 색 */
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 700;
     transition: all 0.3s ease;
     padding: 8px 20px;
     border-radius: 20px;
+  }
+
+  [data-theme="dark"] .auth-link {
+    color: var(--text-color);
   }
 
   .auth-link:hover {
@@ -98,6 +111,11 @@
   }
 
   .separator {
+    color: #34495e;  /* ⬅️ 진한 색 */
+    font-weight: 600;
+  }
+
+  [data-theme="dark"] .separator {
     color: var(--secondary-text);
   }
   
@@ -117,8 +135,12 @@
   }
   
   .user-welcome {
+    color: #1a1a2e;  /* ⬅️ 매우 진한 색 */
+    font-weight: 700;
+  }
+
+  [data-theme="dark"] .user-welcome {
     color: var(--text-color);
-    font-weight: 600;
   }
   
   .btn-logout-small {
@@ -168,14 +190,23 @@
   .feature-title {
     font-size: 1.3rem;
     font-weight: 700;
-    color: var(--text-color);
+    color: #1a1a2e;  /* ⬅️ 매우 진한 색 */
     margin-bottom: 10px;
+  }
+
+  [data-theme="dark"] .feature-title {
+    color: var(--text-color);
   }
   
   .feature-desc {
     font-size: 1rem;
-    color: var(--secondary-text);
+    color: #2c3e50;  /* ⬅️ 진한 색 */
     line-height: 1.6;
+    font-weight: 500;
+  }
+
+  [data-theme="dark"] .feature-desc {
+    color: var(--secondary-text);
   }
   
   .secondary-actions {
@@ -189,24 +220,40 @@
     gap: 8px;
     padding: 12px 30px;
     font-size: 1rem;
-    font-weight: 600;
-    background: transparent;
-    color: white;
+    font-weight: 700;
+    background: white;
+    color: #667eea;
     border: 2px solid white;
     border-radius: 50px;
     cursor: pointer;
     transition: all 0.3s ease;
     text-decoration: none;
     margin: 0 10px;
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0);
   }
   
+  [data-theme="dark"] .secondary-btn {
+    background: transparent;  /* ⬅️ 다크모드에서는 투명 */
+    color: white;  /* ⬅️ 다크모드에서는 흰색 */
+  }
+  
+
   .secondary-btn:hover {
-    background: white;
-    color: #667eea;
+    background: rgba(255, 255, 255, 0.95);  /* ⬅️ 호버 시 약간 투명 */
+    color: #764ba2;  /* ⬅️ 호버 시 더 진한 보라색 */
     transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255, 255, 255, 0.4);  /* ⬅️ 호버 그림자 강화 */
   }
   
-  /* 모달 스타일 */
+  [data-theme="dark"] .secondary-btn:hover {
+    background: white;  /* ⬅️ 다크모드 호버 시 흰색 */
+    color: #667eea;  /* ⬅️ 다크모드 호버 시 보라색 */
+  }
+  /* ========================================
+     모달 스타일
+     ======================================== */
+  
+  /* 커스텀 모달 오버레이 (로그인 필요) */
   .modal-overlay {
     position: fixed;
     top: 0;
@@ -257,10 +304,11 @@
     margin-bottom: 20px;
   }
   
+  /* 로그인 모달 제목 */
   .modal-title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--text-color, #333);
+    color: #1a1a2e;  /* ⬅️ 매우 진한 색 */
     margin-bottom: 15px;
   }
   
@@ -268,11 +316,13 @@
     color: #e0e0e0;
   }
   
+  /* 로그인 모달 메시지 */
   .modal-message {
     font-size: 1rem;
-    color: var(--secondary-text, #666);
+    color: #2c3e50;  /* ⬅️ 진한 색 */
     margin-bottom: 30px;
     line-height: 1.6;
+    font-weight: 600;
   }
   
   [data-theme="dark"] .modal-message {
@@ -284,11 +334,12 @@
     gap: 10px;
   }
   
+  /* 주 버튼 (로그인하기) */
   .btn-modal-primary {
     flex: 1;
     padding: 15px 25px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    color: white !important;  /* ⬅️ 흰색 강제 */
     border: none;
     border-radius: 50px;
     font-size: 1rem;
@@ -302,12 +353,13 @@
     box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
   }
   
+  /* 보조 버튼 (취소) */
   .btn-modal-secondary {
     flex: 1;
     padding: 15px 25px;
     background: transparent;
-    color: var(--text-color, #333);
-    border: 2px solid var(--border-color, #e0e0e0);
+    color: #2c3e50;  /* ⬅️ 진한 색 */
+    border: 2px solid #2c3e50;  /* ⬅️ 진한 테두리 */
     border-radius: 50px;
     font-size: 1rem;
     font-weight: 700;
@@ -317,18 +369,91 @@
   
   [data-theme="dark"] .btn-modal-secondary {
     color: #e0e0e0;
-    border-color: #555;
+    border-color: #e0e0e0;
   }
   
   .btn-modal-secondary:hover {
-    background: var(--border-color, #f0f0f0);
+    background: rgba(44, 62, 80, 0.1);
     transform: translateY(-2px);
   }
   
   [data-theme="dark"] .btn-modal-secondary:hover {
-    background: #3a3a3a;
+    background: rgba(224, 224, 224, 0.1);
   }
   
+  /* ========================================
+     Bootstrap IP 동의 모달 스타일
+     ======================================== */
+  
+  /* Bootstrap 모달 헤더 */
+  .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px 20px 0 0;
+    border-bottom: none;
+    padding: 20px 25px;
+  }
+  
+  .modal-header .modal-title {
+    color: white !important;  /* ⬅️ 흰색 강제 */
+    font-weight: 700;
+  }
+  
+  /* Bootstrap 모달 본문 */
+  .modal-body {
+    padding: 30px;
+    color: #2c3e50;  /* ⬅️ 진한 색 */
+  }
+  
+  [data-theme="dark"] .modal-body {
+    color: #e0e0e0;
+  }
+  
+  .modal-body h6 {
+    font-weight: 700;
+    color: #1a1a2e;  /* ⬅️ 매우 진한 색 */
+    margin-top: 15px;
+    margin-bottom: 10px;
+  }
+  
+  [data-theme="dark"] .modal-body h6 {
+    color: #e0e0e0;
+  }
+  
+  .modal-body p {
+    color: #2c3e50;  /* ⬅️ 진한 색 */
+    font-weight: 500;
+    line-height: 1.6;
+  }
+  
+  [data-theme="dark"] .modal-body p {
+    color: #aaa;
+  }
+  
+  /* Bootstrap 모달 푸터 */
+  .modal-footer {
+    border-top: 1px solid var(--border-color);
+    padding: 20px 25px;
+  }
+  
+  .modal-footer .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    font-weight: 700;
+    color: white !important;  /* ⬅️ 흰색 강제 */
+    padding: 12px 30px;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+  }
+
+  .modal-footer .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  }
+  
+  /* ========================================
+     반응형
+     ======================================== */
   @media (max-width: 768px) {
     .hero-title {
       font-size: 2.2rem;
