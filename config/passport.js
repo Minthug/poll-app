@@ -33,7 +33,7 @@ async (accessToken, refreshToken, profile, done) => {
     try {
         // 기존 사용자 찾기
         let user = await User.findOne({
-            oauthProvider: 'naver',
+            oauthProvider: 'google',
             oauthId: profile.id
         });
 
@@ -45,7 +45,7 @@ async (accessToken, refreshToken, profile, done) => {
         user = await User.findOne({ email: profile.emails[0].value });
 
         if (user) {
-            user.oauthProvider = 'naver';
+            user.oauthProvider = 'google';
             user.oauthId = profile.id;
             user.profileImage = profile._json.profile_image;
             await user.save();
@@ -54,10 +54,10 @@ async (accessToken, refreshToken, profile, done) => {
 
         // 새 사용자 생성
         user = await User.create({
-            username = profile.displayName,
-            email = profile.emails[0].value,
-            oauthProvider = 'naver',
-            oauthId = profile.id,
+            username: profile.displayName,
+            email: profile.emails[0].value,
+            oauthProvider: 'google',
+            oauthId: profile.id,
             profileImage: profile._json.profile_image,
             password: null
         });
@@ -66,6 +66,52 @@ async (accessToken, refreshToken, profile, done) => {
         done(error, null);
     }
 }
+));
+
+
+// ========================================
+// Naver OAuth 전략
+// ========================================
+passport.use(new NaverStrategy({
+    clientID: process.env.NAVER_CLIENT_ID,
+    clientSecret: process.env.NAVER_CLIENT_SECRET,
+    callbackURL: process.env.NAVER_CALLBACK_URL || '/oauth/naver/callback'
+},
+ async (accessToken, refreshToken, profile, done) => {
+    try {
+        let user = await User.findOne({
+            oauthProvider: 'naver',
+            oauthId: profile.id
+        });
+
+        if (user) {
+            return done(null, user);
+        }
+
+        user = await User.findOne({ email: profile.emails[0].value });
+
+        if (user) {
+            user.oauthProvider = 'naver';
+            user.oauthId = profile.id;
+            user.profileImage = profile._json.profile_image;
+            await user.save();
+            return done(null, user);
+        }
+
+        user = await User.create({
+            username: profile.displayName,
+            email: profile.emails[0].value,
+            oauthProvider: 'naver',
+            oauthId: profile.id,
+            profileImage: profile._json.profile_image,
+            password: null
+        });
+
+        done(null, user);
+    } catch (error) {
+        done(error, null);
+    }
+ }        
 ));
 
 module.exports = passport;
