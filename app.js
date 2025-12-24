@@ -55,7 +55,7 @@ const IPConsent = require('./models/IPConsent');
 // ========================================
 // 4. 미들웨어
 // ========================================
-const passport = require('passport');
+const passport = require('./config/passport');
 
 const {
   cookieParser,
@@ -94,9 +94,6 @@ app.use(session({
   store: MongoStore.create ({
     mongoUrl: process.env.MONGODB_URI,
     touchAfter: 24 * 3600, // 24시간 내 변경사항이 없으면 업데이트 안함 (성능 최적화)
-    crypto: {
-      secret: process.env.SESSION_SECRET
-    }
   }),
   cookie: { 
     maxAge: 1000 * 60 * 60,
