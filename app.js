@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
+const MongoStore = require('connect-mongo'); // Render MemoryStore 문제 해결을 위한 추가 12.24
 const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
@@ -50,6 +51,7 @@ const Poll = require('./models/Poll');
 const Visitor = require('./models/Visitor');
 const User = require('./models/User');
 const IPConsent = require('./models/IPConsent');
+const passport = require('./config/passport');
 
 // ========================================
 // 4. 미들웨어
@@ -88,6 +90,13 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create ({
+    mongoUrl: process.env.MONGODB_URI,
+    touchAfter: 24 * 3600, // 24시간 내 변경사항이 없으면 업데이트 안함 (성능 최적화)
+    crypto: {
+      secret: process.env.SESSION_SECRET
+    }
+  }),
   cookie: { 
     maxAge: 1000 * 60 * 60,
     httpOnly: true,
@@ -98,6 +107,8 @@ app.use(session({
 // 세션 활동 체크
 app.use(sessionActivity);
 app.use(checkSessionWarning);
+app.use(passport.initialize());
+app.use(passport.session());
 
 // 모든 뷰에 세션 정보 전달
 app.use((req, res, next) => {
@@ -141,11 +152,12 @@ mongoose.connect(process.env.MONGODB_URI)
 const pollRoutes = require('./routes/polls');
 const adminRoutes = require('./routes/admin');
 const authRoutes = require('./routes/auth');
+const oauthRoutes = require('./routes/oauth');
 
 app.use('/polls', pollRoutes);
 app.use('/admin', adminRoutes);
 app.use('/auth', authRoutes);
-// consent 라우터는 위에서 이미 등록했으므로 여기서는 제거됨
+app.use('/oauth', oauthRoutes);
 
 // ========================================
 // 7. 홈 라우트
