@@ -1,6 +1,6 @@
 const express = require('express');
-const router = express.Router();
 const passport = require('../config/passport');
+const router = express.Router();
 
 
 // ========================================
@@ -8,7 +8,7 @@ const passport = require('../config/passport');
 // ========================================
 router.get('/google', passport.authenticate('google', {
     scope: ['profile', 'email']
-})
+    })
 );
 
 router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/auth/login' }),
@@ -17,7 +17,6 @@ router.get('/google/callback', passport.authenticate('google', { failureRedirect
     req.session.userId = req.user._id;
     req.session.username = req.user.username;
     req.session.lastActivity = Date.now();
-
     res.redirect('/');
     }
 );
@@ -36,3 +35,5 @@ router.get('/naver/callback', passport.authenticate('naver', { failureRedirect: 
     res.redirect('/');
     }
 );
+
+module.exports = router;

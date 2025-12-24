@@ -94,6 +94,95 @@
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
   }
+
+  /* ========================================
+     OAuth 버튼 스타일 추가 12.24
+     ======================================== */
+    .divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 30px 0;
+    color: var(--secondary-text);
+    font-size: 0.9rem;
+    }
+
+  .divider::before,
+  .divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-color, #e0e0e0);
+  }
+  
+  .divider span {
+    padding: 0 15px;
+  }
+  
+  .oauth-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .oauth-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 14px 20px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .oauth-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+  
+  .google-btn {
+    background: white;
+    border: 2px solid #dadce0;
+    color: #3c4043;
+  }
+  
+  .google-btn:hover {
+    background: #f8f9fa;
+    color: #3c4043;
+    border-color: #d2d2d2;
+  }
+  
+  [data-theme="dark"] .google-btn {
+    background: #3a3a3a;
+    border-color: #555;
+    color: #e8eaed;
+  }
+  
+  [data-theme="dark"] .google-btn:hover {
+    background: #4a4a4a;
+    border-color: #666;
+  }
+  
+  .naver-btn {
+    background: #03C75A;
+    border: 2px solid #03C75A;
+    color: white;
+  }
+  
+  .naver-btn:hover {
+    background: #02b350;
+    border-color: #02b350;
+    color: white;
+  }
+  
+  .oauth-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
   
   .error-message {
     background: #fee;

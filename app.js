@@ -51,11 +51,12 @@ const Poll = require('./models/Poll');
 const Visitor = require('./models/Visitor');
 const User = require('./models/User');
 const IPConsent = require('./models/IPConsent');
-const passport = require('./config/passport');
 
 // ========================================
 // 4. 미들웨어
 // ========================================
+const passport = require('passport');
+
 const {
   cookieParser,
   csrfProtection,
@@ -153,6 +154,11 @@ const pollRoutes = require('./routes/polls');
 const adminRoutes = require('./routes/admin');
 const authRoutes = require('./routes/auth');
 const oauthRoutes = require('./routes/oauth');
+
+console.log('pollRoutes:', typeof pollRoutes);
+console.log('adminRoutes:', typeof adminRoutes);
+console.log('authRoutes:', typeof authRoutes);
+console.log('oauthRoutes:', typeof oauthRoutes); // ⬅️ 'function'이어야 함
 
 app.use('/polls', pollRoutes);
 app.use('/admin', adminRoutes);
