@@ -3,7 +3,6 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const NaverStrategy = require('passport-naver').Strategy;
 const User = require('../models/User');
 
-
 // ========================================
 // 세션에 사용자 정보 저장
 // ========================================
@@ -47,7 +46,8 @@ async (accessToken, refreshToken, profile, done) => {
         if (user) {
             user.oauthProvider = 'google';
             user.oauthId = profile.id;
-            user.profileImage = profile._json.profile_image;
+            user.profileImage = profile.photos[0]?.value;
+            user.isFirstLogin = true;
             await user.save();
             return done(null, user);
         }
@@ -59,7 +59,8 @@ async (accessToken, refreshToken, profile, done) => {
             oauthProvider: 'google',
             oauthId: profile.id,
             profileImage: profile._json.profile_image,
-            password: null
+            password: null,
+            isFirstLogin: true
         });
         done(null, user);
     } catch (error) {
@@ -94,6 +95,7 @@ passport.use(new NaverStrategy({
             user.oauthProvider = 'naver';
             user.oauthId = profile.id;
             user.profileImage = profile._json.profile_image;
+            isFirstLogin: true;
             await user.save();
             return done(null, user);
         }
@@ -104,7 +106,8 @@ passport.use(new NaverStrategy({
             oauthProvider: 'naver',
             oauthId: profile.id,
             profileImage: profile._json.profile_image,
-            password: null
+            password: null,
+            isFirstLogin: true
         });
 
         done(null, user);
