@@ -61,6 +61,7 @@
     overflow-y: auto;
     margin-bottom: 25px;
     color: var(--text-color);
+    position: relative;
   }
   
   [data-theme="dark"] .terms-box {
@@ -187,21 +188,30 @@
       <p>• 대한민국 국민을 위한 여론조사입니다</p>
       <p>• 부정한 방법으로 투표 조작 시 계정이 정지될 수 있습니다</p>
       <p>• 모든 투표는 익명으로 진행됩니다</p>
+
+      <h4>⚖️ 책임의 제한</h4>
+      <p>서비스는 "있는 그대로" 제공되며, 명시적이거나 묵시적인 보증을 하지 않습니다.</p>
+      
+      <h4>📞 문의하기</h4>
+      <p>서비스 이용 중 문의사항이 있으시면 관리자에게 연락해주세요.</p>
+
+       <!-- 스크롤 표시 -->
+      <div class="scroll-indicator" id="scrollIndicator">
+        ⬇️ 약관을 끝까지 읽어주세요
+      </div>
     </div>
     
     <!-- 약관 동의 체크박스 -->
-    <form action="/auth/oauth-terms" method="POST">
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      
+    <form action="/auth/oauth-terms" method="POST" id="termsForm">
       <div class="checkbox-group">
         <label class="checkbox-label">
           <input 
             type="checkbox" 
             name="agreeTerms" 
             id="agreeTerms" 
-            required
+            disabled
           >
-          <span>위 약관에 모두 동의합니다 (필수)</span>
+          <span id="checkboxText">약관을 끝까지 읽어주세요</span>
         </label>
       </div>
       
@@ -213,11 +223,50 @@
 </div>
 
 <script>
-  // 체크박스 상태에 따라 버튼 활성화
+  const termsBox = document.getElementById('termsBox');
+  const scrollIndicator = document.getElementById('scrollIndicator');
   const checkbox = document.getElementById('agreeTerms');
+  const checkboxText = document.getElementById('checkboxText');
   const submitBtn = document.getElementById('submitBtn');
   
+  let hasScrolledToBottom = false;
+  
+  // 스크롤 이벤트 감지
+  termsBox.addEventListener('scroll', function() {
+    const scrollTop = this.scrollTop;
+    const scrollHeight = this.scrollHeight;
+    const clientHeight = this.clientHeight;
+    
+    // 스크롤이 끝에 도달했는지 확인 (약간의 여유 포함)
+    if (scrollTop + clientHeight >= scrollHeight - 10) {
+      if (!hasScrolledToBottom) {
+        hasScrolledToBottom = true;
+        
+        // 체크박스 활성화
+        checkbox.disabled = false;
+        checkboxText.textContent = '위 약관에 모두 동의합니다 (필수)';
+        
+        // 스크롤 표시 숨김
+        scrollIndicator.classList.add('hidden');
+        
+        // 약간의 피드백
+        checkbox.parentElement.style.animation = 'pulse 0.5s ease';
+      }
+    }
+  });
+  
+  // 체크박스 상태에 따라 버튼 활성화
   checkbox.addEventListener('change', function() {
     submitBtn.disabled = !this.checked;
   });
+  
+  // CSS 애니메이션 추가
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+  `;
+  document.head.appendChild(style);
 </script>
