@@ -190,33 +190,42 @@ router.get('/oauth-terms', (req, res) => {
     res.render('oauth-terms', {
         title: '서비스 약관 동의',
         error: null,
-        csrfToken: req.csrfToken()
+        csrfToken: ''
     });
 });
 
 // OAuth 약관 동의 처리
 router.post('/oauth-terms', async (req, res) => {
     try {
+        console.log('📝 약관 동의 POST 요청 받음');
+        console.log('세션 ID:', req.session.userId);
+        console.log('동의 여부:', req.body.agreeTerms);
+        
         if (!req.session || !req.session.userId) {
+            console.log('❌ 세션 없음, 로그인 페이지로');
             return res.redirect('/auth/login');
         }
 
-        // 약관 동의 여부
+        // 약관 동의 여부 확인
         if (!req.body.agreeTerms) {
+            console.log('❌ 약관 미동의');
             return res.render('oauth-terms', {
                 title: '서비스 약관 동의',
                 error: '서비스 이용약관에 동의해주세요',
-                csrfToken: req.csrfToken()
+                csrfToken: ''
             });
-
-            // const User = require('../models/User');
-
-            await User.findByIdAndUpdate(req.session.userId, {
-                isFirstLogin: false
-            });
-
-            res.redirect('/');
         }
+        
+        // isFirstLogin 플래그 해제
+        const result = await User.findByIdAndUpdate(req.session.userId, {
+            isFirstLogin: false
+        });
+        
+        console.log('✅ 약관 동의 완료:', result.username);
+        console.log('🔄 /polls로 리디렉션');
+        
+        res.redirect('/polls');
+        
     } catch (error) {
         console.error('약관 동의 처리 오류:', error);
         res.redirect('/');

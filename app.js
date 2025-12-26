@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
-const MongoStore = require('connect-mongo'); // Render MemoryStore 문제 해결을 위한 추가 12.24
+const MongoStore = require('connect-mongo');
 const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
@@ -45,7 +45,14 @@ io.on('connection', (socket) => {
 });
 
 // ========================================
-// 3. 모델
+// 3. MongoDB 연결 (세션 전에!)
+// ========================================
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('✅ MongoDB 연결 성공'))
+  .catch(err => console.error('❌ MongoDB 연결 오류:', err));
+
+// ========================================
+// 4. 모델
 // ========================================
 const Poll = require('./models/Poll');
 const Visitor = require('./models/Visitor');
@@ -53,7 +60,7 @@ const User = require('./models/User');
 const IPConsent = require('./models/IPConsent');
 
 // ========================================
-// 4. 미들웨어
+// 5. 미들웨어
 // ========================================
 const passport = require('./config/passport');
 
@@ -74,57 +81,24 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 보안 미들웨어 (순서 중요!)
+// 보안 미들웨어
 app.use(cookieParser());
 app.use(globalLimiter);
 
-// ⬇️⬇️⬇️ consent 라우터를 CSRF 보호 전에 등록 ⬇️⬇️⬇️
-const consentRoutes = require('./routes/consent');
-app.use('/admin/consent', consentRoutes);
-
-app.post('/auth/oauth-terms', express.urlencoded({ extended: true }), async (req, res) => {
-  try {
-    if (!req.session || !req.session.userId) {
-      return res.redirect('/auth/login');
-    }
-
-    if (!req.body.agreeTerms) {
-      return res.render('oauth-terms', {
-        title: '서비스 약관 동의',
-        error: '서비스 이용약관에 동의해주세요',
-        csrfToken: ''
-      });
-    }
-
-    await User.findByIdAndUpdate(req.session.userId, {
-      isFirstLogin: false
-    });
-
-    res.redirect('/');
-  } catch (error) {
-      console.error('약관 동의 처리 오류:', error);
-      res.redirect('/');
-  }
-});
-
-// ⬇️⬇️⬇️ 그 다음 CSRF 보호 적용 ⬇️⬇️⬇️
-app.use(csrfProtection);
-app.use(addCsrfToViews);
-
-// 세션
+// ⬇️⬇️⬇️ 세션을 먼저 초기화! ⬇️⬇️⬇️
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create ({
-    mongoUrl: process.env.MONGODB_URI,
-    touchAfter: 24 * 3600, // 24시간 내 변경사항이 없으면 업데이트 안함 (성능 최적화)
+  store: MongoStore.create({
+    client: mongoose.connection.getClient(),
+    touchAfter: 24 * 3600
   }),
   cookie: { 
     maxAge: 1000 * 60 * 60,
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production'
-   }
+  }
 }));
 
 // 세션 활동 체크
@@ -133,19 +107,105 @@ app.use(checkSessionWarning);
 app.use(passport.initialize());
 app.use(passport.session());
 
-// OAuth 첫 로그인 체크 미들웨어 추가
+// ⬇️⬇️⬇️ CSRF 보호 전에 예외 라우트 등록 ⬇️⬇️⬇️
+const consentRoutes = require('./routes/consent');
+app.use('/admin/consent', consentRoutes);
+
+// OAuth 약관 동의 라우트 (CSRF 예외)
+app.get('/auth/oauth-terms', async (req, res) => {
+  console.log('🔍 GET /auth/oauth-terms');
+  console.log('세션:', req.session);
+  console.log('세션 ID:', req.session?.userId);
+  
+  if (!req.session || !req.session.userId) {
+    console.log('❌ 세션 없음, 로그인으로');
+    return res.redirect('/auth/login');
+  }
+
+  console.log('✅ 약관 페이지 렌더링');
+  res.render('oauth-terms', {
+    title: '서비스 약관 동의',
+    error: null,
+    csrfToken: ''
+  });
+});
+
+app.post('/auth/oauth-terms', async (req, res) => {
+  try {
+    console.log('📝 POST /auth/oauth-terms');
+    console.log('세션 ID:', req.session?.userId);
+    console.log('동의:', req.body.agreeTerms);
+    
+    if (!req.session || !req.session.userId) {
+      console.log('❌ 세션 없음');
+      return res.redirect('/auth/login');
+    }
+
+    if (!req.body.agreeTerms) {
+      console.log('❌ 동의 안 함');
+      return res.render('oauth-terms', {
+        title: '서비스 약관 동의',
+        error: '서비스 이용약관에 동의해주세요',
+        csrfToken: ''
+      });
+    }
+    
+    const result = await User.findByIdAndUpdate(
+      req.session.userId,
+      { isFirstLogin: false },
+      { new: true }
+    );
+
+    console.log('✅ 동의 완료:', result?.username, 'isFirstLogin:', result?.isFirstLogin);
+    console.log('🔄 /polls로 리디렉션');
+    res.redirect('/polls');
+    
+  } catch (error) {
+    console.error('❌ 오류:', error);
+    res.redirect('/');
+  }
+});
+
+// ⬇️⬇️⬇️ CSRF 보호 적용 ⬇️⬇️⬇️
+app.use(csrfProtection);
+app.use(addCsrfToViews);
+
+// ⬇️⬇️⬇️ OAuth 첫 로그인 체크 미들웨어 ⬇️⬇️⬇️
 app.use(async (req, res, next) => {
-  // 로그인 사용자만 체크
   if (req.session && req.session.userId) {
     try {
-      const user = await User.findById(req.session.userId);
+      // 제외할 경로들
+      const excludedPaths = [
+        '/auth/oauth-terms',
+        '/auth/logout',
+        '/api/',
+        '/public/',
+        '/images/',
+        '/css/',
+        '/js/'
+      ];
+      
+      if (excludedPaths.some(path => req.path.startsWith(path))) {
+        console.log('⏭️  제외 경로:', req.path);
+        return next();
+      }
 
-      if (user && user.isFirstLogin && req.path !== '/auth/oauth-terms' && req.path !== '/auth/logout') {
+      const user = await User.findById(req.session.userId);
+      
+      console.log('👤 체크:', user?.username, 'isFirstLogin:', user?.isFirstLogin);
+
+      if (user && user.isFirstLogin === true) {
+        console.log('🔄 약관 페이지로 리디렉션');
         return res.redirect('/auth/oauth-terms');
       }
+
+      if (user && (user.isFirstLogin === undefined || user.isFirstLogin === null)) {
+        await User.findByIdAndUpdate(user._id, { isFirstLogin: false });
+        console.log('✅ 기존 사용자 업데이트');
+      }
     } catch (error) {
-      console.error('첫 로그인 체크 오류:', error);
-   }
+      console.error('❌ 첫 로그인 체크 오류:', error);
+    }
   }
   next();
 });
@@ -180,24 +240,12 @@ app.use(async (req, res, next) => {
 });
 
 // ========================================
-// 5. MongoDB 연결
-// ========================================
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('✅ MongoDB 연결 성공'))
-  .catch(err => console.error('❌ MongoDB 연결 오류:', err));
-
-// ========================================
-// 6. 나머지 라우터
+// 6. 라우터
 // ========================================
 const pollRoutes = require('./routes/polls');
 const adminRoutes = require('./routes/admin');
 const authRoutes = require('./routes/auth');
 const oauthRoutes = require('./routes/oauth');
-
-console.log('pollRoutes:', typeof pollRoutes);
-console.log('adminRoutes:', typeof adminRoutes);
-console.log('authRoutes:', typeof authRoutes);
-console.log('oauthRoutes:', typeof oauthRoutes); // ⬅️ 'function'이어야 함
 
 app.use('/polls', pollRoutes);
 app.use('/admin', adminRoutes);

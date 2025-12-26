@@ -1,4 +1,5 @@
 <style>
+  /* 로그인 페이지 전용 스타일 */
   .layout-full-width {
     display: flex;
     align-items: center;
@@ -62,6 +63,12 @@
     margin-bottom: 25px;
     color: var(--text-color);
     position: relative;
+    border: 2px solid transparent;
+    transition: border-color 0.3s ease;
+  }
+  
+  .terms-box.reading {
+    border-color: #667eea;
   }
   
   [data-theme="dark"] .terms-box {
@@ -83,6 +90,35 @@
     margin-bottom: 10px;
   }
   
+  /* 스크롤 진행 표시 */
+  .scroll-indicator {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, var(--border-color, #f5f5f5) 70%, transparent);
+    padding: 20px 0 5px 0;
+    text-align: center;
+    color: #667eea;
+    font-size: 0.95rem;
+    font-weight: 600;
+    pointer-events: none;
+    animation: bounce 2s infinite;
+  }
+  
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+  
+  .scroll-indicator.hidden {
+    display: none;
+  }
+  
+  [data-theme="dark"] .scroll-indicator {
+    background: linear-gradient(to top, #2a2a2a 70%, transparent);
+  }
+  
   .checkbox-group {
     margin-bottom: 30px;
   }
@@ -96,17 +132,32 @@
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
+    border: 2px solid transparent;
+  }
+  
+  .checkbox-label.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .checkbox-label.enabled {
+    border-color: #667eea;
+    background: #e8eaf6;
   }
   
   [data-theme="dark"] .checkbox-label {
     background: #2a2a2a;
   }
   
-  .checkbox-label:hover {
+  [data-theme="dark"] .checkbox-label.enabled {
+    background: #3a3a5a;
+  }
+  
+  .checkbox-label:hover:not(.disabled) {
     background: #e8eaf6;
   }
   
-  [data-theme="dark"] .checkbox-label:hover {
+  [data-theme="dark"] .checkbox-label:hover:not(.disabled) {
     background: #3a3a3a;
   }
   
@@ -114,6 +165,10 @@
     width: 20px;
     height: 20px;
     cursor: pointer;
+  }
+  
+  .checkbox-label input[type="checkbox"]:disabled {
+    cursor: not-allowed;
   }
   
   .checkbox-label span {
@@ -154,6 +209,20 @@
     text-align: center;
     font-weight: 600;
   }
+  
+  /* 디버깅 정보 표시 */
+  .debug-info {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-family: monospace;
+    z-index: 9999;
+  }
 </style>
 
 <div class="terms-container">
@@ -173,38 +242,46 @@
     <% } %>
     
     <!-- 약관 내용 -->
-    <div class="terms-box">
+    <div class="terms-box" id="termsBox">
       <h4>📋 서비스 이용약관</h4>
       <p>본 약관은 여론조사 서비스 이용에 관한 기본적인 사항을 규정합니다.</p>
+      <p>서비스를 이용하기 전에 반드시 약관을 읽어주세요.</p>
       
       <h4>🔒 개인정보 처리방침</h4>
       <p>수집된 개인정보는 여론조사 참여 및 결과 분석 목적으로만 사용됩니다.</p>
       <p>• 수집 항목: 이메일, 사용자명, 프로필 이미지(선택)</p>
       <p>• 보유 기간: 회원 탈퇴 시까지</p>
       <p>• 제3자 제공: 하지 않음</p>
+      <p>• 개인정보는 암호화되어 안전하게 보관됩니다</p>
       
       <h4>✅ 투표 참여 규칙</h4>
       <p>• 한 투표당 1회만 참여 가능합니다</p>
-      <p>• 대한민국 국민을 위한 여론조사입니다</p>
       <p>• 부정한 방법으로 투표 조작 시 계정이 정지될 수 있습니다</p>
       <p>• 모든 투표는 익명으로 진행됩니다</p>
-
+      <p>• 투표 결과는 실시간으로 업데이트됩니다</p>
+      
       <h4>⚖️ 책임의 제한</h4>
       <p>서비스는 "있는 그대로" 제공되며, 명시적이거나 묵시적인 보증을 하지 않습니다.</p>
+      <p>서비스 이용으로 인한 손해에 대해서는 책임을 지지 않습니다.</p>
+      
+      <h4>🔄 약관의 변경</h4>
+      <p>본 약관은 필요한 경우 변경될 수 있으며, 변경 시 공지사항을 통해 알려드립니다.</p>
+      <p>변경된 약관에 동의하지 않을 경우 서비스 이용을 중단하실 수 있습니다.</p>
       
       <h4>📞 문의하기</h4>
       <p>서비스 이용 중 문의사항이 있으시면 관리자에게 연락해주세요.</p>
-
-       <!-- 스크롤 표시 -->
+      <p>빠른 시일 내에 답변드리겠습니다.</p>
+      
+      <!-- 스크롤 표시 -->
       <div class="scroll-indicator" id="scrollIndicator">
-        ⬇️ 약관을 끝까지 읽어주세요
+        ⬇️ 스크롤하여 약관을 끝까지 읽어주세요
       </div>
     </div>
     
     <!-- 약관 동의 체크박스 -->
     <form action="/auth/oauth-terms" method="POST" id="termsForm">
       <div class="checkbox-group">
-        <label class="checkbox-label">
+        <label class="checkbox-label disabled" id="checkboxLabel">
           <input 
             type="checkbox" 
             name="agreeTerms" 
@@ -222,14 +299,24 @@
   </div>
 </div>
 
+<!-- 디버깅 정보 -->
+<div class="debug-info" id="debugInfo">
+  스크롤 대기 중...
+</div>
+
 <script>
   const termsBox = document.getElementById('termsBox');
   const scrollIndicator = document.getElementById('scrollIndicator');
   const checkbox = document.getElementById('agreeTerms');
+  const checkboxLabel = document.getElementById('checkboxLabel');
   const checkboxText = document.getElementById('checkboxText');
   const submitBtn = document.getElementById('submitBtn');
+  const debugInfo = document.getElementById('debugInfo');
   
   let hasScrolledToBottom = false;
+  
+  console.log('약관 페이지 로드됨');
+  console.log('termsBox 높이:', termsBox.scrollHeight);
   
   // 스크롤 이벤트 감지
   termsBox.addEventListener('scroll', function() {
@@ -237,20 +324,44 @@
     const scrollHeight = this.scrollHeight;
     const clientHeight = this.clientHeight;
     
-    // 스크롤이 끝에 도달했는지 확인 (약간의 여유 포함)
-    if (scrollTop + clientHeight >= scrollHeight - 10) {
+    // 진행률 계산
+    const scrollPercent = ((scrollTop + clientHeight) / scrollHeight * 100).toFixed(1);
+    
+    // 디버깅 정보 업데이트
+    debugInfo.innerHTML = `
+      스크롤: ${scrollTop.toFixed(0)}px<br>
+      전체: ${scrollHeight}px<br>
+      화면: ${clientHeight}px<br>
+      진행: ${scrollPercent}%
+    `;
+    
+    console.log(`스크롤 진행: ${scrollPercent}%`);
+    
+    // 스크롤 박스에 읽는 중 표시
+    termsBox.classList.add('reading');
+    
+    // 95% 이상 스크롤하면 활성화 (여유 있게)
+    if (scrollPercent >= 95) {
       if (!hasScrolledToBottom) {
         hasScrolledToBottom = true;
         
+        console.log('✅ 약관 읽기 완료!');
+        
         // 체크박스 활성화
         checkbox.disabled = false;
+        checkboxLabel.classList.remove('disabled');
+        checkboxLabel.classList.add('enabled');
         checkboxText.textContent = '위 약관에 모두 동의합니다 (필수)';
         
         // 스크롤 표시 숨김
         scrollIndicator.classList.add('hidden');
         
+        // 디버깅 정보 업데이트
+        debugInfo.innerHTML = '✅ 체크박스 활성화됨!';
+        debugInfo.style.background = 'rgba(0,128,0,0.8)';
+        
         // 약간의 피드백
-        checkbox.parentElement.style.animation = 'pulse 0.5s ease';
+        checkboxLabel.style.animation = 'pulse 0.5s ease';
       }
     }
   });
@@ -258,6 +369,7 @@
   // 체크박스 상태에 따라 버튼 활성화
   checkbox.addEventListener('change', function() {
     submitBtn.disabled = !this.checked;
+    console.log('체크박스 상태:', this.checked);
   });
   
   // CSS 애니메이션 추가
@@ -269,4 +381,24 @@
     }
   `;
   document.head.appendChild(style);
+  
+  // 페이지 로드 시 초기 상태 체크
+  setTimeout(() => {
+    const sh = termsBox.scrollHeight;
+    const ch = termsBox.clientHeight;
+    console.log('초기 체크 - scrollHeight:', sh, 'clientHeight:', ch);
+    
+    // 스크롤이 필요 없을 정도로 내용이 짧으면 자동 활성화
+    if (sh <= ch + 10) {
+      console.log('⚠️ 스크롤 필요 없음 - 자동 활성화');
+      checkbox.disabled = false;
+      checkboxLabel.classList.remove('disabled');
+      checkboxLabel.classList.add('enabled');
+      checkboxText.textContent = '위 약관에 모두 동의합니다 (필수)';
+      scrollIndicator.classList.add('hidden');
+      debugInfo.innerHTML = '✅ 자동 활성화 (스크롤 불필요)';
+      debugInfo.style.background = 'rgba(0,128,0,0.8)';
+      hasScrolledToBottom = true;
+    }
+  }, 100);
 </script>
