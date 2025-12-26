@@ -1,0 +1,222 @@
+<style>
+  .layout-full-width {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 100px);
+  }
+  
+  .terms-container {
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  
+  .terms-card {
+    background: var(--card-bg);
+    border-radius: 30px;
+    padding: 50px 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  
+  .terms-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-color);
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  
+  .terms-subtitle {
+    text-align: center;
+    color: var(--secondary-text);
+    margin-bottom: 30px;
+    font-size: 1rem;
+  }
+  
+  .welcome-message {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  
+  .welcome-message h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.3rem;
+  }
+  
+  .welcome-message p {
+    margin: 0;
+    opacity: 0.9;
+  }
+  
+  .terms-box {
+    background: var(--border-color, #f5f5f5);
+    border-radius: 15px;
+    padding: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 25px;
+    color: var(--text-color);
+  }
+  
+  [data-theme="dark"] .terms-box {
+    background: #2a2a2a;
+  }
+  
+  .terms-box h4 {
+    color: var(--text-color);
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .terms-box h4:first-child {
+    margin-top: 0;
+  }
+  
+  .terms-box p {
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+  
+  .checkbox-group {
+    margin-bottom: 30px;
+  }
+  
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    background: var(--border-color, #f5f5f5);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  [data-theme="dark"] .checkbox-label {
+    background: #2a2a2a;
+  }
+  
+  .checkbox-label:hover {
+    background: #e8eaf6;
+  }
+  
+  [data-theme="dark"] .checkbox-label:hover {
+    background: #3a3a3a;
+  }
+  
+  .checkbox-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+  }
+  
+  .checkbox-label span {
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+  
+  .btn-submit {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-submit:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  }
+  
+  .btn-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .error-message {
+    background: #fee;
+    color: #c00;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 600;
+  }
+</style>
+
+<div class="terms-container">
+  <div class="terms-card">
+    <h1 class="terms-title">환영합니다! 🎉</h1>
+    <p class="terms-subtitle">서비스 이용을 위해 약관에 동의해주세요</p>
+    
+    <div class="welcome-message">
+      <h3>회원가입이 완료되었습니다</h3>
+      <p>여론조사에 참여하고 의견을 나눠보세요</p>
+    </div>
+    
+    <% if (error) { %>
+      <div class="error-message">
+        <%= error %>
+      </div>
+    <% } %>
+    
+    <!-- 약관 내용 -->
+    <div class="terms-box">
+      <h4>📋 서비스 이용약관</h4>
+      <p>본 약관은 여론조사 서비스 이용에 관한 기본적인 사항을 규정합니다.</p>
+      
+      <h4>🔒 개인정보 처리방침</h4>
+      <p>수집된 개인정보는 여론조사 참여 및 결과 분석 목적으로만 사용됩니다.</p>
+      <p>• 수집 항목: 이메일, 사용자명, 프로필 이미지(선택)</p>
+      <p>• 보유 기간: 회원 탈퇴 시까지</p>
+      <p>• 제3자 제공: 하지 않음</p>
+      
+      <h4>✅ 투표 참여 규칙</h4>
+      <p>• 한 투표당 1회만 참여 가능합니다</p>
+      <p>• 부정한 방법으로 투표 조작 시 계정이 정지될 수 있습니다</p>
+      <p>• 모든 투표는 익명으로 진행됩니다</p>
+    </div>
+    
+    <!-- 약관 동의 체크박스 -->
+    <form action="/auth/oauth-terms" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input 
+            type="checkbox" 
+            name="agreeTerms" 
+            id="agreeTerms" 
+            required
+          >
+          <span>위 약관에 모두 동의합니다 (필수)</span>
+        </label>
+      </div>
+      
+      <button type="submit" class="btn-submit" id="submitBtn" disabled>
+        동의하고 시작하기
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // 체크박스 상태에 따라 버튼 활성화
+  const checkbox = document.getElementById('agreeTerms');
+  const submitBtn = document.getElementById('submitBtn');
+  
+  checkbox.addEventListener('change', function() {
+    submitBtn.disabled = !this.checked;
+  });
+</script>

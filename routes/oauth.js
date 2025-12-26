@@ -17,6 +17,11 @@ router.get('/google/callback', passport.authenticate('google', { failureRedirect
     req.session.userId = req.user._id;
     req.session.username = req.user.username;
     req.session.lastActivity = Date.now();
+
+    if (req.user.isFirstLogin) {
+        return res.redirect('/auth/oauth-terms');
+    }
+
     res.redirect('/');
     }
 );
@@ -32,6 +37,10 @@ router.get('/naver/callback', passport.authenticate('naver', { failureRedirect: 
     req.session.userId = req.user._id;
     req.session.username = req.user.username;
     req.session.lastActivity = Date.now();
+
+    if (req.user.isFirstLogin) {
+        return res.redirect('/auth/oauth-terms');
+    }
     res.redirect('/');
     }
 );

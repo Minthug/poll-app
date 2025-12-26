@@ -8,6 +8,7 @@ const { body, validationResult } = require('express-validator');
 // ========================================
 router.get('/register', (req, res) => {
     const message = req.query.message || null;
+
     res.render('auth/register', { 
         error: null,
         message: message,
@@ -178,4 +179,45 @@ router.get('/logout', (req, res) => {
     });
 });
 
+// ========================================
+// OAuth 약관 동의 페이지
+// ========================================
+router.get('/oauth-terms', (res, req) => {
+    if (!req.session.userId) {
+        return res.redirect('/auth/login');
+    }
+
+    res.render('oauth-terms', {
+        title: '서비스 약관 동의',
+        error: null,
+        csrfToken: req.csrfToken()
+    });
+});
+
+// OAuth 약관 동의 처리
+router.post('/oauth-terms', async (req, res) => {
+    try {
+        if (!req.session.userId) {
+            return res.redirect('/auth/login');
+        }
+
+        // 약관 동의 여부
+        if (!req.body.agreeTerms) {
+            return res.render('oauth-terms', {
+                title: '서비스 약관 동의',
+                error: '서비스 이용약관에 동의해주세요',
+                csrfToken: req.csrfToken()
+            });
+
+            await User.findByIdAndUpdate(req.session.userId, {
+                isFirstLogin: false
+            });
+
+            res.redirect('/');
+        }
+    } catch (error) {
+        console.error('약관 동의 처리 오류:', error);
+        res.redirect('/');
+    }
+});
 module.exports = router;
