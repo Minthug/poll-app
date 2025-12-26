@@ -82,6 +82,31 @@ app.use(globalLimiter);
 const consentRoutes = require('./routes/consent');
 app.use('/admin/consent', consentRoutes);
 
+app.post('/auth/oauth-terms', express.urlencoded({ extended: true }), async (req, res) => {
+  try {
+    if (!req.session || !req.session.userId) {
+      return res.redirect('/auth/login');
+    }
+
+    if (!req.body.agreeTerms) {
+      return res.render('oauth-terms', {
+        title: '서비스 약관 동의',
+        error: '서비스 이용약관에 동의해주세요',
+        csrfToken: ''
+      });
+    }
+
+    await User.findByIdAndUpdate(req.session.userId, {
+      isFirstLogin: false
+    });
+
+    res.redirect('/');
+  } catch (error) {
+      console.error('약관 동의 처리 오류:', error);
+      res.redirect('/');
+  }
+});
+
 // ⬇️⬇️⬇️ 그 다음 CSRF 보호 적용 ⬇️⬇️⬇️
 app.use(csrfProtection);
 app.use(addCsrfToViews);
@@ -107,6 +132,23 @@ app.use(sessionActivity);
 app.use(checkSessionWarning);
 app.use(passport.initialize());
 app.use(passport.session());
+
+// OAuth 첫 로그인 체크 미들웨어 추가
+app.use(async (req, res, next) => {
+  // 로그인 사용자만 체크
+  if (req.session && req.session.userId) {
+    try {
+      const user = await User.findById(req.session.userId);
+
+      if (user && user.isFirstLogin && req.path !== '/auth/oauth-terms' && req.path !== '/auth/logout') {
+        return res.redirect('/auth/oauth-terms');
+      }
+    } catch (error) {
+      console.error('첫 로그인 체크 오류:', error);
+   }
+  }
+  next();
+});
 
 // 모든 뷰에 세션 정보 전달
 app.use((req, res, next) => {
