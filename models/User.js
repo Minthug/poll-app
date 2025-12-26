@@ -42,6 +42,15 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: null
     },
+
+    // ========================================
+    // 첫 로그인 플래그 (OAuth 약관 동의용)
+    // ========================================
+    isFirstLogin: {
+        type: Boolean,
+        default: false
+    },
+    
   // 인증 레벨
     verificationLevel: {
         type: String,
@@ -55,6 +64,33 @@ const userSchema = new mongoose.Schema({
     
     createdAt: { type: Date, default: Date.now }
     });
+    // ========================================
+// password 해싱
+// ========================================
+userSchema.pre('save', async function(next) {
+    if (!this.password || !this.isModified('password')) {
+        return next();
+    }
+
+    try {
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password, salt);
+        next();
+    } catch(error) {
+        next(error);
+    }
+});
+
+// ========================================
+// 비밀번호 비교
+// ========================================
+userSchema.methods.comparePassword = async function(candidatePassword) {
+    if (!this.password) {
+        return false;
+    }
+    return await bcrypt.compare(candidatePassword, this.password);
+};
+
 
 userSchema.pre('save', async function(next) {
     if (!this.password || !this.isModified('password')) return next();
@@ -73,7 +109,7 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
     if (!this.password) {
         return false;
     }
-    
+
     return await bcrypt.compare(candidatePassword, this.password);
 };
 
