@@ -182,8 +182,8 @@ router.get('/logout', (req, res) => {
 // ========================================
 // OAuth 약관 동의 페이지
 // ========================================
-router.get('/oauth-terms', (res, req) => {
-    if (!req.session.userId) {
+router.get('/oauth-terms', (req, res) => {
+    if (!req.session || !req.session.userId) {
         return res.redirect('/auth/login');
     }
 
@@ -197,7 +197,7 @@ router.get('/oauth-terms', (res, req) => {
 // OAuth 약관 동의 처리
 router.post('/oauth-terms', async (req, res) => {
     try {
-        if (!req.session.userId) {
+        if (!req.session || !req.session.userId) {
             return res.redirect('/auth/login');
         }
 
@@ -208,6 +208,8 @@ router.post('/oauth-terms', async (req, res) => {
                 error: '서비스 이용약관에 동의해주세요',
                 csrfToken: req.csrfToken()
             });
+
+            // const User = require('../models/User');
 
             await User.findByIdAndUpdate(req.session.userId, {
                 isFirstLogin: false
