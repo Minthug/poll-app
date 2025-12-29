@@ -139,6 +139,19 @@
       </div>
     </button>
 
+    <!--2. 이미지 저장-->
+    <button class="export-btn btn-image" onclick="downloadAsImage()">
+      <span class="export-icon">📸</span>
+      <div>
+        <div class="export-title">이미지로 저장</div>
+        <div class="export-desc">SNS 공유용</div>
+      </div>
+    </button>
+
+    <!--3. CSV 다운로드-->
+    <a href="/polls/<%= poll._id %>/export-csv" class="export-btn btn-csv">
+      <span class="export-icon">📊</span>
+      
   <!-- 액션 버튼 -->
   <div class="stats-card">
     <div class="action-buttons">
