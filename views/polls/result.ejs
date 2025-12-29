@@ -122,36 +122,46 @@
     <% }); %>
   </div>
 
-  <!-- 공유 및 내보내기 버튼(추가)-->>
+ <!-- 공유 및 내보내기 버튼 (새로 추가) -->
   <div class="stats-card">
     <h3 class="section-title">
-      <span>📨</span>
+      <span>📤</span>
       <span>결과 공유 및 내보내기</span>
     </h3>
-
-  <div class="export-buttons">
-    <!--1. 공유 URL-->
-    <button class="export-btn btn-share" onclick="copyShareLink()">
-      <span class="export-icon">🔗</span>
-      <div>
-        <div class="export-title">투표 공유하기</div>
-        <div class="export-desc">링크 복사</div>
-      </div>
-    </button>
-
-    <!--2. 이미지 저장-->
-    <button class="export-btn btn-image" onclick="downloadAsImage()">
-      <span class="export-icon">📸</span>
-      <div>
-        <div class="export-title">이미지로 저장</div>
-        <div class="export-desc">SNS 공유용</div>
-      </div>
-    </button>
-
-    <!--3. CSV 다운로드-->
-    <a href="/polls/<%= poll._id %>/export-csv" class="export-btn btn-csv">
-      <span class="export-icon">📊</span>
+    
+    <div class="export-buttons">
+      <!-- 1. 공유 URL -->
+      <button class="export-btn btn-share" onclick="copyShareLink()">
+        <span class="export-icon">🔗</span>
+        <div>
+          <div class="export-title">투표 공유하기</div>
+          <div class="export-desc">링크 복사</div>
+        </div>
+      </button>
       
+      <!-- 2. 이미지 저장 -->
+      <button class="export-btn btn-image" onclick="downloadAsImage()">
+        <span class="export-icon">📸</span>
+        <div>
+          <div class="export-title">이미지로 저장</div>
+          <div class="export-desc">SNS 공유용</div>
+        </div>
+      </button>
+      
+      <!-- 3. CSV 다운로드 -->
+      <a href="/polls/<%= poll._id %>/export-csv" class="export-btn btn-csv">
+        <span class="export-icon">📊</span>
+        <div>
+          <div class="export-title">데이터 다운로드</div>
+          <div class="export-desc">CSV 파일</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- 액션 버튼 (기존) -->
+  <div class="stats-card">
+
   <!-- 액션 버튼 -->
   <div class="stats-card">
     <div class="action-buttons">
