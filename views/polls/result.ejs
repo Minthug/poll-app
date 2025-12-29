@@ -122,7 +122,9 @@
     <% }); %>
   </div>
 
- <!-- 공유 및 내보내기 버튼 (새로 추가) -->
+  <!-- ========================================
+       공유 및 내보내기 버튼 (새로 추가)
+       ======================================== -->
   <div class="stats-card">
     <h3 class="section-title">
       <span>📤</span>
@@ -158,9 +160,6 @@
       </a>
     </div>
   </div>
-
-  <!-- 액션 버튼 (기존) -->
-  <div class="stats-card">
 
   <!-- 액션 버튼 -->
   <div class="stats-card">
@@ -462,6 +461,99 @@
     font-weight: 600;
   }
   
+  /* ========================================
+     공유 버튼 스타일 (새로 추가)
+     ======================================== */
+  .export-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+  }
+  
+  .export-btn {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background: var(--border-color);
+    border: 2px solid transparent;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: var(--text-color);
+  }
+  
+  [data-theme="dark"] .export-btn {
+    background: #3a3a3a;
+  }
+  
+  .export-btn:hover {
+    transform: translateY(-5px);
+    border-color: #667eea;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    color: var(--text-color);
+  }
+  
+  .export-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+  }
+  
+  .export-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: 3px;
+  }
+  
+  .export-desc {
+    font-size: 0.85rem;
+    color: var(--secondary-text);
+  }
+  
+  /* 토스트 알림 */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 18px 25px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 10000;
+    animation: slideInRight 0.3s ease;
+  }
+  
+  .toast.fade-out {
+    animation: slideOutRight 0.3s ease;
+  }
+  
+  @keyframes slideInRight {
+    from {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideOutRight {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+  }
+  
   /* 액션 버튼 */
   .action-buttons {
     display: flex;
@@ -518,6 +610,10 @@
       grid-template-columns: 1fr;
     }
     
+    .export-buttons {
+      grid-template-columns: 1fr;
+    }
+    
     .action-buttons {
       flex-direction: column;
     }
@@ -529,9 +625,10 @@
   }
 </style>
 
-<!-- Socket.io와 Chart.js 필요 -->
+<!-- Socket.io, Chart.js, html2canvas 라이브러리 -->
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <script>
   // 차트 데이터
@@ -652,6 +749,91 @@
       }
     }
   });
+
+  // ========================================
+  // 1. 공유 링크 복사
+  // ========================================
+  function copyShareLink() {
+    const shareUrl = window.location.origin + '/polls/<%= poll._id %>';
+    
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      showToast('✅ 링크가 클립보드에 복사되었습니다!');
+    }).catch(err => {
+      // 폴백: 구식 방법
+      const textArea = document.createElement('textarea');
+      textArea.value = shareUrl;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      showToast('✅ 링크가 복사되었습니다!');
+    });
+  }
+
+  // ========================================
+  // 2. 이미지로 저장
+  // ========================================
+  async function downloadAsImage() {
+    showToast('📸 이미지 생성 중...');
+    
+    try {
+      const resultContainer = document.querySelector('.result-container');
+      
+      // html2canvas로 캡처
+      const canvas = await html2canvas(resultContainer, {
+        backgroundColor: getComputedStyle(document.documentElement)
+          .getPropertyValue('--bg-color'),
+        scale: 2, // 고해상도
+        logging: false,
+        useCORS: true
+      });
+      
+      // 이미지로 변환
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = 'poll-result-<%= poll._id %>-' + Date.now() + '.png';
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+        
+        showToast('✅ 이미지가 다운로드되었습니다!');
+      });
+      
+    } catch (error) {
+      console.error('이미지 생성 오류:', error);
+      showToast('❌ 이미지 생성 중 오류가 발생했습니다');
+    }
+  }
+
+  // ========================================
+  // 토스트 알림 표시
+  // ========================================
+  function showToast(message) {
+    // 기존 토스트 제거
+    const existingToast = document.querySelector('.toast');
+    if (existingToast) {
+      existingToast.remove();
+    }
+    
+    // 새 토스트 생성
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `
+      <span style="font-size: 1.5rem;">📢</span>
+      <span style="font-weight: 600;">${message}</span>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // 3초 후 제거
+    setTimeout(() => {
+      toast.classList.add('fade-out');
+      setTimeout(() => {
+        toast.remove();
+      }, 300);
+    }, 3000);
+  }
 
   // Socket.io 실시간 업데이트
   socket.on('vote-update', (data) => {

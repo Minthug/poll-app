@@ -6,6 +6,7 @@
     const axios = require('axios');
     const { requireLogin } = require('../middleware/auth');
 
+
     // 모든 여론 조사 목록 - 비로그인 사용자도 목록 확인 가능
     router.get('/', async (req, res) => {
         try {
@@ -397,6 +398,57 @@
             isKorea: geo ? geo.country === 'KR' : false
         });
     })
+
+    router.get('/:id/export-csv', async(req, res) => {
+        try {
+            const poll = await Poll.findById(req.params.id);
+
+            if (!poll) {
+                return res.status(404).send('투표를 찾을 수 없습니다');
+            }
+
+            // CSV 헤더 (BOM 추가 - Excel 한글 깨짐 방지)
+            let csv = '\uFEFF';
+
+            // 투표 정보
+            csv += `"투표 제목","${poll.title.replace(/"/g, '""')}"\n`;
+            csv += `"생성일","${new Date(poll.createdAt).toLocaleString('ko-KR')}"\n`;
+            csv += '\n';
+
+            // 데이터 헤더
+            csv += '"순위","선택지","투표수","비율"\n';
+
+            // 투표 데이터
+            const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+            const sortedOptions = [...poll.options].sort((a, b) => b.votes - a.votes);
+            
+            sortedOptions.forEach((option, index) => {
+            const percentage = totalVotes > 0 
+                ? ((option.votes / totalVotes) * 100).toFixed(1) 
+                : 0;
+            
+            csv += `${index + 1},"${option.text.replace(/"/g, '""')}",${option.votes},${percentage}%\n`;
+            });
+            
+            // 총계
+            csv += '\n';
+            csv += `"총 투표수",${totalVotes}\n`;
+
+            // 파일명 생성
+            const timestamp = new Date().toISOString().slice(0, 10);
+            const filename = `poll_${poll._id}_${timestamp}.csv`;
+            
+            // 응답 헤더 설정
+            res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            res.send(csv);
+            
+            console.log('✅ CSV 다운로드:', filename);
+        } catch (error) {
+        console.error('❌ CSV 내보내기 오류:', error);
+        res.status(500).send('CSV 생성 중 오류가 발생했습니다');
+        }
+    });
 
     module.exports = router;
 
