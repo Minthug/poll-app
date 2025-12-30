@@ -196,7 +196,7 @@
     <p class="qr-modal-suntitle">스마트폰으로 스캔하여 투표하세요</p>
 
     <div class="qr-code-container">
-      <canvas id="qrcode"></canvas>
+      <div id="qrcode"></div>
     </div>
 
     <div class="qr-url">
@@ -644,8 +644,16 @@
     margin-bottom: 20px;
   }
   
-  #qrCanvas {
-    display: block;
+  #qrCode {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  #qrCanvas,
+  #qrcode img {
+    display: block !important;
+    margin: 0 auto;
   }
   
   .qr-url {
@@ -961,36 +969,70 @@
   // 2. QR코드 관련 변수 및 함수 (새로 추가!)
   // ========================================
   let currentQRCanvas = null;
+  let qrCodeInstance = null;
 
-  // QR코드 모달 표시
   function showQRCode() {
-    const modal = document.getElementById('qrModal');
-    const canvas = document.getElementById('qrCanvas');
-    const pollUrl = window.location.origin + '/polls/<%= poll._id %>';
+  console.log('🔍 showQRCode 시작');
+  
+  const modal = document.getElementById('qrModal');
+  const qrContainer = document.getElementById('qrcode');
+  
+  console.log('modal:', modal);
+  console.log('qrContainer:', qrContainer);
+  
+  if (!modal) {
+    console.error('❌ qrModal을 찾을 수 없습니다');
+    alert('QR 모달을 찾을 수 없습니다. 페이지를 새로고침해주세요.');
+    return;
+  }
+  
+  if (!qrContainer) {
+    console.error('❌ qrcode 컨테이너를 찾을 수 없습니다');
+    alert('QR 컨테이너를 찾을 수 없습니다. 페이지를 새로고침해주세요.');
+    return;
+  }
+  
+  const pollUrl = window.location.origin + '/polls/<%= poll._id %>';
+  console.log('📍 URL:', pollUrl);
+  
+  // 기존 내용 초기화
+  qrContainer.innerHTML = '';
+  
+  try {
+    // QR코드 생성
+    new QRCode(qrContainer, {
+      text: pollUrl,
+      width: 300,
+      height: 300,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.correctLevel.H
+    });
     
-    // 기존 QR 코드 제거
-    qrContainer.innerHTML = '<div id="qrcode"></div>';
-
-    try {
-      new QRCode(document.getElementById('qrcode'), {
-        text: pollUrl,
-        width: 300,
-        height: 300,
-        colorDark: '#000000',
-        colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.H
-      });
-
-      setTimeout(() => {
-        currentQRCanvas = document.querySelector('#qrcode canvas');
+    console.log('✅ QR코드 생성 시작');
+    
+    // 약간의 딜레이 후 모달 표시
+    setTimeout(() => {
+      // Canvas 또는 Image 찾기
+      currentQRCanvas = qrContainer.querySelector('canvas') || qrContainer.querySelector('img');
+      
+      console.log('currentQRCanvas:', currentQRCanvas);
+      console.log('qrContainer.innerHTML:', qrContainer.innerHTML);
+      
+      if (currentQRCanvas) {
         modal.style.display = 'flex';
         showToast('✅ QR코드가 생성되었습니다!');
-      }, 100);
-    } catch (error) {
-      console.error('QR코드 생성 오류:', error);
-      showToast('❌ QR코드 생성 중 오류가 발생했습니다');
-    }
+      } else {
+        console.error('❌ Canvas/Image를 찾을 수 없음');
+        alert('QR코드 생성에 실패했습니다. 새로고침 후 다시 시도해주세요.');
+      }
+    }, 200); // 200ms로 약간 늘림
+    
+  } catch (error) {
+    console.error('❌ QR코드 생성 오류:', error);
+    alert('QR코드 생성 중 오류: ' + error.message);
   }
+}
 
   // QR코드 모달 닫기
   function closeQRModal() {
