@@ -196,7 +196,7 @@
     <p class="qr-modal-suntitle">스마트폰으로 스캔하여 투표하세요</p>
 
     <div class="qr-code-container">
-      <canvas id="qrCanvas"></canvas>
+      <canvas id="qrcode"></canvas>
     </div>
 
     <div class="qr-url">
@@ -216,8 +216,6 @@
   </div>
 </div>
 
-
-<!-- 이 페이지만의 스타일 -->
 <style>
   .result-container {
     max-width: 1000px;
@@ -503,7 +501,7 @@
   }
   
   /* ========================================
-     공유 버튼 스타일 (새로 추가)
+     공유 버튼 스타일
      ======================================== */
   .export-buttons {
     display: grid;
@@ -550,6 +548,145 @@
   .export-desc {
     font-size: 0.85rem;
     color: var(--secondary-text);
+  }
+  
+  /* ========================================
+     QR 모달 스타일
+     ======================================== */
+  .qr-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }  
+
+  .qr-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+  }
+  
+  .qr-modal-content {
+    position: relative;
+    background: var(--card-bg);
+    border-radius: 30px;
+    padding: 50px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    animation: modalSlideIn 0.3s ease;
+  }
+  
+  @keyframes modalSlideIn {
+    from {
+      transform: translateY(-50px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  .qr-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    font-size: 2rem;
+    color: var(--text-color);
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+  }
+  
+  .qr-close-btn:hover {
+    background: var(--border-color);
+    transform: rotate(90deg);
+  }
+  
+  .qr-modal-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-color);
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  
+  .qr-modal-subtitle {
+    text-align: center;
+    color: var(--secondary-text);
+    margin-bottom: 30px;
+  }
+  
+  .qr-code-container {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  #qrCanvas {
+    display: block;
+  }
+  
+  .qr-url {
+    text-align: center;
+    font-weight: 600;
+    color: var(--text-color);
+    padding: 15px;
+    background: var(--border-color);
+    border-radius: 12px;
+    margin-bottom: 25px;
+    word-break: break-all;
+  }
+  
+  [data-theme="dark"] .qr-url {
+    background: #3a3a3a;
+  }
+  
+  .qr-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  
+  .qr-action-btn {
+    padding: 15px 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  .qr-action-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
   }
   
   /* 토스트 알림 */
@@ -652,6 +789,14 @@
     }
     
     .export-buttons {
+      grid-template-columns: 1fr 1fr;
+    }
+    
+    .qr-modal-content {
+      padding: 30px;
+    }
+    
+    .qr-actions {
       grid-template-columns: 1fr;
     }
     
@@ -666,10 +811,11 @@
   }
 </style>
 
-<!-- Socket.io, Chart.js, html2canvas 라이브러리 -->
+<!-- Socket.io, Chart.js, html2canvas, QRCode.js 라이브러리 -->
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
   // 차트 데이터
@@ -812,7 +958,191 @@
   }
 
   // ========================================
-  // 2. 이미지로 저장
+  // 2. QR코드 관련 변수 및 함수 (새로 추가!)
+  // ========================================
+  let currentQRCanvas = null;
+
+  // QR코드 모달 표시
+  function showQRCode() {
+    const modal = document.getElementById('qrModal');
+    const canvas = document.getElementById('qrCanvas');
+    const pollUrl = window.location.origin + '/polls/<%= poll._id %>';
+    
+    // 기존 QR 코드 제거
+    qrContainer.innerHTML = '<div id="qrcode"></div>';
+
+    try {
+      new QRCode(document.getElementById('qrcode'), {
+        text: pollUrl,
+        width: 300,
+        height: 300,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      setTimeout(() => {
+        currentQRCanvas = document.querySelector('#qrcode canvas');
+        modal.style.display = 'flex';
+        showToast('✅ QR코드가 생성되었습니다!');
+      }, 100);
+    } catch (error) {
+      console.error('QR코드 생성 오류:', error);
+      showToast('❌ QR코드 생성 중 오류가 발생했습니다');
+    }
+  }
+
+  // QR코드 모달 닫기
+  function closeQRModal() {
+    const modal = document.getElementById('qrModal');
+    modal.style.display = 'none';
+  }
+
+  // QR코드 다운로드
+  function downloadQRCode() {
+    if (!currentQRCanvas) {
+      showToast('❌ QR코드를 먼저 생성해주세요');
+      return;
+    }
+    
+    currentQRCanvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.download = 'poll-qr-<%= poll._id %>-' + Date.now() + '.png';
+      link.href = url;
+      link.click();
+      URL.revokeObjectURL(url);
+      
+      showToast('✅ QR코드가 다운로드되었습니다!');
+    });
+  }
+
+  // QR코드 인쇄
+  function printQRCode() {
+    if (!currentQRCanvas) {
+      showToast('❌ QR코드를 먼저 생성해주세요');
+      return;
+    }
+    
+    const printWindow = window.open('', '', 'width=600,height=800');
+    const pollTitle = '<%= poll.title.replace(/'/g, "\\'") %>';
+    const qrImage = currentQRCanvas.toDataURL();
+    const pollUrl = window.location.origin + '/polls/<%= poll._id %>';
+    
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>투표 QR코드 - ${pollTitle}</title>
+        <style>
+          body {
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px;
+          }
+          .print-container {
+            text-align: center;
+            max-width: 500px;
+          }
+          h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #333;
+          }
+          .qr-image {
+            margin: 30px 0;
+            padding: 20px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+          }
+          img {
+            display: block;
+            margin: 0 auto;
+          }
+          .url {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 20px;
+            word-break: break-all;
+          }
+          .instructions {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            text-align: left;
+          }
+          .instructions h3 {
+            margin-top: 0;
+            color: #333;
+          }
+          .instructions ol {
+            padding-left: 20px;
+          }
+          .instructions li {
+            margin: 10px 0;
+            color: #555;
+          }
+          @media print {
+            body {
+              padding: 0;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="print-container">
+          <h1>${pollTitle}</h1>
+          <p>스마트폰으로 QR코드를 스캔하여 투표에 참여하세요</p>
+          
+          <div class="qr-image">
+            <img src="${qrImage}" width="300" height="300" />
+          </div>
+          
+          <div class="url">
+            ${pollUrl}
+          </div>
+          
+          <div class="instructions">
+            <h3>📱 참여 방법</h3>
+            <ol>
+              <li>스마트폰 카메라 앱을 실행하세요</li>
+              <li>위의 QR코드를 스캔하세요</li>
+              <li>링크를 클릭하여 투표 페이지로 이동하세요</li>
+              <li>원하는 항목에 투표하세요</li>
+            </ol>
+          </div>
+        </div>
+        <script>
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+            }, 500);
+          };
+        <\/script>
+      </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+    showToast('🖨️ 인쇄 창이 열렸습니다!');
+  }
+
+  // ESC 키로 모달 닫기
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeQRModal();
+    }
+  });
+
+  // ========================================
+  // 3. 이미지로 저장
   // ========================================
   async function downloadAsImage() {
     showToast('📸 이미지 생성 중...');
@@ -876,7 +1206,9 @@
     }, 3000);
   }
 
+  // ========================================
   // Socket.io 실시간 업데이트
+  // ========================================
   socket.on('vote-update', (data) => {
     if (data.pollId === pollId) {
       console.log('투표 업데이트 수신:', data);
