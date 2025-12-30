@@ -150,7 +150,16 @@
         </div>
       </button>
       
-      <!-- 3. CSV 다운로드 -->
+      <!-- QR코드 -->
+       <button class="export-btn btn-qr" onclick="showQRCode()">
+        <span class="export-icon">📱</span>
+        <div>
+          <div class="export-title">QR코드 생성</div>
+          <div class="export-desc">오프라인 홍보용</div>
+        </div>
+       </button>
+
+      <!-- 4. CSV 다운로드 -->
       <a href="/polls/<%= poll._id %>/export-csv" class="export-btn btn-csv">
         <span class="export-icon">📊</span>
         <div>
