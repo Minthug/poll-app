@@ -1006,7 +1006,6 @@
       height: 300,
       colorDark: '#000000',
       colorLight: '#ffffff',
-      correctLevel: QRCode.correctLevel.H
     });
     
     console.log('✅ QR코드 생성 시작');
@@ -1016,21 +1015,19 @@
       // Canvas 또는 Image 찾기
       currentQRCanvas = qrContainer.querySelector('canvas') || qrContainer.querySelector('img');
       
-      console.log('currentQRCanvas:', currentQRCanvas);
-      console.log('qrContainer.innerHTML:', qrContainer.innerHTML);
+      console.log('Canvas/Image:', currentQRCanvas);
       
       if (currentQRCanvas) {
         modal.style.display = 'flex';
         showToast('✅ QR코드가 생성되었습니다!');
       } else {
         console.error('❌ Canvas/Image를 찾을 수 없음');
-        alert('QR코드 생성에 실패했습니다. 새로고침 후 다시 시도해주세요.');
       }
-    }, 200); // 200ms로 약간 늘림
+    }, 200);
     
   } catch (error) {
     console.error('❌ QR코드 생성 오류:', error);
-    alert('QR코드 생성 중 오류: ' + error.message);
+    showToast('❌ QR코드 생성 중 오류가 발생했습니다: ' + error.message);
   }
 }
 
