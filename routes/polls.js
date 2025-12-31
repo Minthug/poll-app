@@ -79,7 +79,8 @@
                 tags: tagArray,
                 options: pollOptions,
                 endDate: endDate ? new Date(endDate) : null, // 종료 시간이 있으면 Date 객체로 변환 
-                createdBy: req.session.userId
+                createdBy: req.session.userId,
+                createdByUsername: req.session.username
             });
 
             await poll.save();
@@ -88,6 +89,7 @@
 
             return res.redirect('/polls');
         } catch (error) {
+            console.error('투표 생성 오류:', error);  // ⬅️ 에러 로그 개선
             res.status(500).send('서버 오류');
         }
     });
@@ -111,6 +113,11 @@
             console.log('투표 페이지 접속 IP:', clientIp);
             console.log('투표한 IP 목록:', poll.votedIPs);
 
+            // 본인 확인 추가
+            const isOwner = req.session.userId &&
+                            poll.createdBy &&
+                            poll.createdBy.toString() === req.session.userId.toString();
+            
             // 이미 투표한 IP면 결과 페이지로 리다이렉트
             if (poll.votedIPs && poll.votedIPs.includes(clientIp)) {
                 console.log('✅ 이미 투표한 사용자 - 결과 페이지로 리다이렉트');
@@ -124,7 +131,7 @@
             }
 
             // 투표 안 했으면 투표 페이지 표시
-            res.render('polls/show', { poll,  showRanking: true  });
+            res.render('polls/show', { poll, isOwner ,showRanking: true  });
         } catch (error) {
             console.error(error);
             res.status(500).send('서버 오류');
@@ -151,11 +158,16 @@
             const alreadyVoted = req.query.alreadyVoted === 'true';
             const ended = req.query.ended === 'true';
 
+            const isOwner = req.session.userId &&
+                            poll.createdBy &&
+                            poll.createdBy.toString() === req.session.userId.toString();
+
             res.render('polls/result', { 
                 poll, 
                 locationStats,
                 alreadyVoted,  // ⭐ 추가
                 ended,          // ⭐ 추가
+                isOwner,
                 showRanking: true 
             });
         } catch (error) {

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const User = require('./User');
 
 const optionSchema = new mongoose.Schema({
     text: {
@@ -37,10 +38,23 @@ const pollSchema = new mongoose.Schema({
     // 최대 5개의 옵션을 가질 수 있음
     options: [optionSchema],
     views: { type: Number, default: 0 },
+
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: false
+    },
+
+    createdByUsername: {
+        type: String,
+        required: false
+    },
+    
     createdAt: {
         type: Date,
         default: Date.now
     },
+    
     endDate: {
         type: Date,
         default: null
