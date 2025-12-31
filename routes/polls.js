@@ -462,5 +462,103 @@
         }
     });
 
-    module.exports = router;
+    // ========================================
+    // 투표 수정 페이지
+    // ========================================
+    router.get('/:id/edit', requireLogin, async (req, res) => {
+        try {
+            const poll = await Poll.findById(req.params.id);
+
+            if (!poll) {
+                return res.status(404).send('투표를 찾을 수 없습니다');
+            }
+
+            if (!poll.createdBy || poll.createdBy.toString() !== req.session.userId.toString()) {
+                return res.status(403).send('수정 권한이 없습니다');
+            }
+
+            res.render('/polls/edit',  {
+                poll,
+                showRanking: true
+            });
+        } catch (error) {
+            console.error('투표 수정 페이지 오류:', error);
+            res.status(500).send('서버 오류');
+        }
+    });
+
+
+    // ========================================
+    // 투표 수정 처리
+    // ========================================
+    router.post('/:id/edit', requireLogin, async (req, res) => {
+        try {
+            const { title, description, options, category, tags } = req.body;
+            const poll = await Poll.findById(req.params.id);
+
+            if (!poll) {
+                return res.status(404).send('투표를 찾을 수 없습니다');
+            }
+
+            if (!poll.createdBy || poll.createdBy.toString() !== req.session.userId.toString()) {
+                return res.status(403).send('수정 권한이 없습니다');
+            }
+
+            poll.title = title;
+            poll.description = description;
+            poll.category = category || '일반';
+
+            if (tags && tags.trim() !== '') {
+                poll.tags = tags.split(',')
+                    .map(tag => tag.trim())
+                    .filter(tag => tag !== (''))
+                    .slice(0, 5);
+            } else {
+                poll.tags = [];
+            }
+
+            if (options && Array.isArray(options)) {
+                options.forEach((optionText, index) => {
+                    if (poll.options[index] && optionText.trim() !== '') {
+                        poll.options[index].text = optionText.trim();
+                    }
+                });
+            }
+
+            await poll.save();
+
+            console.log('✅ 투표 수정 완료:', poll._id);
+            res.redirect(`/polls/${poll._id}`);
+        } catch (error) {
+            console.error('투표 수정 오류:', error);
+            res.status(500).send('서버 오류');
+        }
+    });
+
+    // ========================================
+    // 투표 삭제
+    // ========================================
+    router.post('/:id/delete', requireLogin, async (req, res) => {
+            try {
+            const poll = await Poll.findById(req.params.id);
+            
+            if (!poll) {
+                return res.status(404).json({ success: false, message: '투표를 찾을 수 없습니다' });
+            }
+
+            // 본인 확인
+            if (!poll.createdBy || poll.createdBy.toString() !== req.session.userId.toString()) {
+                return res.status(403).json({ success: false, message: '삭제 권한이 없습니다' });
+            }
+
+            await Poll.findByIdAndDelete(req.params.id);
+            
+            console.log('✅ 투표 삭제 완료:', poll._id);
+            res.json({ success: true });
+        } catch (error) {
+            console.error('투표 삭제 오류:', error);
+            res.status(500).json({ success: false, message: '서버 오류' });
+        }
+    });
+module.exports = router;
 
