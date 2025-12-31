@@ -1,0 +1,312 @@
+<!-- 메인 콘텐츠만 -->
+<div class="create-poll-container">
+  <div class="create-poll-card">
+    <div class="card-header">
+      <h1 class="card-title">투표 수정하기</h1>
+      <p class="card-subtitle">투표 내용을 수정할 수 있습니다 (투표수는 유지됩니다)</p>
+    </div>
+
+    <form action="/polls/<%= poll._id %>/edit" method="POST" class="poll-form">
+      <!-- 제목 -->
+      <div class="form-group">
+        <label for="title" class="form-label">
+          <span class="label-icon">📝</span>
+          <span>제목</span>
+          <span class="required">*</span>
+        </label>
+        <input 
+          type="text" 
+          id="title" 
+          name="title" 
+          class="form-input" 
+          value="<%= poll.title %>"
+          placeholder="투표 제목을 입력하세요"
+          required
+          maxlength="200"
+        >
+      </div>
+
+      <!-- 설명 -->
+      <div class="form-group">
+        <label for="description" class="form-label">
+          <span class="label-icon">💬</span>
+          <span>설명</span>
+          <span class="optional">(선택)</span>
+        </label>
+        <textarea 
+          id="description" 
+          name="description" 
+          class="form-textarea"
+          placeholder="투표에 대한 설명을 입력하세요"
+          rows="3"
+          maxlength="1000"
+        ><%= poll.description || '' %></textarea>
+      </div>
+
+      <!-- 카테고리 -->
+      <div class="form-group">
+        <label for="category" class="form-label">
+          <span class="label-icon">📂</span>
+          <span>카테고리</span>
+        </label>
+        <select id="category" name="category" class="form-select">
+          <option value="일반" <%= poll.category === '일반' ? 'selected' : '' %>>일반</option>
+          <option value="정치" <%= poll.category === '정치' ? 'selected' : '' %>>정치</option>
+          <option value="경제" <%= poll.category === '경제' ? 'selected' : '' %>>경제</option>
+          <option value="사회" <%= poll.category === '사회' ? 'selected' : '' %>>사회</option>
+          <option value="문화" <%= poll.category === '문화' ? 'selected' : '' %>>문화</option>
+          <option value="스포츠" <%= poll.category === '스포츠' ? 'selected' : '' %>>스포츠</option>
+          <option value="연예" <%= poll.category === '연예' ? 'selected' : '' %>>연예</option>
+          <option value="기술" <%= poll.category === '기술' ? 'selected' : '' %>>기술</option>
+          <option value="게임" <%= poll.category === '게임' ? 'selected' : '' %>>게임</option>
+          <option value="음식" <%= poll.category === '음식' ? 'selected' : '' %>>음식</option>
+          <option value="기타" <%= poll.category === '기타' ? 'selected' : '' %>>기타</option>
+        </select>
+      </div>
+
+      <!-- 태그 -->
+      <div class="form-group">
+        <label for="tags" class="form-label">
+          <span class="label-icon">🏷️</span>
+          <span>태그</span>
+          <span class="optional">(최대 5개, 쉼표로 구분)</span>
+        </label>
+        <input 
+          type="text" 
+          id="tags" 
+          name="tags" 
+          class="form-input"
+          value="<%= poll.tags.join(', ') %>"
+          placeholder="예: 대선, 정치, 2024"
+        >
+      </div>
+
+      <!-- 선택지 -->
+      <div class="form-group">
+        <label class="form-label">
+          <span class="label-icon">☑️</span>
+          <span>선택지</span>
+          <span class="required">*</span>
+        </label>
+        <div id="options-container">
+          <% poll.options.forEach((option, index) => { %>
+            <div class="option-input-group">
+              <input 
+                type="text" 
+                name="options[]" 
+                class="form-input option-input"
+                value="<%= option.text %>"
+                placeholder="선택지 <%= index + 1 %>"
+                required
+              >
+              <span class="vote-count">
+                <span class="vote-badge"><%= option.votes %>표</span>
+              </span>
+            </div>
+          <% }); %>
+        </div>
+        <p class="form-help">💡 투표수는 수정되지 않고 그대로 유지됩니다</p>
+      </div>
+
+      <!-- 버튼 -->
+      <div class="form-actions">
+        <button type="submit" class="btn-submit">
+          <span>💾</span>
+          <span>수정 완료</span>
+        </button>
+        <a href="/polls/<%= poll._id %>" class="btn-cancel">
+          <span>↩️</span>
+          <span>취소</span>
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  .create-poll-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px 20px;
+  }
+  
+  .create-poll-card {
+    background: var(--card-bg);
+    border-radius: 30px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  
+  .card-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  
+  .card-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text-color);
+    margin-bottom: 10px;
+  }
+  
+  .card-subtitle {
+    color: var(--secondary-text);
+    font-size: 1.1rem;
+  }
+  
+  .poll-form {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .form-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--text-color);
+    font-size: 1.05rem;
+  }
+  
+  .label-icon {
+    font-size: 1.3rem;
+  }
+  
+  .required {
+    color: #ef4444;
+    font-size: 1.2rem;
+  }
+  
+  .optional {
+    color: var(--secondary-text);
+    font-size: 0.9rem;
+    font-weight: 400;
+  }
+  
+  .form-input,
+  .form-textarea,
+  .form-select {
+    padding: 15px 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    font-size: 1rem;
+    background: var(--card-bg);
+    color: var(--text-color);
+    transition: all 0.3s ease;
+  }
+  
+  .form-input:focus,
+  .form-textarea:focus,
+  .form-select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+  
+  .form-textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+  
+  .option-input-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 12px;
+  }
+  
+  .option-input {
+    flex: 1;
+  }
+  
+  .vote-count {
+    flex-shrink: 0;
+  }
+  
+  .vote-badge {
+    display: inline-block;
+    padding: 8px 15px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  
+  .form-help {
+    color: var(--secondary-text);
+    font-size: 0.9rem;
+    margin-top: 5px;
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+  }
+  
+  .btn-submit,
+  .btn-cancel {
+    flex: 1;
+    padding: 18px 30px;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-decoration: none;
+    border: none;
+  }
+  
+  .btn-submit {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+  
+  .btn-submit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+  }
+  
+  .btn-cancel {
+    background: transparent;
+    color: var(--text-color);
+    border: 2px solid var(--border-color);
+  }
+  
+  .btn-cancel:hover {
+    background: var(--border-color);
+    transform: translateY(-3px);
+    color: var(--text-color);
+  }
+  
+  @media (max-width: 768px) {
+    .create-poll-card {
+      padding: 30px 20px;
+    }
+    
+    .card-title {
+      font-size: 2rem;
+    }
+    
+    .form-actions {
+      flex-direction: column;
+    }
+    
+    .option-input-group {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>

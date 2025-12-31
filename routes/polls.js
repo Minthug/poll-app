@@ -477,7 +477,7 @@
                 return res.status(403).send('수정 권한이 없습니다');
             }
 
-            res.render('/polls/edit',  {
+            res.render('polls/edit',  {
                 poll,
                 showRanking: true
             });
