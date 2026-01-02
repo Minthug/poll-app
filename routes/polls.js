@@ -17,7 +17,7 @@
                 query.category = category;
             }
 
-            const polls = await Poll.find().sort({ createdAt: -1 });
+            const polls = await Poll.find(query).sort({ createdAt: -1 });
 
             const topPolls = await Poll.find()
                 .sort({ views: -1 })
