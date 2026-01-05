@@ -10,12 +10,40 @@
     // 모든 여론 조사 목록 - 비로그인 사용자도 목록 확인 가능
     router.get('/', async (req, res) => {
         try {
-            const { category } = req.query;
+            const { category, search, sort } = req.query;
             let query = {};
 
             if (category) {
                 query.category = category;
             }
+
+            if (search) {
+                query.$or = [
+                    { title: { $regex: search, $options: 'i' } },
+                    { description: { $regex: search, $options: 'i'}}
+                ];
+            }
+
+            // 정렬 옵션
+            let sortOption = {};
+            switch(sort) {
+                case 'popular':
+                    sortOption = { createdAt: -1 }; // 최신순으로 가져온 후 클라이언트에서 정렬
+                    break;
+                case 'participants':
+                    sortOption = { createdAt: -1 }; // 최신순으로 가져온 후 클라이언트에서 정렬
+                    break;
+                case 'oldest':
+                    sortOption = { createdAt: 1};
+                    break;
+                case 'views':
+                    sortOption = { views: -1, createdAt: -1};
+                    break;
+                case 'newest':
+                    default: sortOption = { createdAt: -1};
+            }
+
+            let polls = a
 
             const polls = await Poll.find(query).sort({ createdAt: -1 });
 
