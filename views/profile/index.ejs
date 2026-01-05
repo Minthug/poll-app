@@ -1,0 +1,498 @@
+<!-- 메인 콘텐츠만 -->
+<div class="profile-container">
+  <!-- 프로필 헤더 -->
+  <div class="profile-header">
+    <div class="profile-avatar">
+      <span class="avatar-icon">👤</span>
+    </div>
+    <div class="profile-info">
+      <h1 class="profile-username"><%= user.username %></h1>
+      <p class="profile-email"><%= user.email || '이메일 정보 없음' %></p>
+    </div>
+  </div>
+
+  <!-- 통계 카드 -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">📊</div>
+      <div class="stat-content">
+        <div class="stat-number"><%= stats.totalCreated %></div>
+        <div class="stat-label">생성한 투표</div>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">🗳️</div>
+      <div class="stat-content">
+        <div class="stat-number"><%= stats.totalVoted %></div>
+        <div class="stat-label">참여한 투표</div>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-content">
+        <div class="stat-number"><%= stats.totalVotesReceived %></div>
+        <div class="stat-label">받은 총 투표수</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 탭 네비게이션 -->
+  <div class="tabs-container">
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('created')">
+        <span>📝</span>
+        <span>내가 만든 투표 (<%= myPolls.length %>)</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('voted')">
+        <span>✅</span>
+        <span>참여한 투표 (<%= votedPolls.length %>)</span>
+      </button>
+    </div>
+
+    <!-- 내가 만든 투표 -->
+    <div id="created-tab" class="tab-content active">
+      <% if (myPolls.length > 0) { %>
+        <div class="polls-grid">
+          <% myPolls.forEach(poll => { %>
+            <div class="poll-card">
+              <div class="poll-card-header">
+                <div class="poll-badges">
+                  <% if (poll.category) { %>
+                    <span class="poll-badge badge-category"><%= poll.category %></span>
+                  <% } %>
+                  <% if (poll.tags && poll.tags.length > 0) { %>
+                    <% poll.tags.slice(0, 2).forEach(tag => { %>
+                      <span class="poll-badge badge-tag">#<%= tag %></span>
+                    <% }); %>
+                  <% } %>
+                </div>
+                <div class="poll-actions">
+                  <a href="/polls/<%= poll._id %>/edit" class="action-icon" title="수정">✏️</a>
+                </div>
+              </div>
+              
+              <h3 class="poll-card-title">
+                <a href="/polls/<%= poll._id %>"><%= poll.title %></a>
+              </h3>
+              
+              <% if (poll.description) { %>
+                <p class="poll-card-description"><%= poll.description %></p>
+              <% } %>
+              
+              <div class="poll-card-meta">
+                <div class="meta-item">
+                  <span>👥</span>
+                  <span><%= poll.totalVotes %>표</span>
+                </div>
+                <div class="meta-item">
+                  <span>👁️</span>
+                  <span><%= poll.views %>명</span>
+                </div>
+                <div class="meta-item">
+                  <span>📅</span>
+                  <span><%= new Date(poll.createdAt).toLocaleDateString('ko-KR') %></span>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <h3 class="empty-title">아직 만든 투표가 없습니다</h3>
+          <p class="empty-subtitle">첫 번째 투표를 만들어보세요!</p>
+          <a href="/polls/new" class="create-btn">
+            <span>➕</span>
+            <span>투표 만들기</span>
+          </a>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- 참여한 투표 -->
+    <div id="voted-tab" class="tab-content">
+      <% if (votedPolls.length > 0) { %>
+        <div class="polls-grid">
+          <% votedPolls.forEach(poll => { %>
+            <div class="poll-card">
+              <div class="poll-badges">
+                <% if (poll.category) { %>
+                  <span class="poll-badge badge-category"><%= poll.category %></span>
+                <% } %>
+                <% if (poll.tags && poll.tags.length > 0) { %>
+                  <% poll.tags.slice(0, 2).forEach(tag => { %>
+                    <span class="poll-badge badge-tag">#<%= tag %></span>
+                  <% }); %>
+                <% } %>
+              </div>
+              
+              <h3 class="poll-card-title">
+                <a href="/polls/<%= poll._id %>/result"><%= poll.title %></a>
+              </h3>
+              
+              <% if (poll.description) { %>
+                <p class="poll-card-description"><%= poll.description %></p>
+              <% } %>
+              
+              <div class="poll-card-meta">
+                <div class="meta-item">
+                  <span>👥</span>
+                  <span><%= poll.totalVotes %>표</span>
+                </div>
+                <div class="meta-item">
+                  <span>📅</span>
+                  <span><%= new Date(poll.createdAt).toLocaleDateString('ko-KR') %></span>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <div class="empty-state">
+          <div class="empty-icon">🗳️</div>
+          <h3 class="empty-title">아직 참여한 투표가 없습니다</h3>
+          <p class="empty-subtitle">다양한 투표에 참여해보세요!</p>
+          <a href="/polls" class="create-btn">
+            <span>📊</span>
+            <span>투표 목록 보기</span>
+          </a>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<style>
+  .profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .profile-header {
+    background: var(--card-bg);
+    border-radius: 30px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+  }
+  
+  .profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    flex-shrink: 0;
+  }
+  
+  .avatar-icon {
+    filter: brightness(0) invert(1);
+  }
+  
+  .profile-info {
+    flex: 1;
+  }
+  
+  .profile-username {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text-color);
+    margin-bottom: 8px;
+  }
+  
+  .profile-email {
+    font-size: 1.1rem;
+    color: var(--secondary-text);
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .stat-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s ease;
+  }
+  
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+  }
+  
+  .stat-icon {
+    font-size: 3rem;
+  }
+  
+  .stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .stat-label {
+    color: var(--secondary-text);
+    font-weight: 600;
+    margin-top: 5px;
+  }
+  
+  .tabs-container {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+  
+  .tabs-nav {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 0;
+  }
+  
+  .tab-btn {
+    padding: 15px 30px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--secondary-text);
+    font-weight: 600;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: -2px;
+  }
+  
+  .tab-btn:hover {
+    color: var(--text-color);
+  }
+  
+  .tab-btn.active {
+    color: #667eea;
+    border-bottom-color: #667eea;
+  }
+  
+  .tab-content {
+    display: none;
+  }
+  
+  .tab-content.active {
+    display: block;
+  }
+  
+  .polls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+  }
+  
+  .poll-card {
+    background: var(--border-color);
+    border-radius: 15px;
+    padding: 25px;
+    transition: all 0.3s ease;
+  }
+  
+  [data-theme="dark"] .poll-card {
+    background: #3a3a3a;
+  }
+  
+  .poll-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+  }
+  
+  .poll-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+  }
+  
+  .poll-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .poll-badge {
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  
+  .badge-category {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+  
+  .badge-tag {
+    background: var(--card-bg);
+    color: var(--text-color);
+  }
+  
+  .poll-actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .action-icon {
+    background: transparent;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+  
+  .action-icon:hover {
+    transform: scale(1.2);
+  }
+  
+  .poll-card-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  
+  .poll-card-title a {
+    color: var(--text-color);
+    text-decoration: none;
+  }
+  
+  .poll-card-title a:hover {
+    color: #667eea;
+  }
+  
+  .poll-card-description {
+    color: var(--secondary-text);
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .poll-card-meta {
+    display: flex;
+    gap: 15px;
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+  }
+  
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+  }
+  
+  .empty-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 10px;
+  }
+  
+  .empty-subtitle {
+    color: var(--secondary-text);
+    margin-bottom: 25px;
+  }
+  
+  .create-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+  }
+  
+  .create-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    color: white;
+  }
+  
+  @media (max-width: 768px) {
+    .profile-header {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .profile-username {
+      font-size: 2rem;
+    }
+    
+    .tabs-nav {
+      flex-direction: column;
+      gap: 0;
+    }
+    
+    .tab-btn {
+      justify-content: center;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .polls-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  function switchTab(tabName) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    
+    if (tabName === 'created') {
+      document.querySelector('.tab-btn:first-child').classList.add('active');
+      document.getElementById('created-tab').classList.add('active');
+    } else {
+      document.querySelector('.tab-btn:last-child').classList.add('active');
+      document.getElementById('voted-tab').classList.add('active');
+    }
+  }
+</script>

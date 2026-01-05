@@ -15,8 +15,8 @@ router.get('/', requireLogin, async (req, res) => {
             .lean();
 
         // 각 투표의 총 투표수 계산
-        myPolls.forEach(pol => {
-            poll.totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+        myPolls.forEach(p => {
+            p.totalVotes = p.options.reduce((sum, opt) => sum + opt.votes, 0);
         });
 
         // 내가 참여한 투표 조회 (IP 기반)
@@ -31,6 +31,7 @@ router.get('/', requireLogin, async (req, res) => {
         votedPolls.forEach(poll => {
             poll.totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
         });
+
 
         // 통계 계산
         const stats = {
