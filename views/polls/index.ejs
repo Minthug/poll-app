@@ -27,6 +27,52 @@
     </div>
   </div>
 
+   <!-- ⭐ 검색 및 정렬 영역 추가 ⭐ -->
+  <div class="search-sort-section">
+    <form method="GET" action="/polls" class="search-sort-form">
+      <!-- 카테고리 유지 -->
+      <% if (category) { %>
+        <input type="hidden" name="category" value="<%= category %>">
+      <% } %>
+      
+      <!-- 검색창 -->
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          name="search" 
+          class="search-input"
+          placeholder="제목이나 내용으로 검색..."
+          value="<%= search %>"
+        >
+        <% if (search) { %>
+          <a href="/polls<%= category ? '?category=' + category : '' %>" class="clear-btn">
+            ✖
+          </a>
+        <% } %>
+      </div>
+
+       <!-- 정렬 선택 -->
+      <select name="sort" class="sort-select" onchange="this.form.submit()">
+        <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>📅 최신순</option>
+        <option value="oldest" <%= sort === 'oldest' ? 'selected' : '' %>>📆 오래된순</option>
+        <option value="popular" <%= sort === 'popular' ? 'selected' : '' %>>🔥 인기순</option>
+        <option value="participants" <%= sort === 'participants' ? 'selected' : '' %>>👥 참여자순</option>
+        <option value="views" <%= sort === 'views' ? 'selected' : '' %>>👁️ 조회수순</option>
+      </select>
+      
+      <!-- 검색 버튼 -->
+      <button type="submit" class="search-btn">검색</button>
+    </form>
+    
+    <!-- 검색 결과 표시 -->
+    <% if (search) { %>
+      <div class="search-result-info">
+        "<strong><%= search %></strong>" 검색 결과: <strong><%= polls.length %></strong>개의 투표
+      </div>
+    <% } %>
+  </div>
+
   <!-- 여론조사 목록 -->
   <% if (polls && polls.length > 0) { %>
     <div class="polls-grid">
@@ -181,6 +227,117 @@
     color: white;
     border-color: transparent;
   }
+
+  /* ⭐ 검색/정렬 섹션 스타일 ⭐ */
+  .search-sort-section {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    margin-bottom: 30px;
+  }
+
+  .search-sort-form {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .search-box {
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    align-items: center;
+    background: var(--border-color);
+    border-radius: 50px;
+    padding: 12px 20px;
+    gap: 10px;
+  }
+
+  [data-theme="dark"] .search-box {
+    background: #2a2a2a;
+  }
+
+  .search-icon {
+    font-size: 1.2rem;
+  }
+
+  .search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-color);
+    font-size: 1rem;
+    outline: none;
+  }
+
+  .search-input::placeholder {
+    color: var(--secondary-text);
+  }
+
+  .clear-btn {
+    background: rgba(255, 0, 0, 0.1);
+    color: #ff4444;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.8rem;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .clear-btn:hover {
+    background: rgba(255, 0, 0, 0.2);
+  }
+
+  .sort-select {
+    padding: 12px 20px;
+    border: 2px solid var(--border-color);
+    background: transparent;
+    color: var(--text-color);
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s;
+  }
+
+  .sort-select:hover {
+    border-color: #667eea;
+  }
+
+  .search-btn {
+    padding: 12px 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  }
+
+  .search-result-info {
+    margin-top: 15px;
+    padding: 12px 20px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 15px;
+    color: var(--text-color);
+    font-size: 0.95rem;
+  }
   
   /* 여론조사 카드 그리드 */
   .polls-grid {
@@ -306,6 +463,20 @@
     
     .category-buttons {
       justify-content: center;
+    }
+
+
+    .search-sort-form {
+      flex-direction: column;
+    }
+
+    .search-box {
+      min-width: 100%;
+    }
+
+    .sort-select,
+    .search-btn {
+      width: 100%;
     }
   }
 </style>

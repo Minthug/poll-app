@@ -43,9 +43,20 @@
                     default: sortOption = { createdAt: -1};
             }
 
-            let polls = a
+            let polls = await Poll.find(query).sort(sortOption).lean();
 
-            const polls = await Poll.find(query).sort({ createdAt: -1 });
+            // 각 투표의 통계 계산
+            polls = polls.map(poll => {
+                const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+                const uniqueVoters = poll.votedIPs ? poll.votedIPs.length : 0;
+
+                return {
+                    ...poll,
+                    totalVotes,
+                    uniqueVoters
+                };
+            });
+
 
             const topPolls = await Poll.find()
                 .sort({ views: -1 })
@@ -61,8 +72,13 @@
             console.log('🔥 TOP 5 투표:', topPolls.length, '개');
 
 
-            res.render('polls/index', { polls: polls, category: category || null,
-                topPolls: topPolls,  showRanking: true 
+            res.render('polls/index', { 
+                polls: polls, 
+                category: category || null,
+                search: search || '',
+                sort: sort || 'newest',
+                topPolls: topPolls,
+                showRanking: true 
              });
         } catch (error) {
             console.error(error);
