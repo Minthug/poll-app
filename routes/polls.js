@@ -624,5 +624,40 @@
             res.status(500).json({ success: false, message: '서버 오류' });
         }
     });
+
+    /* 임베디드 전용 페이지(iframe) */
+    router.get('/:id/embed', async (req, res) => {
+        try {
+            const poll = await Poll.findById(req.params.id);
+
+            if (!poll) {
+                return res.status(404).send('여론조사를 찾을 수 없습니다');
+            }
+
+            // IP 체크
+            let clientIp = req.headers['x-forwarded-for'] 
+            ? req.headers['x-forwarded-for'].split(',')[0].trim()
+            : req.ip || req.socket.remoteAddress;
+
+            // 이미 투표했는지 확인
+            const hasVoted = poll.votedIPs && poll.votedIPs.includes(clientIp);
+
+            // 투표 종료 여부
+            const isEnded = poll.isEnded();
+
+            const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+
+            res.render('polls/embed', {
+                poll,
+                hasVoted,
+                isEnded,
+                totalVotes,
+                layout: false
+            });
+        } catch (error) {
+            console.error('임베드 페이지 오류:', error);
+            res.status(500).send('서버 오류');
+        }
+    });
 module.exports = router;
 
