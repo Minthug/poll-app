@@ -71,14 +71,21 @@
             console.log('📋 여론조사 목록 조회:', polls.length, '개');  // ⭐ 디버깅용
             console.log('🔥 TOP 5 투표:', topPolls.length, '개');
 
+            const baseUrl = `${req.protocol}://${req.get(host)}`;
 
             res.render('polls/index', { 
                 polls: polls, 
-                category: category || null,
-                search: search || '',
-                sort: sort || 'newest',
-                topPolls: topPolls,
-                showRanking: true 
+            category: category || null,
+            search: search || '',
+            sort: sort || 'newest',
+            topPolls: topPolls,  
+            showRanking: true,
+            pageTitle: '여론조사 - 실시간 투표 플랫폼',
+            pageDescription: `${polls.length}개의 여론조사가 진행 중입니다. 지금 바로 참여하세요!`,
+            ogTitle: '한국 여론조사',
+            ogDescription: `${polls.length}개의 여론조사가 진행 중입니다. 실시간으로 투표하고 결과를 확인하세요!`,
+            ogUrl: `${baseUrl}/polls`,
+            ogImage: null
              });
         } catch (error) {
             console.error(error);
@@ -174,8 +181,21 @@
                 return res.redirect(`/polls/${req.params.id}/result?ended=true`);
             }
 
+            const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+            const baseUrl = `${protocol}://${req.get(host)}`;
+
             // 투표 안 했으면 투표 페이지 표시
-            res.render('polls/show', { poll, isOwner ,showRanking: true  });
+            res.render('polls/show', { 
+                poll, 
+                isOwner, 
+                showRanking: true,
+                pageTitle: `${poll.title} - 여론조사`,
+                pageDescription: poll.description || `${poll,title}에 투표하세요. 현재 ${totalVotes}명이 참여했습니다.`,
+                ogTitle: poll.title,
+                ogDescription: poll.description || `${poll.title}에 투표하세요. 현재 ${totalVotes}명이 참여했습니다.`,
+                ogUrl: `${baseUrl}/polls/${poll._id}`,
+                ogImage: poll.image || null
+            });
         } catch (error) {
             console.error(error);
             res.status(500).send('서버 오류');
