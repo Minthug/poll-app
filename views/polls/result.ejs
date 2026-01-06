@@ -122,9 +122,7 @@
     <% }); %>
   </div>
 
-  <!-- ========================================
-       공유 및 내보내기 버튼 (새로 추가)
-       ======================================== -->
+  <!-- 공유 및 내보내기 -->
   <div class="stats-card">
     <h3 class="section-title">
       <span>📤</span>
@@ -132,8 +130,8 @@
     </h3>
     
     <div class="export-buttons">
-      <!-- 1. 공유 URL -->
-      <button class="export-btn btn-share" onclick="copyShareLink()">
+      <!-- 링크 복사 -->
+      <button class="export-btn" onclick="copyShareLink()">
         <span class="export-icon">🔗</span>
         <div>
           <div class="export-title">투표 공유하기</div>
@@ -141,8 +139,8 @@
         </div>
       </button>
       
-      <!-- 2. 이미지 저장 -->
-      <button class="export-btn btn-image" onclick="downloadAsImage()">
+      <!-- 이미지 저장 -->
+      <button class="export-btn" onclick="downloadAsImage()">
         <span class="export-icon">📸</span>
         <div>
           <div class="export-title">이미지로 저장</div>
@@ -151,21 +149,47 @@
       </button>
       
       <!-- QR코드 -->
-       <button class="export-btn btn-qr" onclick="showQRCode()">
+      <button class="export-btn" onclick="showQRCode()">
         <span class="export-icon">📱</span>
         <div>
           <div class="export-title">QR코드 생성</div>
           <div class="export-desc">오프라인 홍보용</div>
         </div>
-       </button>
+      </button>
 
-      <!-- 4. CSV 다운로드 -->
-      <a href="/polls/<%= poll._id %>/export-csv" class="export-btn btn-csv">
+      <!-- CSV 다운로드 -->
+      <a href="/polls/<%= poll._id %>/export-csv" class="export-btn">
         <span class="export-icon">📊</span>
         <div>
           <div class="export-title">데이터 다운로드</div>
           <div class="export-desc">CSV 파일</div>
         </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- 임베드 코드 -->
+  <div class="stats-card">
+    <h3 class="section-title">
+      <span>📋</span>
+      <span>임베드 코드</span>
+    </h3>
+    <p style="color: var(--secondary-text); font-size: 0.95rem; margin-bottom: 20px;">
+      이 투표를 블로그나 웹사이트에 삽입할 수 있습니다
+    </p>
+    
+    <!-- 코드 박스 -->
+    <div class="embed-code-container">
+      <pre id="embedCode"><code>&lt;iframe src="<%= req.protocol %>://<%= req.get('host') %>/polls/<%= poll._id %>/embed" width="100%" height="500" frameborder="0" style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"&gt;&lt;/iframe&gt;</code></pre>
+    </div>
+    
+    <!-- 버튼 -->
+    <div class="embed-buttons">
+      <button onclick="copyEmbedCode()" class="embed-action-btn">
+        📋 코드 복사
+      </button>
+      <a href="/polls/<%= poll._id %>/embed" target="_blank" class="embed-action-btn embed-preview-btn">
+        👁️ 미리보기
       </a>
     </div>
   </div>
@@ -185,15 +209,13 @@
   </div>
 </div>
 
-<!-- ========================================
-     QR코드 모달 (새로 추가)
-     ======================================== -->
+<!-- QR코드 모달 -->
 <div id="qrModal" class="qr-modal" style="display: none;">
   <div class="qr-modal-overlay" onclick="closeQRModal()"></div>
   <div class="qr-modal-content">
-    <button class="qr-close-btn" onclick="closeQRModal()">x</button>
+    <button class="qr-close-btn" onclick="closeQRModal()">✕</button>
     <h2 class="qr-modal-title">투표 QR코드</h2>
-    <p class="qr-modal-suntitle">스마트폰으로 스캔하여 투표하세요</p>
+    <p class="qr-modal-subtitle">스마트폰으로 스캔하여 투표하세요</p>
 
     <div class="qr-code-container">
       <div id="qrcode"></div>
@@ -500,9 +522,7 @@
     font-weight: 600;
   }
   
-  /* ========================================
-     공유 버튼 스타일
-     ======================================== */
+  /* 공유 버튼 */
   .export-buttons {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -550,9 +570,73 @@
     color: var(--secondary-text);
   }
   
-  /* ========================================
-     QR 모달 스타일
-     ======================================== */
+  /* 임베드 코드 */
+  .embed-code-container {
+    background: var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+  }
+  
+  [data-theme="dark"] .embed-code-container {
+    background: #3a3a3a;
+  }
+  
+  .embed-code-container pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+  
+  .embed-code-container code {
+    color: var(--text-color);
+  }
+  
+  .embed-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  
+  .embed-action-btn {
+    padding: 15px 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    text-align: center;
+    display: inline-block;
+  }
+  
+  .embed-action-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    color: white;
+  }
+  
+  .embed-preview-btn {
+    background: transparent;
+    color: var(--text-color);
+    border: 2px solid var(--border-color);
+  }
+  
+  .embed-preview-btn:hover {
+    background: var(--border-color);
+    border-color: #667eea;
+    color: var(--text-color);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+  }
+  
+  /* QR 모달 */
   .qr-modal {
     position: fixed;
     top: 0;
@@ -563,8 +647,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-  }  
-
+  }
+  
   .qr-modal-overlay {
     position: absolute;
     top: 0;
@@ -644,14 +728,14 @@
     margin-bottom: 20px;
   }
   
-  #qrCode {
+  #qrcode {
     display: flex;
     justify-content: center;
     align-items: center;
   }
   
-  #qrCanvas,
-  #qrcode img {
+  #qrcode img,
+  #qrcode canvas {
     display: block !important;
     margin: 0 auto;
   }
@@ -697,7 +781,7 @@
     box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
   }
   
-  /* 토스트 알림 */
+  /* 토스트 */
   .toast {
     position: fixed;
     bottom: 30px;
@@ -800,6 +884,10 @@
       grid-template-columns: 1fr 1fr;
     }
     
+    .embed-buttons {
+      grid-template-columns: 1fr;
+    }
+    
     .qr-modal-content {
       padding: 30px;
     }
@@ -819,14 +907,13 @@
   }
 </style>
 
-<!-- Socket.io, Chart.js, html2canvas, QRCode.js 라이브러리 -->
+<!-- 라이브러리 -->
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
-  // 차트 데이터
   const pollId = '<%= poll._id %>';
   const socket = io();
 
@@ -945,16 +1032,13 @@
     }
   });
 
-  // ========================================
-  // 1. 공유 링크 복사
-  // ========================================
+  // 링크 복사
   function copyShareLink() {
     const shareUrl = window.location.origin + '/polls/<%= poll._id %>';
     
     navigator.clipboard.writeText(shareUrl).then(() => {
       showToast('✅ 링크가 클립보드에 복사되었습니다!');
     }).catch(err => {
-      // 폴백: 구식 방법
       const textArea = document.createElement('textarea');
       textArea.value = shareUrl;
       document.body.appendChild(textArea);
@@ -965,79 +1049,92 @@
     });
   }
 
-  // ========================================
-  // 2. QR코드 관련 변수 및 함수 (새로 추가!)
-  // ========================================
+  // 임베드 코드 복사
+  function copyEmbedCode() {
+    const code = document.getElementById('embedCode').textContent;
+    
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).then(() => {
+        const button = event.target;
+        const originalText = button.innerHTML;
+        button.innerHTML = '✅ 복사 완료!';
+        button.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
+        
+        setTimeout(() => {
+          button.innerHTML = originalText;
+          button.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        }, 2000);
+        
+        showToast('✅ 임베드 코드가 복사되었습니다!');
+      }).catch(err => {
+        fallbackCopyEmbed(code);
+      });
+    } else {
+      fallbackCopyEmbed(code);
+    }
+  }
+
+  function fallbackCopyEmbed(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    
+    try {
+      document.execCommand('copy');
+      showToast('✅ 임베드 코드가 복사되었습니다!');
+    } catch (err) {
+      showToast('❌ 복사에 실패했습니다. 수동으로 복사해주세요.');
+    }
+    
+    document.body.removeChild(textarea);
+  }
+
+  // QR코드
   let currentQRCanvas = null;
-  let qrCodeInstance = null;
 
   function showQRCode() {
-  console.log('🔍 showQRCode 시작');
-  
-  const modal = document.getElementById('qrModal');
-  const qrContainer = document.getElementById('qrcode');
-  
-  console.log('modal:', modal);
-  console.log('qrContainer:', qrContainer);
-  
-  if (!modal) {
-    console.error('❌ qrModal을 찾을 수 없습니다');
-    alert('QR 모달을 찾을 수 없습니다. 페이지를 새로고침해주세요.');
-    return;
-  }
-  
-  if (!qrContainer) {
-    console.error('❌ qrcode 컨테이너를 찾을 수 없습니다');
-    alert('QR 컨테이너를 찾을 수 없습니다. 페이지를 새로고침해주세요.');
-    return;
-  }
-  
-  const pollUrl = window.location.origin + '/polls/<%= poll._id %>';
-  console.log('📍 URL:', pollUrl);
-  
-  // 기존 내용 초기화
-  qrContainer.innerHTML = '';
-  
-  try {
-    // QR코드 생성
-    new QRCode(qrContainer, {
-      text: pollUrl,
-      width: 300,
-      height: 300,
-      colorDark: '#000000',
-      colorLight: '#ffffff',
-    });
-    
-    console.log('✅ QR코드 생성 시작');
-    
-    // 약간의 딜레이 후 모달 표시
-    setTimeout(() => {
-      // Canvas 또는 Image 찾기
-      currentQRCanvas = qrContainer.querySelector('canvas') || qrContainer.querySelector('img');
-      
-      console.log('Canvas/Image:', currentQRCanvas);
-      
-      if (currentQRCanvas) {
-        modal.style.display = 'flex';
-        showToast('✅ QR코드가 생성되었습니다!');
-      } else {
-        console.error('❌ Canvas/Image를 찾을 수 없음');
-      }
-    }, 200);
-    
-  } catch (error) {
-    console.error('❌ QR코드 생성 오류:', error);
-    showToast('❌ QR코드 생성 중 오류가 발생했습니다: ' + error.message);
-  }
-}
-
-  // QR코드 모달 닫기
-  function closeQRModal() {
     const modal = document.getElementById('qrModal');
-    modal.style.display = 'none';
+    const qrContainer = document.getElementById('qrcode');
+    
+    if (!modal || !qrContainer) {
+      alert('QR 모달을 찾을 수 없습니다.');
+      return;
+    }
+    
+    const pollUrl = window.location.origin + '/polls/<%= poll._id %>';
+    qrContainer.innerHTML = '';
+    
+    try {
+      new QRCode(qrContainer, {
+        text: pollUrl,
+        width: 300,
+        height: 300,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+      });
+      
+      setTimeout(() => {
+        currentQRCanvas = qrContainer.querySelector('canvas') || qrContainer.querySelector('img');
+        
+        if (currentQRCanvas) {
+          modal.style.display = 'flex';
+          showToast('✅ QR코드가 생성되었습니다!');
+        }
+      }, 200);
+      
+    } catch (error) {
+      console.error('QR코드 생성 오류:', error);
+      showToast('❌ QR코드 생성 중 오류가 발생했습니다');
+    }
   }
 
-  // QR코드 다운로드
+  function closeQRModal() {
+    document.getElementById('qrModal').style.display = 'none';
+  }
+
   function downloadQRCode() {
     if (!currentQRCanvas) {
       showToast('❌ QR코드를 먼저 생성해주세요');
@@ -1047,16 +1144,14 @@
     currentQRCanvas.toBlob((blob) => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.download = 'poll-qr-<%= poll._id %>-' + Date.now() + '.png';
+      link.download = 'poll-qr-<%= poll._id %>.png';
       link.href = url;
       link.click();
       URL.revokeObjectURL(url);
-      
       showToast('✅ QR코드가 다운로드되었습니다!');
     });
   }
 
-  // QR코드 인쇄
   function printQRCode() {
     if (!currentQRCanvas) {
       showToast('❌ QR코드를 먼저 생성해주세요');
@@ -1075,7 +1170,7 @@
         <title>투표 QR코드 - ${pollTitle}</title>
         <style>
           body {
-            font-family: 'Pretendard', -apple-system, sans-serif;
+            font-family: sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -1084,85 +1179,20 @@
             margin: 0;
             padding: 40px;
           }
-          .print-container {
-            text-align: center;
-            max-width: 500px;
-          }
-          h1 {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            color: #333;
-          }
-          .qr-image {
-            margin: 30px 0;
-            padding: 20px;
-            background: white;
-            border: 2px solid #ddd;
-            border-radius: 15px;
-          }
-          img {
-            display: block;
-            margin: 0 auto;
-          }
-          .url {
-            font-size: 0.9rem;
-            color: #666;
-            margin-top: 20px;
-            word-break: break-all;
-          }
-          .instructions {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f5f5f5;
-            border-radius: 10px;
-            text-align: left;
-          }
-          .instructions h3 {
-            margin-top: 0;
-            color: #333;
-          }
-          .instructions ol {
-            padding-left: 20px;
-          }
-          .instructions li {
-            margin: 10px 0;
-            color: #555;
-          }
-          @media print {
-            body {
-              padding: 0;
-            }
-          }
+          h1 { font-size: 2rem; margin-bottom: 20px; }
+          .qr-image { margin: 30px 0; padding: 20px; background: white; border: 2px solid #ddd; border-radius: 15px; }
+          img { display: block; margin: 0 auto; }
+          .url { font-size: 0.9rem; color: #666; margin-top: 20px; word-break: break-all; }
         </style>
       </head>
       <body>
-        <div class="print-container">
-          <h1>${pollTitle}</h1>
-          <p>스마트폰으로 QR코드를 스캔하여 투표에 참여하세요</p>
-          
-          <div class="qr-image">
-            <img src="${qrImage}" width="300" height="300" />
-          </div>
-          
-          <div class="url">
-            ${pollUrl}
-          </div>
-          
-          <div class="instructions">
-            <h3>📱 참여 방법</h3>
-            <ol>
-              <li>스마트폰 카메라 앱을 실행하세요</li>
-              <li>위의 QR코드를 스캔하세요</li>
-              <li>링크를 클릭하여 투표 페이지로 이동하세요</li>
-              <li>원하는 항목에 투표하세요</li>
-            </ol>
-          </div>
-        </div>
+        <h1>${pollTitle}</h1>
+        <p>스마트폰으로 QR코드를 스캔하여 투표하세요</p>
+        <div class="qr-image"><img src="${qrImage}" width="300" height="300" /></div>
+        <div class="url">${pollUrl}</div>
         <script>
           window.onload = function() {
-            setTimeout(function() {
-              window.print();
-            }, 500);
+            setTimeout(function() { window.print(); }, 500);
           };
         <\/script>
       </body>
@@ -1173,40 +1203,30 @@
     showToast('🖨️ 인쇄 창이 열렸습니다!');
   }
 
-  // ESC 키로 모달 닫기
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeQRModal();
-    }
+    if (e.key === 'Escape') closeQRModal();
   });
 
-  // ========================================
-  // 3. 이미지로 저장
-  // ========================================
+  // 이미지 저장
   async function downloadAsImage() {
     showToast('📸 이미지 생성 중...');
     
     try {
       const resultContainer = document.querySelector('.result-container');
-      
-      // html2canvas로 캡처
       const canvas = await html2canvas(resultContainer, {
-        backgroundColor: getComputedStyle(document.documentElement)
-          .getPropertyValue('--bg-color'),
-        scale: 2, // 고해상도
+        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-color'),
+        scale: 2,
         logging: false,
         useCORS: true
       });
       
-      // 이미지로 변환
       canvas.toBlob((blob) => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.download = 'poll-result-<%= poll._id %>-' + Date.now() + '.png';
+        link.download = 'poll-result-<%= poll._id %>.png';
         link.href = url;
         link.click();
         URL.revokeObjectURL(url);
-        
         showToast('✅ 이미지가 다운로드되었습니다!');
       });
       
@@ -1216,17 +1236,11 @@
     }
   }
 
-  // ========================================
-  // 토스트 알림 표시
-  // ========================================
+  // 토스트
   function showToast(message) {
-    // 기존 토스트 제거
     const existingToast = document.querySelector('.toast');
-    if (existingToast) {
-      existingToast.remove();
-    }
+    if (existingToast) existingToast.remove();
     
-    // 새 토스트 생성
     const toast = document.createElement('div');
     toast.className = 'toast';
     toast.innerHTML = `
@@ -1236,22 +1250,15 @@
     
     document.body.appendChild(toast);
     
-    // 3초 후 제거
     setTimeout(() => {
       toast.classList.add('fade-out');
-      setTimeout(() => {
-        toast.remove();
-      }, 300);
+      setTimeout(() => toast.remove(), 300);
     }, 3000);
   }
 
-  // ========================================
-  // Socket.io 실시간 업데이트
-  // ========================================
+  // 실시간 업데이트
   socket.on('vote-update', (data) => {
     if (data.pollId === pollId) {
-      console.log('투표 업데이트 수신:', data);
-      
       pollChart.data.datasets[0].data = data.poll.options.map(opt => opt.votes);
       pollChart.update('active');
 
