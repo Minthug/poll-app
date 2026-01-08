@@ -11,7 +11,7 @@ router.get('/google', passport.authenticate('google', {
     })
 );
 
-router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/auth/login' }),
+router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/login' }),
 (req, res) => {
     // 성공 시 세션에 사용자 정보 저장
     req.session.userId = req.user._id;
