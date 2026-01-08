@@ -6,7 +6,7 @@ const router = express.Router();
 // ========================================
 // Google OAuth 라우트
 // ========================================
-router.get('/google', (req, res, next) => {
+router.get('/oauth/google', (req, res, next) => {
     console.log('🔵 Google OAuth 시작');
     console.log('GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? '설정됨' : '❌ 없음');
     console.log('GOOGLE_CALLBACK_URL:', process.env.GOOGLE_CALLBACK_URL);
@@ -17,7 +17,7 @@ router.get('/google', (req, res, next) => {
     })
 );
 
-router.get('/google/callback', (req, res, next) => {
+router.get('/oauth/google/callback', (req, res, next) => {
     console.log('🔵 Google 콜백 도착');
     console.log('Query:', req.query);
     next();
