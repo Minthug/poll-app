@@ -1,12 +1,12 @@
 const express = require('express');
-const passport = require('../config/passport');
+const passport = require('passport');
 const router = express.Router();
 
 
 // ========================================
 // Google OAuth 라우트
 // ========================================
-router.get('/oauth/google', (req, res, next) => {
+router.get('/google', (req, res, next) => {
     console.log('🔵 Google OAuth 시작');
     console.log('GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? '설정됨' : '❌ 없음');
     console.log('GOOGLE_CALLBACK_URL:', process.env.GOOGLE_CALLBACK_URL);
@@ -17,7 +17,7 @@ router.get('/oauth/google', (req, res, next) => {
     })
 );
 
-router.get('/oauth/google/callback', (req, res, next) => {
+router.get('/google/callback', (req, res, next) => {
     console.log('🔵 Google 콜백 도착');
     console.log('Query:', req.query);
     next();
@@ -27,15 +27,26 @@ router.get('/oauth/google/callback', (req, res, next) => {
     console.log('✅ Google 인증 성공');
     console.log('User:', req.user);
     
+    // 세션에 저장
     req.session.userId = req.user._id;
     req.session.username = req.user.username;
     req.session.lastActivity = Date.now();
 
-    if (req.user.isFirstLogin) {
-        return res.redirect('/auth/oauth-terms');
-    }
-
-    res.redirect('/');
+    // ✅ 세션 저장 후 리디렉션
+    req.session.save((err) => {
+        if (err) {
+            console.error('❌ 세션 저장 실패:', err);
+            return res.redirect('/login');
+        }
+        
+        console.log('💾 세션 저장 완료, 리디렉션');
+        
+        if (req.user.isFirstLogin) {
+            return res.redirect('/auth/oauth-terms');
+        }
+        
+        res.redirect('/');
+    });
 });
 
 
