@@ -149,4 +149,8 @@ if (process.env.NAVER_CLIENT_ID && process.env.NAVER_CLIENT_SECRET) {
     console.warn('⚠️ Naver OAuth 환경변수 누락');
 }
 
+
+console.log('🔧 Passport 설정 완료');
+console.log('등록된 Strategies:', passport._strategies ? Object.keys(passport._strategies) : 'none');
+
 module.exports = passport;
