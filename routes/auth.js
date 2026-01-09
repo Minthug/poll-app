@@ -1,7 +1,43 @@
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 const User = require('../models/User');
 const { body, validationResult } = require('express-validator');
+
+
+// ========================================
+// 이메일 발송 설정
+// ========================================
+const transporter = nodemailer.createTransport({
+    service: 'naver',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
+    }
+});
+async function sendVerificationEmail(email, token) {
+    const verificationUrl = `${process.env.BASE_URL}/auth/verify-email/${token}`;
+
+    await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: '[여론조사 사이트] 이메일 인증',
+        html:`
+            <h2>이메일 인증</h2>
+            <p>가입해 주셔서 감사합니다!</p>
+            <p>아래 버튼을 클릭하여 이메일 인증을 완료해주세요:</p>
+            <a href="${verificationUrl}" 
+               style="display:inline-block; padding:12px 24px; background:#007bff; 
+                      color:white; text-decoration:none; border-radius:5px; margin:20px 0;">
+                이메일 인증하기
+            </a>
+            <p>또는 아래 링크를 복사하여 브라우저에 붙여넣으세요:</p>
+            <p style="color:#666; word-break:break-all;">${verificationUrl}</p>
+            <p style="color:#999; font-size:12px;">링크는 24시간 동안 유효합니다.</p>
+        `
+    });
+}
 
 // ========================================
 // 회원가입 페이지
