@@ -42,6 +42,15 @@ async (req, res) => {
     try {
         const { username, email, password } = req.body;
 
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+        if (!passwordRegex.test(password)) {
+            return res.render('register', {
+                title: '회원가입',
+                error: '비밀번호는 8자 이상, 영문+숫자+특수문자 조합이어야 합니다',
+                csrfToken: req.csrfToken();
+            })
+        }
+
         const existingUser = await User.findOne({
             $or: [{ email }, { username }]
         });
@@ -231,4 +240,5 @@ router.post('/oauth-terms', async (req, res) => {
         res.redirect('/');
     }
 });
+
 module.exports = router;
