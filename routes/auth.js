@@ -49,7 +49,7 @@ router.get('/register', (req, res) => {
         error: null,
         message: message,
         timeout: req.query.timeout === true, 
-        csrtToken: req.csrfToken(), 
+        csrfToken: req.csrfToken(), 
         showRanking: false });
 });
 
@@ -57,78 +57,90 @@ router.get('/register', (req, res) => {
 // 회원가입 처리
 // ========================================
 router.post('/register', [
-    body('username').trim().isLength({ min: 2, max: 20}).withMessage('닉네임은 2-20자여야 합니다')
-    .matches(/^[a-zA-Z0-9가-힣]+$/).withMessage('닉네임은 한글, 영문, 숫자만 가능합니다'),
-    body('email').isEmail().withMessage('올바른 이메일 형식이 아닙니다').normalizeEmail(),
-    body('passwordConfirm').custom((value, { req }) => {
-        if (value !== req.body.password) {
-        throw new Error('비밀번호가 일치하지 않습니다');
-        }
-        return true;
-    })
-],
-async (req, res) => {
+    body('username')
+        .trim()
+        .isLength({ min: 2, max: 20}).withMessage('닉네임은 2-20자여야 합니다')
+        .matches(/^[a-zA-Z0-9가-힣]+$/).withMessage('닉네임은 한글, 영문, 숫자만 가능합니다'),
+    body('email')
+        .isEmail().withMessage('올바른 이메일 형식이 아닙니다')
+        .normalizeEmail(),
+    body('passwordConfirm')
+        .custom((value, { req }) => {
+            if (value !== req.body.password) {
+            throw new Error('비밀번호가 일치하지 않습니다');
+            }
+            return true;
+        })
+], async (req, res) => {
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
         return res.render('auth/register', {
             error: errors.array()[0].msg,
-            csrfToken: req.csrtToken()
+            message: null,
+            csrfToken: req.csrfToken(),
+            showRanking: false
         });
     }
+
     try {
         const { username, email, password } = req.body;
 
-        // 비밀번호 강도 검증
-        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
-        if (!passwordRegex.test(password)) {
-            return res.render('register', {
-                title: '회원가입',
-                error: '비밀번호는 8자 이상, 영문+숫자+특수문자 조합이어야 합니다',
-                csrfToken: req.csrfToken();
-            });
-        }
-
-        // 이메일 중복 확인
         const existingUser = await User.findOne({
             $or: [{ email }, { username }]
         });
 
         if (existingUser) {
-            if (existingUser.email === email) {
-                return res.render('auth/register', {
-                    error: '이미 사용 중인 이메일입니다',
-                    csrfToken: req.csrfToken()
-                });
-            }
-            if (existingUser.username === username) {
-                return res.render('auth/register', {
-                    error: '이미 사용 중인 사용자명입니다',
-                    csrfToken: req.csrfToken()
-                });
-            }
-        }
+            const errorMsg = existingUser.email === email
+            ? '이미 사용 중인 이메일 입니다'
+            : '이미 사용 중인 닉네임 입니다'
         
+            return res.render('auth/register', {
+                error: errorMsg,
+                message: null,
+                csrfToken: req.csrfToken(),
+                showRanking: false
+            });
+        }
+
+        // 이메일 인증 토큰 생성
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+
+        // 사용자 생성
         const user = await User.create({
             username,
             email,
-            password
+            password,
+            emailVerified: false,
+            emailVerificationToken: verificationToken,
+            emailVerificationExpires: Date.now() + 24 * 60 * 60 * 1000,
+            verificationLevel: 'email'
         });
 
         console.log('✅ 회원가입 완료:', user.username);
 
-        // 자동 로그인 (? 쿠키 세션? ) => 세션
-        req.session.userId = user._id;
-        req.session.username = user.username;
-        res.redirect('/polls');
-    } catch(error) {
-        console.error('회원가입 오류:', error);
-        res.render('auth/register', {
-            error: '회원가입 중 오류가 발생했습니다',
-            csrfToken: req.csrfToken()
+        // 인증 이메일 발송
+        await sendVerificationEmail(email, verificationToken);
+        console.log('📧 인증 이메일 발송:', email);
+
+        // 인증 안내 페이지
+        res.render('auth/email-verification-sent', {
+            title: '이메일 인증',
+            email,
+            csrfToken: req.csrfToken(),
+            showRanking: false
         });
+    } catch (error) {
+        console.error('❌ 회원가입 오류:', error)
+            res.render('auth/register', {
+                error: '회원가입 중 오류가 발생했습니다',
+                message: null,
+                csrfToken: req.csrfToken(),
+                showRanking: false
+            });
+        }
     }
-}
-);
+});
 
 // ========================================
 // 로그인 페이지
@@ -211,8 +223,7 @@ async (req, res) => {
             showRanking: false
         });
     }
-}
-);
+});
 
 // ========================================
 // 로그아웃
