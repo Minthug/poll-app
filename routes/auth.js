@@ -59,21 +59,25 @@ router.get('/register', (req, res) => {
 router.post('/register', [
     body('username')
         .trim()
-        .isLength({ min: 2, max: 20}).withMessage('닉네임은 2-20자여야 합니다')
+        .isLength({ min: 2, max: 20 }).withMessage('닉네임은 2-20자여야 합니다')
         .matches(/^[a-zA-Z0-9가-힣]+$/).withMessage('닉네임은 한글, 영문, 숫자만 가능합니다'),
     body('email')
         .isEmail().withMessage('올바른 이메일 형식이 아닙니다')
         .normalizeEmail(),
+    body('password')
+        .isLength({ min: 8 }).withMessage('비밀번호는 최소 8자 이상이어야 합니다')
+        .matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/)
+        .withMessage('비밀번호는 영문+숫자+특수문자 조합이어야 합니다'),
     body('passwordConfirm')
         .custom((value, { req }) => {
             if (value !== req.body.password) {
-            throw new Error('비밀번호가 일치하지 않습니다');
+                throw new Error('비밀번호가 일치하지 않습니다');
             }
             return true;
         })
 ], async (req, res) => {
     const errors = validationResult(req);
-
+    
     if (!errors.isEmpty()) {
         return res.render('auth/register', {
             error: errors.array()[0].msg,
@@ -86,15 +90,16 @@ router.post('/register', [
     try {
         const { username, email, password } = req.body;
 
+        // 중복 확인
         const existingUser = await User.findOne({
             $or: [{ email }, { username }]
         });
 
         if (existingUser) {
-            const errorMsg = existingUser.email === email
-            ? '이미 사용 중인 이메일 입니다'
-            : '이미 사용 중인 닉네임 입니다'
-        
+            const errorMsg = existingUser.email === email 
+                ? '이미 사용 중인 이메일입니다' 
+                : '이미 사용 중인 닉네임입니다';
+            
             return res.render('auth/register', {
                 error: errorMsg,
                 message: null,
@@ -105,7 +110,7 @@ router.post('/register', [
 
         // 이메일 인증 토큰 생성
         const verificationToken = crypto.randomBytes(32).toString('hex');
-
+        
         // 사용자 생성
         const user = await User.create({
             username,
@@ -121,6 +126,7 @@ router.post('/register', [
 
         // 인증 이메일 발송
         await sendVerificationEmail(email, verificationToken);
+        
         console.log('📧 인증 이메일 발송:', email);
 
         // 인증 안내 페이지
@@ -130,15 +136,65 @@ router.post('/register', [
             csrfToken: req.csrfToken(),
             showRanking: false
         });
+
     } catch (error) {
-        console.error('❌ 회원가입 오류:', error)
-            res.render('auth/register', {
-                error: '회원가입 중 오류가 발생했습니다',
-                message: null,
+        console.error('❌ 회원가입 오류:', error);
+        res.render('auth/register', {
+            error: '회원가입 중 오류가 발생했습니다',
+            message: null,
+            csrfToken: req.csrfToken(),
+            showRanking: false
+        });
+    }
+});
+
+// ========================================
+// 이메일 인증 처리
+// ========================================
+router.get('/verify-email/:token', async (req, res) => {
+    try {
+        const user = await User.findOne({
+            emailVerificationToken: req.params.token,
+            emailVerificationExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.render('auth/email-verification-result', {
+                title: '인증 실패',
+                success: false,
+                message: '유효하지 않거나 만료된 인증 링크 입니다',
                 csrfToken: req.csrfToken(),
                 showRanking: false
             });
         }
+
+        // 이메일 인증 완료
+        user.emailVerified = true;
+        user.verificationLevel = 'email_verified';
+        user.emailVerificationToken = undefined;
+        user.emailVerificationExpires = undefined;
+        await user.save();
+
+        console.log('✅ 이메일 인증 완료:', user.username);
+
+        res.render('auth/email-verification-result', {
+            title: '이메일 인증 완료',
+            success: true,
+            message: '이메일 인증이 완료되었습니다. 이제 로그인 할 수 있습니다',
+            username: user.username,
+            csrfToken: req.csrfToken(),
+            showRanking: false
+        });
+    } catch (error) {
+
+        console.error('❌ 이메일 인증 오류:', error);
+        res.render('auth/email-verification-result', {
+            title: '인증 실패',
+            success: false,
+            message: '이메일 인증 중 오류가 발생했습니다',
+            csrfToken: req.csrfToken(),
+            showRanking: false
+        });
     }
 });
 
