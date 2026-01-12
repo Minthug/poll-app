@@ -300,7 +300,8 @@ router.get('/oauth-terms', (req, res) => {
     res.render('oauth-terms', {
         title: '서비스 약관 동의',
         error: null,
-        csrfToken: ''
+        csrfToken: '',
+        showRanking: false
     });
 });
 
