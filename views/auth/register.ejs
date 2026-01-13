@@ -338,8 +338,11 @@
           id="passwordConfirm" 
           name="passwordConfirm"
           placeholder="비밀번호를 다시 입력하세요"
+          onkeyup="checkPasswordStrength()"
           required
         >
+        <!-- 비밀번호 일치 표시-->
+         <div id="password-match" class="password-match"></div>
       </div>
       
       <button type="submit" class="btn-submit">
@@ -352,3 +355,76 @@
     </div>
   </div>
 </div>
+<script>
+<!-- 비밀번호 강도 체크 스크립트-->
+function checkPasswordStrength() {
+  const password = document.getElementById('password').value;
+  const strengthDiv = document.getElementById('password-strength');
+
+  const hasLetter = /[A-Za-z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const hasSpecial = /[@$!%*#?&]/.test(password);
+  const isLongEnough = password.length >= 8;
+
+  if (password.length === 0) {
+    strengthDiv.innerHTML = '';
+    updateRequirements(false, false, false, false);
+    return;
+  }
+
+  let strength = 0;
+  if (hasLetter) strength++;
+  if (hasNumber) strength++;
+  if (hasSpecial) strength++;
+  if (isLongEnough) strength++;
+
+  let message = '';
+  let color = '';
+
+  if (strength <= 2) {
+    message = '약함';
+    color = '#dc3545';
+  } else if (strength === 3) {
+    message = '보통';
+    color = '#ffc107';
+  } else {
+    message = '강함';
+    color = '#28a745';
+  }
+
+  strengthDiv.innerHTML = `<span style="color: ${color};">비밀번호 강도: ${message}</span>`;
+  updateRequirements(isLongEnough, hasLetter, hasNumber, hasSpecial);
+}
+
+function updateRequirements(length, letter, number, special) {
+    document.getElementById('req-length').style.color = length ? '#28a745' : '#dc3545';
+    document.getElementById('req-length').textContent = length ? '✓' : '✗';
+    
+    document.getElementById('req-letter').style.color = letter ? '#28a745' : '#dc3545';
+    document.getElementById('req-letter').textContent = letter ? '✓' : '✗';
+    
+    document.getElementById('req-number').style.color = number ? '#28a745' : '#dc3545';
+    document.getElementById('req-number').textContent = number ? '✓' : '✗';
+    
+    document.getElementById('req-special').style.color = special ? '#28a745' : '#dc3545';
+    document.getElementById('req-special').textContent = special ? '✓' : '✗';
+}
+
+function checkPasswordMatch() {
+  const password = document.getElementById('password').value;
+  const passwordConfirm = document.getElementById('passwordConfirm').value;
+  const matchDiv = document.getElementById('password-match');
+
+  if (passwordConfirm.length === 0) {
+    matchDiv.innerHTML = '';
+    return;
+  }
+
+  if (password === passwordConfirm) {
+    matchDiv.innerHTML = '<span style="color: #28a745;">✓ 비밀번호가 일치합니다</span>';
+  } else {
+    matchDiv.innerHTML = '<span style="color: #dc3545;">✗ 비밀번호가 일치하지 않습니다</span>';
+  }
+}
+</script>
+ 
