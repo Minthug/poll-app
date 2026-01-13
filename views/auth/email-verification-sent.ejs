@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .email-sent-container {
+            max-width: 600px;
+            margin: 100px auto;
+            text-align: center;
+        }
+        .email-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-sent-container">
+        <div class="email-icon">📧</div>
+        <h2 class="mb-3">이메일 인증</h2>
+        <p class="lead">회원가입이 완료되었습니다!</p>
+        <p class="text-muted">
+            <strong><%= email %></strong>로<br>
+            인증 메일을 발송했습니다.
+        </p>
+        
+        <div class="alert alert-info mt-4">
+            <h5>📌 다음 단계</h5>
+            <ol class="text-start" style="max-width: 400px; margin: 0 auto;">
+                <li>이메일 받은편지함 확인</li>
+                <li>인증 링크 클릭</li>
+                <li>자동 로그인 후 서비스 이용</li>
+            </ol>
+        </div>
+
+        <div class="mt-4">
+            <small class="text-muted">
+                * 이메일이 오지 않았다면 스팸함을 확인해주세요<br>
+                * 인증 링크는 24시간 동안 유효합니다
+            </small>
+        </div>
+
+        <div class="mt-4">
+            <a href="/" class="btn btn-outline-secondary">홈으로</a>
+        </div>
+    </div>
+</body>
+</html>
+```
+
+---
+
+## 🔄 전체 흐름
+```
+1. 회원가입
+   ↓
+2. 인증 메일 발송 안내 페이지
+   email-verification-sent.ejs
+   ↓
+3. 사용자가 이메일 링크 클릭
+   ↓
+4. 서버에서 인증 처리 + 세션 생성 ✅
+   ↓
+5. 인증 완료 페이지 (3초 자동 이동)
+   email-verification-result.ejs
+   ↓
+6. /polls로 자동 리디렉션 (로그인 상태)
