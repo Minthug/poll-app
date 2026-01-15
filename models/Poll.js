@@ -10,6 +10,16 @@ const optionSchema = new mongoose.Schema({
     votes: {
         type: Number,
         default: 0
+    },
+
+    memberVotes: {
+        type: Number,
+        default: 0
+    },
+
+    anonymousVotes: {
+        type: Number,
+        default: 0
     }
 });
 
@@ -54,13 +64,18 @@ const pollSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    
+
     endDate: {
         type: Date,
         default: null
     },
     votedIPs: {
         type: [String],
+        default: []
+    },
+    votedUsers: {
+        type:[mongoose.Schema.Types.ObjectId],
+        ref: 'User',
         default: []
     },
     location: {
