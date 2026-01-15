@@ -96,6 +96,33 @@
     </div>
   </div>
 
+  <% poll.options.forEach((option, index) => { %>
+    <div class="poll-option">
+      <div class="option-header">
+        <h4><%= option.text %></h4>
+        <span class="total-votes"><%= option.votes %>표 (<%= ((option.votes / total-votes) * 100).toFixed(1) %>%</span>
+      </div>
+
+      <!-- 진행 바-->
+       <div class="process" style="height: 30px;">
+        <div class="process-bar" style="width: <%= (option.votes / totalVotes) * 100 %>%;"></div>
+       </div>
+
+       <!-- 회원/익명 비율 표시-->
+        <div class="vote-breakdown">
+          <span class="member-votes">
+             👤 회원: <%= option.memberVotes || 0 %>표 
+                (<%= option.votes > 0 ? ((option.memberVotes || 0) / option.votes * 100).toFixed(1) : 0 %>%)
+          </span>
+          <span class="annonymous-votes">
+            🔓 익명: <%= option.anonymousVotes || 0 %>표 
+                (<%= option.votes > 0 ? ((option.anonymousVotes || 0) / option.votes * 100).toFixed(1) : 0 %>%)
+              </span>
+        </div>
+    </div>
+  <% }); %>
+
+
   <!-- 상세 결과 -->
   <div class="details-card">
     <h3 class="section-title">
@@ -869,6 +896,23 @@
     transform: translateY(-3px);
     color: var(--text-color);
   }
+
+  .vote-breakdown {
+    display: flex;
+    gap: 20px;
+    margin-top: 8px;
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+}
+
+.member-votes {
+    color: #667eea;
+    font-weight: 600;
+}
+
+.anonymous-votes {
+    color: #999;
+}
   
   /* 반응형 */
   @media (max-width: 768px) {
