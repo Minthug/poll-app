@@ -335,7 +335,18 @@ router.post('/:id/vote', async (req, res) => {
             return res.status(404).json({ success: false, error: '옵션을 찾을 수 없습니다'});
         }
 
+        // 회원 여부 확인
+        const isMember = req.session && req.session.userId;
+
+        // 투표수 증가
         option.votes += 1;
+
+        // 회원/익명 구분 카운트
+        if (isMember) {
+            option.memberVotes = (option.memberVotes || 0) + 1;
+        } else {
+            option.anonymousVotes = (option.anonymousVotes || 0) + 1;
+        }
 
         if (!poll.votedIPs) poll.votedIPs = [];
         poll.votedIPs.push(clientIp);
@@ -368,6 +379,8 @@ router.post('/:id/vote', async (req, res) => {
             success: true,
             poll: poll,
             votes: option.votes,
+            memberVotes: option.memberVotes,
+            anonymousVotes: option.anonymousVotes,
             totalVotes: poll.options.reduce((sum, opt) => sum + opt.votes, 0)
         });
     } catch(error) {
