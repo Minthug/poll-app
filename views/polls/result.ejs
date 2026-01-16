@@ -99,27 +99,42 @@
   <% poll.options.forEach((option, index) => { %>
     <div class="poll-option">
       <div class="option-header">
+        <div class="option-title-section">
+          <span class="option-number">#<%= index + 1%></span>
         <h4><%= option.text %></h4>
-        <span class="total-votes"><%= option.votes %>표 (<%= totalVotes > 0 ? ((option.votes / totalVotes) * 100).toFixed(1) : 0 %>%)</span>
+        <span class="option-total-votes"><%= option.votes %>표 (<%= totalVotes > 0 ? ((option.votes / totalVotes) * 100).toFixed(1) : 0 %>%)</span>
       </div>
 
       <!-- 진행 바-->
-       <div class="process" style="height: 30px;">
-        <div class="process-bar" style="width: <%= (option.votes / totalVotes) * 100 %>%;"></div>
+       <div class="process" style="height: 30px; margin: 15px 0;">
+        <div class="process-bar" style="width: <%= totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0 %>%;"></div>
        </div>
 
-       <!-- 회원/익명 비율 표시-->
-        <div class="vote-breakdown">
-          <span class="member-votes">
-             👤 회원: <%= option.memberVotes || 0 %>표 
-                (<%= option.votes > 0 ? ((option.memberVotes || 0) / option.votes * 100).toFixed(1) : 0 %>%)
-          </span>
-          <span class="annonymous-votes">
-            🔓 익명: <%= option.anonymousVotes || 0 %>표 
-                (<%= option.votes > 0 ? ((option.anonymousVotes || 0) / option.votes * 100).toFixed(1) : 0 %>%)
-              </span>
+       <!-- 회원/익명 비율 표시 (개선) -->
+    <div class="vote-breakdown">
+      <div class="vote-type-card member-card">
+        <div class="vote-type-icon">👤</div>
+        <div class="vote-type-info">
+          <div class="vote-type-label">회원 투표</div>
+          <div class="vote-type-count">
+            <span class="vote-number"><%= option.memberVotes || 0 %></span>표
+            <span class="vote-percentage">(<%= option.votes > 0 ? ((option.memberVotes || 0) / option.votes * 100).toFixed(1) : 0 %>%)</span>
+          </div>
         </div>
+      </div>
+      
+      <div class="vote-type-card anonymous-card">
+        <div class="vote-type-icon">🔓</div>
+        <div class="vote-type-info">
+          <div class="vote-type-label">익명 투표</div>
+          <div class="vote-type-count">
+            <span class="vote-number"><%= option.anonymousVotes || 0 %></span>표
+            <span class="vote-percentage">(<%= option.votes > 0 ? ((option.anonymousVotes || 0) / option.votes * 100).toFixed(1) : 0 %>%)</span>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
   <% }); %>
 
 

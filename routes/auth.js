@@ -74,7 +74,8 @@ router.get('/register', (req, res) => {
         message: message,
         timeout: req.query.timeout === true, 
         csrfToken: req.csrfToken(), 
-        showRanking: false });
+        showRanking: false
+    });
 });
 
 // ========================================
@@ -132,34 +133,29 @@ router.post('/register', [
             });
         }
 
-        // 이메일 인증 토큰 생성
-        const verificationToken = crypto.randomBytes(32).toString('hex');
-        
-        // 사용자 생성
+        // ⭐ 임시: 이메일 인증 없이 바로 인증된 사용자로 생성
         const user = await User.create({
             username,
             email,
             password,
-            emailVerified: false,
-            emailVerificationToken: verificationToken,
-            emailVerificationExpires: Date.now() + 24 * 60 * 60 * 1000,
+            emailVerified: true,  // ← false에서 true로 변경
             verificationLevel: 'email'
+            // emailVerificationToken, emailVerificationExpires 제거
         });
 
-        console.log('✅ 회원가입 완료:', user.username);
+        console.log('✅ 회원가입 완료 (자동 인증):', user.username);
 
-        // 인증 이메일 발송
-        await sendVerificationEmail(email, verificationToken);
-        
-        console.log('📧 인증 이메일 발송:', email);
+        // ⭐ 이메일 발송 시도 (실패해도 가입은 완료)
+        try {
+            const verificationToken = crypto.randomBytes(32).toString('hex');
+            await sendVerificationEmail(email, verificationToken);
+            console.log('📧 인증 이메일 발송 성공');
+        } catch (emailError) {
+            console.error('⚠️ 이메일 발송 실패 (무시):', emailError.message);
+        }
 
-        // 인증 안내 페이지
-        res.render('auth/email-verification-sent', {
-            title: '이메일 인증',
-            email,
-            csrfToken: req.csrfToken(),
-            showRanking: false
-        });
+        // ⭐ 바로 로그인 페이지로 리디렉트
+        res.redirect('/auth/login?message=회원가입이 완료되었습니다. 로그인해주세요.');
 
     } catch (error) {
         console.error('❌ 회원가입 오류:', error);
