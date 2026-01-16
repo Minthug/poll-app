@@ -10,18 +10,18 @@ const { body, validationResult } = require('express-validator');
 // 이메일 발송 설정
 // ========================================
 const transporter = nodemailer.createTransport({
-    host: 'smtp.naver.com',
-    port: 587,
-    secure: false,
+    host: 'gmail',
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD
     }
 });
+
 async function sendVerificationEmail(email, token) {
+    try {
     const verificationUrl = `${process.env.BASE_URL}/auth/verify-email/${token}`;
 
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: email,
         subject: '[여론조사 사이트] 이메일 인증',
@@ -38,7 +38,19 @@ async function sendVerificationEmail(email, token) {
             <p style="color:#666; word-break:break-all;">${verificationUrl}</p>
             <p style="color:#999; font-size:12px;">링크는 24시간 동안 유효합니다.</p>
         `
-    });
+        });
+
+
+        console.log('✅ 인증 이메일 발송 성공:', email);
+        console.log('📧 Message ID:', info.messageId);
+        return true;
+
+    } catch (error) {
+        console.error('❌ 인증 이메일 발송 실패:', error);
+        console.error('📧 받는 사람:', email);
+        console.error('🔧 발신자 설정:', process.env.EMAIL_USER);
+        throw error;  // 에러를 다시 throw해서 호출한 곳에서 처리하도록
+    }
 }
 
 // ========================================
