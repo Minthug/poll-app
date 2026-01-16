@@ -19,13 +19,13 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-transporter.verify((error, success) => {
-    if (error) {
-        console.error('❌ SMTP 연결 실패:', error);
-    } else {
-        console.log('✅ SMTP 서버 연결 성공 - 이메일 발송 준비 완료');
-    }
-});
+// transporter.verify((error, success) => {
+//     if (error) {
+//         console.error('❌ SMTP 연결 실패:', error);
+//     } else {
+//         console.log('✅ SMTP 서버 연결 성공 - 이메일 발송 준비 완료');
+//     }
+// });
 
 async function sendVerificationEmail(email, token) {
     try {
