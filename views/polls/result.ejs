@@ -100,7 +100,7 @@
     <div class="poll-option">
       <div class="option-header">
         <h4><%= option.text %></h4>
-        <span class="total-votes"><%= option.votes %>표 (<%= ((option.votes / total-votes) * 100).toFixed(1) %>%</span>
+        <span class="total-votes"><%= option.votes %>표 (<%= totalVotes > 0 ? ((option.votes / totalVotes) * 100).toFixed(1) : 0 %>%)</span>
       </div>
 
       <!-- 진행 바-->
@@ -131,7 +131,6 @@
     </h3>
     
     <% 
-      const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
       const sortedOptions = [...poll.options].sort((a, b) => b.votes - a.votes);
       sortedOptions.forEach((option, index) => { 
         const percentage = totalVotes > 0 ? ((option.votes / totalVotes) * 100).toFixed(1) : 0;

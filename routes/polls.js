@@ -232,6 +232,7 @@ router.get('/:id/result', async (req, res) => {
 
         res.render('polls/result', { 
             poll, 
+            totalVotes: poll.options.reduce((sum, opt) => sum + opt.votes, 0),
             locationStats,
             alreadyVoted,
             ended,

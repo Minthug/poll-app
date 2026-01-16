@@ -10,7 +10,9 @@ const { body, validationResult } = require('express-validator');
 // 이메일 발송 설정
 // ========================================
 const transporter = nodemailer.createTransport({
-    service: 'naver',
+    host: 'smtp.naver.com',
+    port: 587,
+    secure: false,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD
@@ -177,11 +179,18 @@ router.get('/verify-email/:token', async (req, res) => {
 
         console.log('✅ 이메일 인증 완료:', user.username);
 
+        // 자동 로그인 (세션 생성)
+        req.session.userId = user._id;
+        req.session.username = user.username;
+    
+        console.log('🔐 자동 로그인:', user.username);
+
         res.render('auth/email-verification-result', {
             title: '이메일 인증 완료',
             success: true,
             message: '이메일 인증이 완료되었습니다. 이제 로그인 할 수 있습니다',
             username: user.username,
+            autoRedirect: true,
             csrfToken: req.csrfToken(),
             showRanking: false
         });
