@@ -10,10 +10,20 @@ const { body, validationResult } = require('express-validator');
 // 이메일 발송 설정
 // ========================================
 const transporter = nodemailer.createTransport({
-    host: 'gmail',
+    host: 'stmp.gmail.com',
+    port: 587,
+    secure: false,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD
+    }
+});
+
+transporter.verify((error, success) => {
+    if (error) {
+        console.error('❌ SMTP 연결 실패:', error);
+    } else {
+        console.log('✅ SMTP 서버 연결 성공 - 이메일 발송 준비 완료');
     }
 });
 
