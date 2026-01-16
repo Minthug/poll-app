@@ -10,7 +10,7 @@ const { body, validationResult } = require('express-validator');
 // 이메일 발송 설정
 // ========================================
 const transporter = nodemailer.createTransport({
-    host: 'stmp.gmail.com',
+    host: 'smtp.gmail.com',
     port: 587,
     secure: false,
     auth: {
