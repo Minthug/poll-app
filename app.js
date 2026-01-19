@@ -300,6 +300,45 @@ app.post('/api/agree-terms', async (req, res) => {
 // 8. 서버 시작
 // ========================================
 const PORT = process.env.PORT || 3000;
+const ENV = process.env.NODE_ENV || 'development';
+
+// base_URL 자동 감지
+const getBaseUrl = () => {
+  // 1순위 환경변수에 명시적으로 설정된 경우
+  if (process.env.BASE_URL) {
+    return process.env.BASE_URL;
+  }
+
+  // 2순위 Render 배포 환경
+  if (process.env.RENDER_EXTERNAL_URL) {
+    return process.env.RENDER_EXTERNAL_URL;
+  }
+
+  // 3순위 프로덕션 환경 (호스팅 플랫폼별로 추가 가능)
+  if (ENV === 'production') {
+    // NCP 등등
+    return `https://your-domain.com`;
+  }
+
+  // 4순위 로컬 개발 환경
+  return `https://localhost:${PORT}`;
+};
+
+const BASE_URL = getBaseUrl();
+
+// OAuth Callback URL 자동 설정
+const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL || `${BASE_URL}/oauth/google/callback`;
+const NAVER_CALLBACK_URL = process.env.NAVER_CALLBACK_URL || `${BASE_URL}/oauth/naver/callback`;
+
+// 8. 서버 시작
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 서버가 http://localhost:${PORT} 에서 실행 중입니다`);
+  console.log(`🚀 서버가 실행 중입니다`);
+  console.log(`📌 환경: ${ENV}`);
+  console.log(`🌐 BASE_URL: ${BASE_URL}`);
+  console.log(`🔐 Google Callback: ${GOOGLE_CALLBACK_URL}`);
+  console.log(`🔐 Naver Callback: ${NAVER_CALLBACK_URL}`);
+
+  if (ENV === 'development') {
+    console.log(`💡 로컬 접속: http://localhost:${PORT}`);
+  }
 });
