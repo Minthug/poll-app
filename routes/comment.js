@@ -73,5 +73,33 @@ router.post('/polls/:pollId/comments', async (req, res) => {
 
         await comment.save();
 
+        // 투표의 댓글 카운트 증가
+        await Poll.findByIdAndUpdate(pollId, {
+            $inc: { commentCount: 1 }
+        });
+
+        console.log(`💬 새 댓글 작성 - Poll: ${pollId}, Author: ${author.displayName}`);
+
+        res.json({
+            success: true,
+            comment: {
+                _id: comment._id,
+                author: comment.author,
+                content: comment.content,
+                createdAt: comment.createdAt
+            }
+        });
+    } catch (error) {
+        console.error('❌ 댓글 작성 오류:', error);
+        res.status(500).json({
+            success: true,
+            message: '댓글 작성에 실패했습니다.'
+        });
     }
+});
+
+// 댓글 목록 조회
+router.get('/polls/:pollId/comments', async (req, res) => {
+
+    
 });
