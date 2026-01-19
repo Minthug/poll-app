@@ -206,3 +206,68 @@ router.delete('/polls/:pollId/comments/:commentId', isAuthenticated, async (req,
         });
     }
 });
+
+// 댓글 수정(본인만 가능)
+router.put('/polls/:pollId/comments/:commentId', isAuthenticated, async (req, res) => {
+    try {
+        const { commentId } = req.params;
+        const { content } = req.body;
+        const userId = req.user._id;
+    
+        // 입력 검증
+        if (!content || content.trim().length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: '댓글 내용을 입력해주세요'
+            });
+        }
+
+        if (content.length > 1000) {
+            return res.status(400).json({
+                success: false,
+                message: '댓글을 1000자 이상 초과할 수 없습니다'
+            });
+        }
+
+        // 댓글 조회
+        const comment = await Comment.findById(commentId);
+        if (!comment) {
+            return res.status(404).json({
+                success: false,
+                message: '댓글을 찾을 수 없습니다'
+            });
+        }
+
+        // 권한 확인: 본인만 수정 가능
+        if (!comment.author.userId || comment.author.userId.toString() !== userId.toString()) {
+            return res.status(403).json({
+                success: false,
+                message: '본인의 댓글만 수정할 수 있습니다'
+            });
+        }
+
+        // 댓글 수정
+        comment.content = content.trim();
+        comment.updatedAt = new Date();
+        await comment.save();
+
+        console.log(`✏️ 댓글 수정 - Comment: ${commentId}`);
+
+        res.json({
+            success: true,
+            comment: {
+                _id: comment._id,
+                content: comment.content,
+                updatedAt: comment.updatedAt 
+            }
+        });
+    } catch (error) {
+        console.error('❌ 댓글 수정 오류:', error);
+        res.status(500).json({
+            success: false,
+            message: '댓글 수정에 실패했습니다'
+        });
+    }
+});
+
+module.exports = router;
