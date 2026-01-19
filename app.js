@@ -56,6 +56,7 @@ mongoose.connect(process.env.MONGODB_URI)
 // ========================================
 const Poll = require('./models/Poll');
 const Visitor = require('./models/Visitor');
+const Comment = require('./models/Comment');
 const User = require('./models/User');
 const IPConsent = require('./models/IPConsent');
 
@@ -245,12 +246,14 @@ app.use(async (req, res, next) => {
 const pollRoutes = require('./routes/polls');
 const adminRoutes = require('./routes/admin');
 const authRoutes = require('./routes/auth');
+const commentRoutes = require('./routes/comment');
 const oauthRoutes = require('./routes/oauth');
 const profileRoutes = require('./routes/profile');
 
 app.use('/polls', pollRoutes);
 app.use('/admin', adminRoutes);
 app.use('/auth', authRoutes);
+app.use('/comment', commentRoutes);
 app.use('/oauth', oauthRoutes);
 app.use('/profile', profileRoutes);
 
