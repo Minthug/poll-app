@@ -100,6 +100,50 @@ router.post('/polls/:pollId/comments', async (req, res) => {
 
 // 댓글 목록 조회
 router.get('/polls/:pollId/comments', async (req, res) => {
+    try {
+        const { pollId } = req.params;
+        const page = parseInt(req.params.page) || 1;
+        const limit = 20;
+        const skip = (page - 1) * limit;
 
-    
+        // 삭제되지 않은 댓글만 조회
+        const comments = await Comment.find({
+            pollId,
+            isDeleted: false
+        })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean();
+
+        const totalComments = await Comment.countDocuments({
+            pollId,
+            isDeleted: false
+        });
+
+        // 현재 사용자가 작성자인지 확인
+        const poll = await Poll.findById(pollId);
+        const isPollCreator = req.isAuthenticated() && poll.createdBy.toString() === req.user._id.toString();
+
+        res.json({
+            success: true,
+            comments,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(totalComments / limit),
+                totalComments,
+                hasMore: skip + comments.length < totalComments
+            },
+            isPollCreator
+        });
+    } catch (error) {
+
+    console.error('❌ 댓글 조회 오류:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: '댓글을 불러오는데 실패했습니다.' 
+        });
+    }
 });
+
+// 
