@@ -146,4 +146,63 @@ router.get('/polls/:pollId/comments', async (req, res) => {
     }
 });
 
-// 
+// 댓글 삭제(작성자 또는 투표 생성자)
+router.delete('/polls/:pollId/comments/:commentId', isAuthenticated, async (req, res) => {
+    try {
+        const { pollId, commentId } = req.params;
+        const userId = req.user._id;
+
+        // 댓글 조회
+        const omment = await Comment.findById(commentId);
+        if (!comment) {
+            return res.status(404).json({
+                success: false,
+                message: '댓글을 찾을 수 없습니다.'
+            });
+        }
+
+        // 투표 조회
+        const poll = await Poll.findById(pollId);
+        if (!poll) {
+            return res.status(404).json({
+                success: false,
+                message: '투표를 찾을 수 없습니다.'
+            });
+        }
+
+        // 권한 확인: 댓글 작성자 또는 투표 생성자
+        const isCommentAuthor = comment.author.userId && comment.author.userId.toString() === userId.toString();
+        const isPollCreator = poll.createdBy.toString() === userId.toString();
+
+        if (!isCommentAuthor && !isPollCreator) {
+            return res.status(403).json({
+                success: false,
+                message: '댓글을 삭제할 권한이 없습니다'
+            })
+        };
+
+        // 소프트 삭제
+        comment.isDeleted = true;
+        comment.deleteAt = new Date();
+        comment.deleteBy = userId;
+        await comment.save();
+
+        // 투표의 댓글 카운트 감소
+        await Poll.findByIdAndUpdate(pollId, {
+            $inc: { commentCount: -1 }
+        });
+
+        console.log(`🗑️ 댓글 삭제 - Comment: ${commentId}, DeletedBy: ${req.user.email}`);
+
+        res.json({
+            success: true,
+            message: '댓글이 삭제되었습니다'
+        });
+    } catch (error) {
+        console.error('❌ 댓글 삭제 오류:', error);
+        res.status(500).json({
+            success: false,
+            message: '댓글 삭제에 실패했습니다'
+        });
+    }
+});
