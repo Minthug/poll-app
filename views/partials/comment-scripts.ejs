@@ -1,0 +1,115 @@
+<script>
+    let currentPage = 1;
+    let hasMore = true;
+    let isPollCreator = false;
+    const pollId = '<%= poll._id %>';
+    const isLoggedIn = <%= isAuthenticated ? 'true' : 'false' %>;
+
+    // 페이지 로드 시 댓글 불러오기
+    document.addEventListener('DOMContentLoaded', () => {
+        loadComments();
+    });
+
+    // 로그인 상태면 익명 체크박스 표시
+    if (isLoggedIn) {
+        document.getElementById('anonymousCheckContainer').style.display = 'block';
+        document.getElementById('loginPrompt').style.display = 'none';
+    }
+
+    // 글자 수 카운터
+    document.getElementById('commentForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const content = document.getElementById('commentContent').value.trim();
+        const isAnonymous = document.getElementById('commentAnonymous').checked;
+
+        if (!content) {
+            alert('댓글 내용을 입력해주세요.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/polls/${pollId}/comments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ content, isAnonymous })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // 폼 초기화
+                document.getElementById('commentContent').value = '';
+                document.getElementById('charCount').textContent = '0';
+                document.getElementById('commentAnonymous').checked = false;
+
+                // 댓글 목록 새로고침
+                currentPage = 1;
+                loadComments(true);
+
+                // 댓글 카운트 업데이트
+                const badge = document.getElementById('commentCountBadge');
+                badge.textContent = parseInt(badge.textContent) + 1;
+            } else {
+                alert(data.message || '댓글 작성에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('댓글 작성 오류:', error);
+            alert('댓글 작성 중 오류가 발생했습니다.');
+        }
+    });
+
+    // 댓글 목록 불러오기
+    async function loadComments(reset = false) {
+        if (reset) {
+            currentPage = 1;
+            document.getElementById('commentList').innerHTML = '';
+        }
+
+        try {
+            const response = await fetch(`/api/polls/${pollId}/comments?page=${currentPage}`);
+            const data = await response.json();
+
+            if (data.success) {
+                isPollCreator = data.isPollCreator;
+
+                if (data.comments.length === 0 && currentPage === 1) {
+                    document.getElementById('commentList').innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        첫번째 댓글을 작성해보세요!
+                    </div>
+                    `;
+                document.getElementById('loadMoreContainer').style.display = 'none';
+                return;
+                }
+
+                const commentList = document.getElementById('commentList');
+                if (reset) {
+                    commentList.innerHTML = '';
+                }
+
+                data.comments.forEach(comment => {
+                    commentList.insertAdjacentHTML('beforeend', renderComment(comment));
+                });
+
+                // 더보기 버튼 표시/숨김
+                if (data.pagination.hasMore) {
+                    document.getElementById('loadMoreContainer').style.display = 'block';
+                    hasMore = true;
+                } else {
+                    document.getElementById('loadMoreContainer').style.display = 'none';
+                    hasMore = false;
+                }
+            }
+        } catch (error) {
+        console.error('댓글 불러오기 오류:', error);
+        document.getElementById('commentList').innerHTML = `
+            <div class="alert alert-danger">
+            댓글을 불러오는데 실패했습니다.
+            </div>
+        `;  
+        }
+    }
+</script>
