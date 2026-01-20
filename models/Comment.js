@@ -36,19 +36,13 @@ const commentSchema = new mongoose.Schema({
         maxlength: 1000
     },
 
-    // 댓글 카운트
-    commentCount: {
-        type: Number,
-        default: 0
-    },
-
     // 상태
     isDeleted: {
         type: Boolean,
         default: false
     },
     deletedAt: Date,
-    deleteBy: {
+    deletedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },

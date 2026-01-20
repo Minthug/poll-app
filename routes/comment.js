@@ -1,7 +1,7 @@
 const express = require("express")
 const router = express.Router();
-const comment = require('../models/Comment');
-const poll = require('../models/Poll');
+const Comment = require('../models/Comment');
+const Poll = require('../models/Poll');
 const { isAuthenticatedAPI } = require('../middleware/auth');
 
 // 댓글 작성
@@ -41,7 +41,7 @@ router.post('/polls/:pollId/comments', async (req, res) => {
             isPollCreator: false
         };
 
-        if (res.isAuthenticated()) {
+        if (req.session && req.session.userId) {
             const user = req.user;
 
             if (isAnonymous === 'true' || isAnonymous === true) {
