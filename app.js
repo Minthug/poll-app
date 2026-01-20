@@ -253,7 +253,7 @@ const profileRoutes = require('./routes/profile');
 app.use('/polls', pollRoutes);
 app.use('/admin', adminRoutes);
 app.use('/auth', authRoutes);
-app.use('/comment', commentRoutes);
+app.use('/api', commentRoutes);
 app.use('/oauth', oauthRoutes);
 app.use('/profile', profileRoutes);
 

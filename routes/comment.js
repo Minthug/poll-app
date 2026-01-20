@@ -102,7 +102,7 @@ router.post('/polls/:pollId/comments', async (req, res) => {
 router.get('/polls/:pollId/comments', async (req, res) => {
     try {
         const { pollId } = req.params;
-        const page = parseInt(req.params.page) || 1;
+        const page = parseInt(req.query.page) || 1;
         const limit = 20;
         const skip = (page - 1) * limit;
 

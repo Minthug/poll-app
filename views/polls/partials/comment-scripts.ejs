@@ -1,0 +1,312 @@
+<!-- views/partials/comment-scripts.ejs -->
+<script>
+console.log('🚀 댓글 스크립트 시작');
+
+let currentPage = 1;
+let hasMore = true;
+let isPollCreator = false;
+const pollId = '<%= poll._id %>';
+const isLoggedIn = <%= isAuthenticated ? 'true' : 'false' %>;
+
+console.log('📌 초기화:', { pollId, isLoggedIn });
+
+// 페이지 로드 시 댓글 불러오기
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('✅ DOMContentLoaded 이벤트 발생');
+  loadComments();
+  
+  // 로그인 상태면 익명 체크박스 표시
+  if (isLoggedIn) {
+    const anonymousCheckContainer = document.getElementById('anonymousCheckContainer');
+    const loginPrompt = document.getElementById('loginPrompt');
+    if (anonymousCheckContainer) anonymousCheckContainer.style.display = 'block';
+    if (loginPrompt) loginPrompt.style.display = 'none';
+  }
+  
+  // 글자 수 카운터
+  const commentContent = document.getElementById('commentContent');
+  if (commentContent) {
+    commentContent.addEventListener('input', (e) => {
+      const charCount = document.getElementById('charCount');
+      if (charCount) charCount.textContent = e.target.value.length;
+    });
+  }
+});
+
+// 댓글 작성
+const commentForm = document.getElementById('commentForm');
+if (commentForm) {
+  commentForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    console.log('📝 댓글 작성 시작');
+    
+    const content = document.getElementById('commentContent').value.trim();
+    const isAnonymous = document.getElementById('commentAnonymous').checked;
+    
+    if (!content) {
+      alert('댓글 내용을 입력해주세요.');
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/polls/${pollId}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ content, isAnonymous })
+      });
+      
+      const data = await response.json();
+      console.log('📬 댓글 작성 응답:', data);
+      
+      if (data.success) {
+        // 폼 초기화
+        document.getElementById('commentContent').value = '';
+        document.getElementById('charCount').textContent = '0';
+        document.getElementById('commentAnonymous').checked = false;
+        
+        // 댓글 목록 새로고침
+        currentPage = 1;
+        loadComments(true);
+        
+        // 댓글 카운트 업데이트
+        const badge = document.getElementById('commentCountBadge');
+        if (badge) {
+          badge.textContent = parseInt(badge.textContent) + 1;
+        }
+      } else {
+        alert(data.message || '댓글 작성에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('❌ 댓글 작성 오류:', error);
+      alert('댓글 작성 중 오류가 발생했습니다.');
+    }
+  });
+}
+
+// 댓글 목록 불러오기
+async function loadComments(reset = false) {
+  console.log('🔍 댓글 로드 시작:', { reset, currentPage, pollId });
+  
+  if (reset) {
+    currentPage = 1;
+    const commentList = document.getElementById('commentList');
+    if (commentList) commentList.innerHTML = '';
+  }
+  
+  const url = `/api/polls/${pollId}/comments?page=${currentPage}`;
+  console.log('📡 요청 URL:', url);
+  
+  try {
+    const response = await fetch(url);
+    console.log('📡 응답 상태:', response.status);
+    
+    const data = await response.json();
+    console.log('📦 받은 데이터:', data);
+    
+    if (data.success) {
+      isPollCreator = data.isPollCreator;
+      
+      const commentList = document.getElementById('commentList');
+      if (!commentList) {
+        console.error('❌ commentList 요소를 찾을 수 없음');
+        return;
+      }
+      
+      if (data.comments.length === 0 && currentPage === 1) {
+        commentList.innerHTML = `
+          <div class="text-center text-muted py-4">
+            첫 번째 댓글을 작성해보세요!
+          </div>
+        `;
+        const loadMoreContainer = document.getElementById('loadMoreContainer');
+        if (loadMoreContainer) loadMoreContainer.style.display = 'none';
+        return;
+      }
+      
+      if (reset) {
+        commentList.innerHTML = '';
+      }
+      
+      data.comments.forEach(comment => {
+        commentList.insertAdjacentHTML('beforeend', renderComment(comment));
+      });
+      
+      // 더보기 버튼 표시/숨김
+      const loadMoreContainer = document.getElementById('loadMoreContainer');
+      if (loadMoreContainer) {
+        if (data.pagination.hasMore) {
+          loadMoreContainer.style.display = 'block';
+          hasMore = true;
+        } else {
+          loadMoreContainer.style.display = 'none';
+          hasMore = false;
+        }
+      }
+    }
+  } catch (error) {
+    console.error('❌ 댓글 불러오기 오류:', error);
+    const commentList = document.getElementById('commentList');
+    if (commentList) {
+      commentList.innerHTML = `
+        <div class="alert alert-danger">
+          댓글을 불러오는데 실패했습니다.
+          <br>에러: ${error.message}
+        </div>
+      `;
+    }
+  }
+}
+
+// 댓글 HTML 생성
+function renderComment(comment) {
+  const authorClass = comment.author.isAnonymous ? 'anonymous' : 
+                     comment.author.isPollCreator ? 'creator' : '';
+  const creatorBadge = comment.author.isPollCreator ? 
+    '<span class="badge bg-primary creator-badge">작성자</span>' : '';
+  
+  const createdAt = new Date(comment.createdAt).toLocaleString('ko-KR');
+  
+  const canDelete = isPollCreator || (isLoggedIn && comment.author.userId);
+  const canEdit = isLoggedIn && comment.author.userId && !comment.author.isAnonymous;
+  
+  let actions = '';
+  if (canDelete || canEdit) {
+    actions = `
+      <div class="comment-actions">
+        ${canEdit ? `<button class="btn btn-sm btn-outline-secondary" onclick="editComment('${comment._id}')">수정</button>` : ''}
+        ${canDelete ? `<button class="btn btn-sm btn-outline-danger" onclick="deleteComment('${comment._id}')">삭제</button>` : ''}
+      </div>
+    `;
+  }
+  
+  return `
+    <div class="comment-item" id="comment-${comment._id}">
+      <div class="comment-header">
+        <div>
+          <span class="comment-author ${authorClass}">
+            ${escapeHtml(comment.author.displayName)}
+          </span>
+          ${creatorBadge}
+          <span class="comment-meta ms-2">${createdAt}</span>
+        </div>
+        ${actions}
+      </div>
+      <div class="comment-content">${escapeHtml(comment.content)}</div>
+    </div>
+  `;
+}
+
+// 더보기 버튼
+const loadMoreBtn = document.getElementById('loadMoreBtn');
+if (loadMoreBtn) {
+  loadMoreBtn.addEventListener('click', () => {
+    console.log('➕ 더보기 클릭');
+    currentPage++;
+    loadComments();
+  });
+}
+
+// 댓글 삭제
+async function deleteComment(commentId) {
+  if (!confirm('정말 이 댓글을 삭제하시겠습니까?')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/api/polls/${pollId}/comments/${commentId}`, {
+      method: 'DELETE'
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      const commentElement = document.getElementById(`comment-${commentId}`);
+      if (commentElement) commentElement.remove();
+      
+      const badge = document.getElementById('commentCountBadge');
+      if (badge) {
+        badge.textContent = parseInt(badge.textContent) - 1;
+      }
+      
+      if (document.querySelectorAll('.comment-item').length === 0) {
+        const commentList = document.getElementById('commentList');
+        if (commentList) {
+          commentList.innerHTML = `
+            <div class="text-center text-muted py-4">
+              첫 번째 댓글을 작성해보세요!
+            </div>
+          `;
+        }
+      }
+    } else {
+      alert(data.message || '댓글 삭제에 실패했습니다.');
+    }
+  } catch (error) {
+    console.error('❌ 댓글 삭제 오류:', error);
+    alert('댓글 삭제 중 오류가 발생했습니다.');
+  }
+}
+
+// HTML 이스케이프 (XSS 방지)
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// 댓글 수정
+function editComment(commentId) {
+  const commentElement = document.getElementById(`comment-${commentId}`);
+  if (!commentElement) return;
+  
+  const contentElement = commentElement.querySelector('.comment-content');
+  const currentContent = contentElement.textContent;
+  
+  const newContent = prompt('댓글을 수정하세요:', currentContent);
+  
+  if (newContent === null || newContent.trim() === currentContent) {
+    return;
+  }
+  
+  if (!newContent.trim()) {
+    alert('댓글 내용을 입력해주세요.');
+    return;
+  }
+  
+  updateComment(commentId, newContent.trim());
+}
+
+// 댓글 수정 API 호출
+async function updateComment(commentId, content) {
+  try {
+    const response = await fetch(`/api/polls/${pollId}/comments/${commentId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ content })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      const commentElement = document.getElementById(`comment-${commentId}`);
+      if (commentElement) {
+        const contentElement = commentElement.querySelector('.comment-content');
+        if (contentElement) {
+          contentElement.textContent = data.comment.content;
+        }
+      }
+    } else {
+      alert(data.message || '댓글 수정에 실패했습니다.');
+    }
+  } catch (error) {
+    console.error('❌ 댓글 수정 오류:', error);
+    alert('댓글 수정 중 오류가 발생했습니다.');
+  }
+}
+
+console.log('✅ 댓글 스크립트 로드 완료');
+</script>

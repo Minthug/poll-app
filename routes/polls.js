@@ -4,7 +4,7 @@ const Poll = require('../models/Poll');
 const Visitor = require('../models/Visitor');
 const geoip = require('geoip-lite');
 const axios = require('axios');
-const { requireLogin } = require('../middleware/auth');
+const { requireLogin, isAuthenticated } = require('../middleware/auth');
 
 
 // 모든 여론 조사 목록 - 비로그인 사용자도 목록 확인 가능
@@ -239,6 +239,8 @@ router.get('/:id/result', async (req, res) => {
             isOwner,
             showRanking: true,
             baseUrl, // ⭐ 추가
+            isAuthenticated: req.isAuthenticated(),
+            user: req.user || null,
             pageTitle: `${poll.title} - 투표 결과`,
             pageDescription: totalVotes > 0 
                 ? `"${topOption.text}"가 ${totalVotes}표 중 ${topOption.votes}표(${((topOption.votes / totalVotes) * 100).toFixed(1)}%)로 1위입니다.`
