@@ -2,7 +2,7 @@ const express = require("express")
 const router = express.Router();
 const comment = require('../models/Comment');
 const poll = require('../models/Poll');
-const { isAuthenticated } = require('../middleware/auth');
+const { isAuthenticatedAPI } = require('../middleware/auth');
 
 // 댓글 작성
 router.post('/polls/:pollId/comments', async (req, res) => {
@@ -147,7 +147,7 @@ router.get('/polls/:pollId/comments', async (req, res) => {
 });
 
 // 댓글 삭제(작성자 또는 투표 생성자)
-router.delete('/polls/:pollId/comments/:commentId', isAuthenticated, async (req, res) => {
+router.delete('/polls/:pollId/comments/:commentId', isAuthenticatedAPI, async (req, res) => {
     try {
         const { pollId, commentId } = req.params;
         const userId = req.user._id;
@@ -208,7 +208,7 @@ router.delete('/polls/:pollId/comments/:commentId', isAuthenticated, async (req,
 });
 
 // 댓글 수정(본인만 가능)
-router.put('/polls/:pollId/comments/:commentId', isAuthenticated, async (req, res) => {
+router.put('/polls/:pollId/comments/:commentId', isAuthenticatedAPI, async (req, res) => {
     try {
         const { commentId } = req.params;
         const { content } = req.body;

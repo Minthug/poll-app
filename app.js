@@ -112,6 +112,9 @@ app.use(passport.session());
 const consentRoutes = require('./routes/consent');
 app.use('/admin/consent', consentRoutes);
 
+const commentRoutes = require('./routes/comment');
+app.use('/api', commentRoutes);
+
 // OAuth 약관 동의 라우트 (CSRF 예외)
 app.get('/auth/oauth-terms', async (req, res) => {
   console.log('🔍 GET /auth/oauth-terms');
@@ -246,14 +249,12 @@ app.use(async (req, res, next) => {
 const pollRoutes = require('./routes/polls');
 const adminRoutes = require('./routes/admin');
 const authRoutes = require('./routes/auth');
-const commentRoutes = require('./routes/comment');
 const oauthRoutes = require('./routes/oauth');
 const profileRoutes = require('./routes/profile');
 
 app.use('/polls', pollRoutes);
 app.use('/admin', adminRoutes);
 app.use('/auth', authRoutes);
-app.use('/api', commentRoutes);
 app.use('/oauth', oauthRoutes);
 app.use('/profile', profileRoutes);
 

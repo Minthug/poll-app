@@ -21,10 +21,18 @@ function isAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return next();
     }
+    res.redirect('/auth/login');  // ✅ 페이지용은 리다이렉트
+}
 
-    res.status(404).json({
+
+// API용 인증 미들웨어 (NEW!)
+function isAuthenticatedAPI(req, res, next) {
+    if (req.session && req.session.userId) {
+        return next();
+    }
+    res.status(401).json({  // ✅ API는 JSON 응답
         success: false,
-        message: '로그인이 필요합니다'
+        message: '로그인이 필요합니다.'
     });
 }
 
@@ -35,4 +43,4 @@ function isNotAuthenticated(req, res, next) {
     res.redirect('/');
 }
 
-module.exports = { checkAuth, requireLogin, isAuthenticated, isNotAuthenticated };
+module.exports = { checkAuth, requireLogin, isAuthenticated, isAuthenticatedAPI ,isNotAuthenticated };
