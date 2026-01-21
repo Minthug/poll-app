@@ -1,6 +1,5 @@
-<!-- views/partials/comment-scripts.ejs -->
 <script>
-console.log('🚀 댓글 스크립트 시작');
+console.log('🚀 댓글 스크립트 로드됨');
 
 let currentPage = 1;
 let hasMore = true;
@@ -10,12 +9,9 @@ const isLoggedIn = <%= isAuthenticated ? 'true' : 'false' %>;
 
 console.log('📌 초기화:', { pollId, isLoggedIn });
 
-console.log('🚀 댓글 스크립트 로드됨');
-
 // 페이지 로드 시 댓글 불러오기
 document.addEventListener('DOMContentLoaded', () => {
   console.log('✅ DOMContentLoaded 이벤트 발생');
-  console.log('📌 pollId:', pollId);
   loadComments();
   
   // 로그인 상태면 익명 체크박스 표시
@@ -92,17 +88,29 @@ if (commentForm) {
 async function loadComments(reset = false) {
   console.log('🔍 댓글 로드 시작:', { reset, currentPage, pollId });
   
-  if (reset) {
-    currentPage = 1;
-    const commentList = document.getElementById('commentList');
-    if (commentList) commentList.innerHTML = '';
+  const commentList = document.getElementById('commentList');
+  if (!commentList) {
+    console.error('❌ commentList 요소를 찾을 수 없음');
+    return;
   }
   
-  const commentList = document.getElementById('commentList');
-  if (!reset && commentList) {
-    commentList.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">로딩 중...</span></div></div>';
+  if (reset) {
+    currentPage = 1;
+    commentList.innerHTML = '';
   }
+  
 
+  // ✅ 첫 페이지이거나 reset이면 로딩 표시
+  if (currentPage === 1) {
+    commentList.innerHTML = `
+      <div class="text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">로딩 중...</span>
+        </div>
+      </div>
+    `;
+  }
+  
   const url = `/api/polls/${pollId}/comments?page=${currentPage}`;
   console.log('📡 요청 URL:', url);
   
@@ -116,27 +124,26 @@ async function loadComments(reset = false) {
     if (data.success) {
       isPollCreator = data.isPollCreator;
       
-      const commentList = document.getElementById('commentList');
-      if (!commentList) {
-        console.error('❌ commentList 요소를 찾을 수 없음');
-        return;
-      }
       
+      // ✅ 댓글이 없는 경우
       if (data.comments.length === 0 && currentPage === 1) {
         commentList.innerHTML = `
           <div class="text-center text-muted py-4">
             첫 번째 댓글을 작성해보세요!
           </div>
         `;
-        const loadMoreContainer = document.getElementById('loadMoreContainer');
-        if (loadMoreContainer) loadMoreContainer.style.display = 'none';
+        document.getElementById('loadMoreContainer').style.display = 'none';
         return;
       }
       
-      if (reset) {
-        commentList.innerHTML = '';
+
+      // ✅ 댓글이 있으면 기존 내용(로딩 스피너) 지우고 댓글 추가
+      if (currentPage === 1) {
+        commentList.innerHTML = '';  // ✅ 로딩 스피너 제거!
       }
+
       
+      // 댓글 추가
       data.comments.forEach(comment => {
         commentList.insertAdjacentHTML('beforeend', renderComment(comment));
       });
@@ -155,15 +162,12 @@ async function loadComments(reset = false) {
     }
   } catch (error) {
     console.error('❌ 댓글 불러오기 오류:', error);
-    const commentList = document.getElementById('commentList');
-    if (commentList) {
-      commentList.innerHTML = `
-        <div class="alert alert-danger">
-          댓글을 불러오는데 실패했습니다.
-          <br>에러: ${error.message}
-        </div>
-      `;
-    }
+    commentList.innerHTML = `
+      <div class="alert alert-danger">
+        댓글을 불러오는데 실패했습니다.
+        <br>에러: ${error.message}
+      </div>
+    `;
   }
 }
 
@@ -257,7 +261,7 @@ async function deleteComment(commentId) {
   }
 }
 
-// HTML 이스케이프 (XSS 방지)
+// HTML 이스케이프
 function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
