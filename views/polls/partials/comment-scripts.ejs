@@ -10,6 +10,8 @@ const isLoggedIn = <%= isAuthenticated ? 'true' : 'false' %>;
 
 console.log('📌 초기화:', { pollId, isLoggedIn });
 
+console.log('🚀 댓글 스크립트 로드됨');
+
 // 페이지 로드 시 댓글 불러오기
 document.addEventListener('DOMContentLoaded', () => {
   console.log('✅ DOMContentLoaded 이벤트 발생');
