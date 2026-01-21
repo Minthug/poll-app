@@ -15,6 +15,7 @@ console.log('🚀 댓글 스크립트 로드됨');
 // 페이지 로드 시 댓글 불러오기
 document.addEventListener('DOMContentLoaded', () => {
   console.log('✅ DOMContentLoaded 이벤트 발생');
+  console.log('📌 pollId:', pollId);
   loadComments();
   
   // 로그인 상태면 익명 체크박스 표시
@@ -97,6 +98,11 @@ async function loadComments(reset = false) {
     if (commentList) commentList.innerHTML = '';
   }
   
+  const commentList = document.getElementById('commentList');
+  if (!reset && commentList) {
+    commentList.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">로딩 중...</span></div></div>';
+  }
+
   const url = `/api/polls/${pollId}/comments?page=${currentPage}`;
   console.log('📡 요청 URL:', url);
   
