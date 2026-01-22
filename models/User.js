@@ -27,11 +27,44 @@ const userSchema = new mongoose.Schema({
   phoneNumber: String,
   phoneVerified: { type: Boolean, default: false },
   birthYear: Number,
-  gender: { type: String, enum: ['male', 'female', 'other'] },
+  gender: { type: String, enum: ['male', 'female'] },
   region: String,
   
   isFirstLogin: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+
+  notificationSettings: {
+    enabled: {
+        type: Boolean,
+        default: true
+    },
+    comments: {
+        type: Boolean,
+        default: true
+    },
+    replies: {
+        type: Boolean,
+        default: true
+    },
+    votes: {
+        type: Boolean,
+        default: true
+    },
+    pollend: {
+        type: Boolean,
+        default: true
+    },
+    email: {
+        enabled: {
+            type: Boolean,
+            default: false
+        },
+        comments: {
+            type: Boolean,
+            default: false
+        }
+    }
+  }
 });
 
 // 비밀번호 해싱
