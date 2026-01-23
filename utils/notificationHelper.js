@@ -66,5 +66,34 @@ class NotificationHelper {
         }
     }
 
+    static async notifyComment(poll, comment, commenter) {
+        const message = `"${poll.question.substring(0, 30)}..." 투표에 새 댓글이 달렸습니다.`;
+        const link = `/poll/${poll._id}#comment-${comment._id}`;
+
+        return await this.createNotification({
+            recipientId: poll.creator,
+            senderId: commenter._id,
+            type: 'comment',
+            pollId: poll._id,
+            commentId: comment._id,
+            message,
+            link
+        });
+    }
+
+    // 대댓글 알림
+    static async notifyReply(poll, comment, parentComment, replier) {
+        const message = `회원님의 댓글에 답글이 달렸습니다.`;
+        const link = `/poll/${poll._id}#comment-${comment._id}`;
     
+        return await this.createNotification({
+            recipientId: parentComment.author,
+            senderId: replier._id,
+            type: 'reply',
+            pollId: poll._id,
+            commentId: comment._id,
+            message,
+            link
+        });
+    } 
 }
