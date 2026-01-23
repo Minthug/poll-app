@@ -140,5 +140,34 @@ class NotificationHelper {
         }
     }
 
+
+    // 읽지 않은 알림 개수
+    static async getUnreadCount(userId) {
+        return await Notification.countDocuments({
+            recipient: userId,
+            read: false
+        });
+    }
+
+    // 알림 목록 조회
+    static async getNotifications(userId, page = 1, limit = 20) {
+        const skip = (page - 1) * limit;
+
+        const notifications = await Notification.find({ recipient: userId })
+        .populate('sender', 'username displayName')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+        const total = await Notification.countDocuments({ recipient: userId });
+
+        return {
+            notifications,
+            total,
+            pages: Math.ceil(total / limit),
+            currentPage: page
+        };
+    }
+
     
 }
