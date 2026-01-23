@@ -95,5 +95,50 @@ class NotificationHelper {
             message,
             link
         });
-    } 
+    }
+
+    // 투표 종료 알림
+    static async notifyPollEnd(poll) {
+        const message = `"${poll.question.substring(0, 30)}..." 투표가 종료되었습니다.`;
+        const link = `/poll/${poll._id}`;
+
+        return await this.createNotification({
+            recipientId: poll.creator,
+            senderId: null,
+            type: 'poll_end',
+            pollId: poll._id,
+            commentId: null,
+            message,
+            link
+        });
+    }
+
+    // 이메일 발송
+    static async sendEmailNotification(email, notification) {
+        try {
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: process.env.EMAIL_USER,
+                    pass: process.env.EMAIL_PASS
+                }
+            });
+
+            const mailOptions = {
+                from: process.env.EMAIL_USER,
+                to: email,
+                subject: '[투표 앱] 새 알림이 있습니다',
+                html: `
+                    <h2>새 알림</h2>  
+                    <p>${notification.message}</p>
+                    <a href="${process.env.BASE_URL}${notification.link}">바로가기</a>
+                    `
+            };
+            await transporter.sendMail(mailOptions);
+        } catch (error) {
+            console.error('이메일 발송 오류:', error);
+        }
+    }
+
+    
 }
