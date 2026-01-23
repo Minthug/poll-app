@@ -169,5 +169,22 @@ class NotificationHelper {
         };
     }
 
-    
+    // 알림 읽음 처리
+    static async markAsRead(notificationId, userId) {
+        return await Notification.findOneAndUpdate(
+            { _id: notificationId, recipient: userId },
+            { read: true },
+            { new: true }
+        );
+    }
+
+    // 알림 삭제
+    static async deleteNotification(notificationId, userId) {
+        return await Notification.findOneAndDelete({
+            _id: notificationId,
+            recipient: userId
+        });
+    }
 }
+
+module.exports = NotificationHelper;
