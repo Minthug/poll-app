@@ -1,0 +1,93 @@
+<!-- views/notifications/settings.ejs -->
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-6 mx-auto">
+      <h2 class="mb-4">알림 설정</h2>
+
+      <form action="/notifications/settings" method="POST">
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title">알림 수신</h5>
+            
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="enabled" 
+                     name="enabled" <%= settings.enabled ? 'checked' : '' %>>
+              <label class="form-check-label" for="enabled">
+                <strong>모든 알림 받기</strong>
+                <small class="d-block text-muted">전체 알림을 끄거나 켤 수 있습니다</small>
+              </label>
+            </div>
+
+            <hr>
+
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="comments" 
+                     name="comments" <%= settings.comments ? 'checked' : '' %>>
+              <label class="form-check-label" for="comments">
+                댓글 알림
+                <small class="d-block text-muted">내 투표에 댓글이 달릴 때</small>
+              </label>
+            </div>
+
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="replies" 
+                     name="replies" <%= settings.replies ? 'checked' : '' %>>
+              <label class="form-check-label" for="replies">
+                답글 알림
+                <small class="d-block text-muted">내 댓글에 답글이 달릴 때</small>
+              </label>
+            </div>
+
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="votes" 
+                     name="votes" <%= settings.votes ? 'checked' : '' %>>
+              <label class="form-check-label" for="votes">
+                투표 알림
+                <small class="d-block text-muted">내 투표에 새로운 투표가 있을 때</small>
+              </label>
+            </div>
+
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="pollEnd" 
+                     name="pollEnd" <%= settings.pollEnd ? 'checked' : '' %>>
+              <label class="form-check-label" for="pollEnd">
+                투표 종료 알림
+                <small class="d-block text-muted">내 투표가 종료될 때</small>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title">이메일 알림</h5>
+            
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="emailEnabled" 
+                     name="emailEnabled" <%= settings.email.enabled ? 'checked' : '' %>>
+              <label class="form-check-label" for="emailEnabled">
+                <strong>이메일 알림 받기</strong>
+                <small class="d-block text-muted">이메일로도 알림을 받습니다</small>
+              </label>
+            </div>
+
+            <hr>
+
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="emailComments" 
+                     name="emailComments" <%= settings.email.comments ? 'checked' : '' %>>
+              <label class="form-check-label" for="emailComments">
+                댓글/답글 이메일 알림
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-primary">저장하기</button>
+          <a href="/notifications" class="btn btn-outline-secondary">취소</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -266,6 +266,45 @@
     </div>
   <% } %>
 
+  <!-- views/layout.ejs의 네비게이션 부분 -->
+<% if (user) { %>
+  <li class="nav-item dropdown">
+    <a class="nav-link position-relative" href="#" id="notificationDropdown" 
+       role="button" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-bell"></i>
+      <span class="notification-badge" id="notificationBadge" style="display: none;">
+        0
+      </span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end notification-dropdown" 
+        aria-labelledby="notificationDropdown" style="min-width: 300px;">
+      <li class="dropdown-header d-flex justify-content-between align-items-center">
+        <span>알림</span>
+        <form action="/notifications/read-all" method="POST" class="d-inline">
+          <button type="submit" class="btn btn-sm btn-link p-0">모두 읽음</button>
+        </form>
+      </li>
+      <li><hr class="dropdown-divider"></li>
+      <div id="notificationList" style="max-height: 400px; overflow-y: auto;">
+        <li class="text-center py-3 text-muted">
+          <small>새 알림이 없습니다</small>
+        </li>
+      </div>
+      <li><hr class="dropdown-divider"></li>
+      <li>
+        <a class="dropdown-item text-center" href="/notifications">
+          모든 알림 보기
+        </a>
+      </li>
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="/notifications/settings">
+      <i class="bi bi-gear"></i>
+    </a>
+  </li>
+<% } %>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/common.js"></script>
   

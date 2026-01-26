@@ -1,0 +1,82 @@
+<!-- views/notifications/list.ejs -->
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-8 mx-auto">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>알림</h2>
+        <div>
+          <form action="/notifications/read-all" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-check-all"></i> 모두 읽음
+            </button>
+          </form>
+          <a href="/notifications/settings" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-gear"></i> 설정
+          </a>
+        </div>
+      </div>
+
+      <% if (notifications.length === 0) { %>
+        <div class="alert alert-info text-center">
+          <i class="bi bi-bell-slash" style="font-size: 3rem;"></i>
+          <p class="mt-3">알림이 없습니다.</p>
+        </div>
+      <% } else { %>
+        <div class="list-group">
+          <% notifications.forEach(notification => { %>
+            <div class="list-group-item <%= !notification.read ? 'list-group-item-action bg-light' : '' %>">
+              <div class="d-flex w-100 justify-content-between">
+                <div class="flex-grow-1">
+                  <% if (notification.sender) { %>
+                    <strong><%= notification.sender.displayName || notification.sender.username %></strong>
+                  <% } %>
+                  <p class="mb-1"><%= notification.message %></p>
+                  <small class="text-muted">
+                    <%= new Date(notification.createdAt).toLocaleString('ko-KR') %>
+                  </small>
+                </div>
+                <div class="d-flex flex-column align-items-end ms-3">
+                  <% if (notification.link) { %>
+                    <a href="<%= notification.link %>" class="btn btn-sm btn-primary mb-2"
+                       onclick="markAsRead('<%= notification._id %>')">
+                      보기
+                    </a>
+                  <% } %>
+                  <form action="/notifications/<%= notification._id %>/delete" method="POST">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+
+        <!-- 페이지네이션 -->
+        <% if (pages > 1) { %>
+          <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+              <% for (let i = 1; i <= pages; i++) { %>
+                <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                  <a class="page-link" href="/notifications?page=<%= i %>"><%= i %></a>
+                </li>
+              <% } %>
+            </ul>
+          </nav>
+        <% } %>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<script>
+function markAsRead(notificationId) {
+  fetch(`/notifications/${notificationId}/read`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+}
+</script>
