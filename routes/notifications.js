@@ -72,3 +72,31 @@ router.get('/settings', isAuthenticated, async (req, res) => {
     });
 });
 
+// 알림 설정 업데이트
+router.post('/settings', isAuthenticated, async (req, res) => {
+    try {
+        const settings = {
+            enabled: req.body.enabled === 'on',
+            comments: req.body.comments === 'on',
+            replies: req.body.replies === 'on',
+            votes: req.body.votes === 'on',
+            pollEnd: req.body.pollEnd === 'on',
+            email: {
+                enabled: req.body.emailEnabled === 'on',
+                comments: req.body.emailComments === 'on'
+            }
+        };
+
+        req.user.notificationSettings = settings;
+        await req.user.save();
+
+        req.flash('success', '알림 설정이 저장되었습니다');
+        res.redirect('/notifications/settings')
+    } catch (error) {
+        console.error('설정 저장 오류:', error);
+        req.flash('error', '설정 저장에 실패했습니다.');
+        res.redirect('/notifications/settings');
+    }
+});
+
+module.exports = router;
