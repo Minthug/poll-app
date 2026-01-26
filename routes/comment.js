@@ -1,6 +1,7 @@
 const express = require("express")
 const router = express.Router();
 const Comment = require('../models/Comment');
+const NotificationHelper = require('../utils/notificationHelper');
 const Poll = require('../models/Poll');
 const { isAuthenticatedAPI } = require('../middleware/auth');
 
@@ -89,6 +90,22 @@ router.post('/polls/:pollId/comments', async (req, res) => {
                 createdAt: comment.createdAt
             }
         });
+
+        // 댓글 알림 생성
+        if (req.user) {
+            // 투표 생성자에게 알림
+            if (poll.creator.toString() !== req.user._id.toString()) {
+                await NotificationHelper.notifyComment(poll, comment, req.user);
+            }
+
+            // 대댓글인 경우 부모 댓글(상위 댓글) 작성자에게 알림
+            if (parentId) {
+                const parentComment = await Comment.findById(parentId);
+                if (parentComment && parentComment.author.toString() !== req.user._id.toString()) {
+                    await NotificationHelper.notifyReply(poll, comment, parentComment, req.user);
+                }
+            }
+        }
     } catch (error) {
         console.error('❌ 댓글 작성 오류:', error);
         res.status(500).json({
