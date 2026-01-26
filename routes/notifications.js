@@ -40,3 +40,14 @@ router.get('/:id/read', isAuthenticated, async (req, res) => {
     }
 });
 
+// 모든 알람 읽음 처리
+router.get('/read-all', isAuthenticated, async (req, res) => {
+    try {
+        await NotificationHelper.markAllAsRead(req.user._id);
+        req.flash('success', '모든 알림을 읽음 처리했습니다');
+        res.redirect('/notifications');
+    } catch (error) {
+        req.flash('error', '오류가 발생했습니다');
+        res.redirect('/notifications');
+    }
+});

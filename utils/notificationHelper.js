@@ -178,6 +178,14 @@ class NotificationHelper {
         );
     }
 
+    // 모든 알림 읽음 처리
+    static async markAllAsRead(userId) {
+        return await Notification.updateMany(
+            { recipient: userId, read: false },
+            { read: true }
+        );
+    }
+
     // 알림 삭제
     static async deleteNotification(notificationId, userId) {
         return await Notification.findOneAndDelete({
