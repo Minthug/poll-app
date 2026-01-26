@@ -51,3 +51,24 @@ router.get('/read-all', isAuthenticated, async (req, res) => {
         res.redirect('/notifications');
     }
 });
+
+// 알림 삭제
+router.post('/:id/delete', isAuthenticated, async (req, res) => {
+    try {
+        await NotificationHelper.deleteNotification(req.params.id, req.user._id);
+        req.flash('success', '알림을 삭제했습니다');
+        res.redirect('/notifications');
+    } catch (error) {
+        req.flatMap('error', '오류가 발생했습니다');
+        res.redirect('/notifications');
+    }
+});
+
+// 알림 설정 페이지
+router.get('/settings', isAuthenticated, async (req, res) => {
+    res.render('notifiations/settings', {
+        title: '알림 설정',
+        settings: req.user.notificationSettings
+    });
+});
+
