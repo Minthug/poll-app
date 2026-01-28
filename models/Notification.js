@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const notficiationSchema = new mongoose.Schema({
+const notificiationSchema = new mongoose.Schema({
     recipient: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -43,6 +43,6 @@ const notficiationSchema = new mongoose.Schema({
 });
 
 // 복합 인덱스
-notificationSchema.index({ recipient: 1, read: 1, createdAt: -1 });
+notificiationSchema.index({ recipient: 1, read: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Notification', notficiationSchema);

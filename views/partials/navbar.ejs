@@ -1,0 +1,82 @@
+<nav class="top-navbar">
+  <div class="nav-left">
+    <!-- 홈 버튼 -->
+    <a href="/" class="nav-button">
+      <span class="nav-icon">🏠</span>
+      <span>홈</span>
+    </a>
+
+    <!-- 프로필 버튼 (로그인한 경우만) -->
+    <% if (typeof user !== 'undefined' && user) { %>
+      <a href="/profile" class="nav-button">
+        <span class="nav-icon">👤</span>
+        <span>프로필</span>
+      </a>
+    <% } %>
+  </div>
+
+  <div class="nav-right">
+    <!-- 알림 (로그인한 경우만) -->
+    <% if (typeof user !== 'undefined' && user) { %>
+      <div class="dropdown">
+        <button class="nav-button dropdown-toggle" type="button" 
+                id="notificationDropdown" data-bs-toggle="dropdown" 
+                aria-expanded="false" style="position: relative;">
+          <span class="nav-icon">🔔</span>
+          <span>알림</span>
+          <span class="notification-badge" id="notificationBadge" style="display: none;">
+            0
+          </span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end notification-dropdown" 
+            aria-labelledby="notificationDropdown" style="min-width: 350px;">
+          <li class="dropdown-header d-flex justify-content-between align-items-center">
+            <span><strong>알림</strong></span>
+            <form action="/notifications/read-all" method="POST" class="d-inline">
+              <button type="submit" class="btn btn-sm btn-link p-0 text-decoration-none">
+                모두 읽음
+              </button>
+            </form>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <div id="notificationList" style="max-height: 400px; overflow-y: auto;">
+            <li class="text-center py-3 text-muted">
+              <small>새 알림이 없습니다</small>
+            </li>
+          </div>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <a class="dropdown-item text-center" href="/notifications">
+              <strong>모든 알림 보기</strong>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 알림 설정 -->
+      <a href="/notifications/settings" class="nav-button" title="알림 설정">
+        <span class="nav-icon">⚙️</span>
+        <span>설정</span>
+      </a>
+    <% } %>
+
+    <!-- 다크모드 토글 -->
+    <button class="nav-button" onclick="toggleDarkMode()">
+      <span class="nav-icon" id="themeIcon">🌙</span>
+      <span id="themeText">다크</span>
+    </button>
+
+    <!-- 로그인/로그아웃 -->
+    <% if (typeof user !== 'undefined' && user) { %>
+      <a href="/auth/logout" class="nav-button">
+        <span class="nav-icon">🚪</span>
+        <span>로그아웃</span>
+      </a>
+    <% } else { %>
+      <a href="/auth/login" class="nav-button">
+        <span class="nav-icon">🔑</span>
+        <span>로그인</span>
+      </a>
+    <% } %>
+  </div>
+</nav>
