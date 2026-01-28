@@ -45,4 +45,4 @@ const notificiationSchema = new mongoose.Schema({
 // 복합 인덱스
 notificiationSchema.index({ recipient: 1, read: 1, createdAt: -1 });
 
-module.exports = mongoose.model('Notification', notficiationSchema);
+module.exports = mongoose.model('Notification', notificiationSchema);
