@@ -20,6 +20,37 @@ document.addEventListener('DOMContentLoaded', function() {
       .catch(err => console.error('알림 개수 조회 오류:', err));
   }
 
+  // 드롭다운 알림 목록 로드
+  function loadRecentNotifications() {
+    fetch('/notifications/recent?limit=5')
+        .then(res => res.json())
+        .then(data => {
+            if (data.notification && data.notifications.length > 0) {
+                notificationList.innerHTML = data.notifications.map(n => `
+                    <li class="notification-item ${!n.read ? 'unread' : ''}">
+              <a href="${n.link}" class="text-decoration-none text-reset d-block"
+                 onclick="markAsRead('${n._id}')">
+                <div class="notification-content">
+                  ${n.message}
+                </div>
+                <div class="notification-time">
+                  ${formatTime(n.createdAt)}
+                </div>
+              </a>
+            </li>
+                `).join('');
+            }
+        })
+        .catch (err => console.error('알림 목록 조회 오류:', err));
+  }
+
+  // 시간 포맷
+  function formatTime(dateString) {
+    const date = new Date(dateString);
+    
+  }
+
+
   // 초기 로드
   updateUnreadCount();
 
