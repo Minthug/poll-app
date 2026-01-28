@@ -99,4 +99,19 @@ router.post('/settings', isAuthenticated, async (req, res) => {
     }
 });
 
+// 최근 알림 (드롭다운용 API)
+router.get('/recent', isAuthenticated, async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 5;
+    const notifications = await Notification.find({ recipient: req.user._id })
+      .populate('sender', 'username displayName')
+      .sort({ createdAt: -1 })
+      .limit(limit);
+    
+    res.json({ notifications });
+  } catch (error) {
+    res.status(500).json({ error: '오류가 발생했습니다.' });
+  }
+});
+
 module.exports = router;
