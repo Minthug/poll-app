@@ -251,12 +251,14 @@ const adminRoutes = require('./routes/admin');
 const authRoutes = require('./routes/auth');
 const oauthRoutes = require('./routes/oauth');
 const profileRoutes = require('./routes/profile');
+const notificationRoutes = require('./routes/notifications');
 
 app.use('/polls', pollRoutes);
 app.use('/admin', adminRoutes);
 app.use('/auth', authRoutes);
 app.use('/oauth', oauthRoutes);
 app.use('/profile', profileRoutes);
+app.use('/notification', notificationRoutes);
 
 // ========================================
 // 7. 홈 라우트
