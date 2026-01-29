@@ -1,3 +1,31 @@
+const User = require('../models/User');
+
+// ==========================================
+// 세션 복구 미들웨어
+// ==========================================
+async function deserializeUser(req, res, next) {
+    // 정적 파일 스킵
+    const staticPaths = ['/css', '/js', '/images', '/favicon.ico', '/api'];
+    if (staticPaths.some(path => req.path.startsWith(path))) {
+        return next();
+    } 
+
+    // 세션에 userId가 있지만 req.user가 없는 경우 DB 조회
+    if (req.session && req.session.userId && !req.user) {
+        try {
+            const user = await User.findById(req.session.userId);
+            if (user) {
+                req.user = user;
+            }
+        } catch (err) {
+            console.error('세션 복구 오류:', err);
+        }
+    }
+
+    next();
+}
+
+
 // 관리자 인증 체크 미들웨어
 function checkAuth(req, res, next) {
     if (req.session && req.session.isAdmin) {
