@@ -26,7 +26,49 @@ async function deserializeUser(req, res, next) {
 }
 
 
-// 관리자 인증 체크 미들웨어
+// ==========================================
+// OAuth 첫 로그인 체크
+// ==========================================
+async function checkFirstLogin(req, res, next) {
+    // 정적 파일 및 API 스킵
+    const skipPaths = ['/css', '/js', '/images', '/favicon.ico', '/api'];
+    if (skipPaths.some(path => req.path.startsWith(path))) {
+        return next();
+    } 
+
+    // 제외 경로
+    const excludedPaths = ['/auth/oauth-terms', '/auth/logout'];
+    if (excludedPaths.some(path => req.path.startsWith(path))) {
+        return next();
+    }
+
+    // 사용자가 없거나 이미 첫 로그인이 아닌 경우 스킵
+    if (!req.user || req.user.isFirstLogin === false) {
+        return next();
+    }
+
+    try {
+        // 첫 로그인인 경우 약관 페이지로
+        if (req.user.isFirstLogin === true) {
+            console.log('🔄 약관 페이지로 리디렉션:', req.user.username);
+            return res.redirect('/auth/oauth-terms');
+        }
+
+        // undefined/null인 경우 기존 사용자 업데이트
+        if (req.user.isFirstLogin === undefined || req.user.isFirstLogin === null) {
+            req.user.isFirstLogin = false;
+            await req.user.save();
+            console.log('✅ 기존 사용자 업데이트:', req.user.username);
+        } 
+    } catch (err) {
+        console.error('❌ 첫 로그인 체크 오류:', err);
+    }
+    next();
+}
+
+// ==========================================
+// 관리자 인증 체크
+// ==========================================
 function checkAuth(req, res, next) {
     if (req.session && req.session.isAdmin) {
         return next();
