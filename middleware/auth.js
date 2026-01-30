@@ -113,4 +113,9 @@ function isNotAuthenticated(req, res, next) {
     res.redirect('/');
 }
 
-module.exports = { checkAuth, requireLogin, isAuthenticated, isAuthenticatedAPI ,isNotAuthenticated };
+module.exports = { deserializeUser,
+  checkAuth,
+  requireLogin,
+  isAuthenticated,
+  isAuthenticatedAPI,
+  isNotAuthenticated };
