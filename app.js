@@ -59,6 +59,7 @@ const Visitor = require('./models/Visitor');
 const Comment = require('./models/Comment');
 const User = require('./models/User');
 const IPConsent = require('./models/IPConsent');
+const Notification = require('./models/Notification');
 
 // ========================================
 // 5. 미들웨어
@@ -76,6 +77,8 @@ const {
   sessionActivity,
   checkSessionWarning
 } = require('./middleware/session');
+
+const { deserializeUser } = require('./middleware/auth');
 
 // 기본 미들웨어
 app.use(express.json());
@@ -107,6 +110,9 @@ app.use(sessionActivity);
 app.use(checkSessionWarning);
 app.use(passport.initialize());
 app.use(passport.session());
+
+// 세션 복구 미들웨어 추가(Passport 이후)
+app.use(deserializeUser);
 
 // ⬇️⬇️⬇️ CSRF 보호 전에 예외 라우트 등록 ⬇️⬇️⬇️
 const consentRoutes = require('./routes/consent');
@@ -258,7 +264,7 @@ app.use('/admin', adminRoutes);
 app.use('/auth', authRoutes);
 app.use('/oauth', oauthRoutes);
 app.use('/profile', profileRoutes);
-app.use('/notification', notificationRoutes);
+app.use('/notifications', notificationRoutes);
 
 // ========================================
 // 7. 홈 라우트
