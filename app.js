@@ -193,41 +193,50 @@ app.use(async (req, res, next) => {
     return next();
   }
 
-  
-  if (req.session && req.session.userId) {
-    try {
-      // 제외할 경로들
-      const excludedPaths = [
-        '/auth/oauth-terms',
-        '/auth/logout',
-        '/api/',
-        '/public/',
-        '/images/',
-        '/css/',
-        '/js/'
-      ];
-      
-      if (excludedPaths.some(path => req.path.startsWith(path))) {
-        console.log('⏭️  제외 경로:', req.path);
+  // 세션이 없거나 userId가 없으면 스킵
+  if (!req.session || !req.session.userId) {
+    return next();
+  }
+
+  // 이미 체크 완료된 세션은 스킵(세션에 플래그 저장)
+  if (req.session.isFirstLoginChecked) {
+    return next();
+  }
+
+  const excludedPaths = ['/auth/oauth-terms', '/auth/logout'];
+  if (excludedPaths.some(path => req.path.startsWith(path))) {
+    return next();
+  }
+
+  try {
+    // req.user가 없으면 조회
+    if (!req.user) {
+      const user = await User.findById(req.session.userId);
+      if (!user) {
         return next();
       }
-
-      const user = await User.findById(req.session.userId);
-      
-      console.log('👤 체크:', user?.username, 'isFirstLogin:', user?.isFirstLogin);
-
-      if (user && user.isFirstLogin === true) {
-        console.log('🔄 약관 페이지로 리디렉션');
-        return res.redirect('/auth/oauth-terms');
-      }
-
-      if (user && (user.isFirstLogin === undefined || user.isFirstLogin === null)) {
-        await User.findByIdAndUpdate(user._id, { isFirstLogin: false });
-        console.log('✅ 기존 사용자 업데이트');
-      }
-    } catch (error) {
-      console.error('❌ 첫 로그인 체크 오류:', error);
+      req.user = user;
     }
+
+    // 첫 로그인이 아닌 경우 세션에 플래그 저장 (다시 체크하지 않음)
+    if (req.user.isFirstLogin === fasle) {
+      req.session.firstLoginChecked = true;
+      return next();
+    }
+
+    // 첫 로그인이 경우 약관 페이지로
+    if (req.user.isFirstLogin === true) {
+      return res.redirect('/auth/oauth-terms');
+    }
+
+    // 기존 사용자 업데이트(한번만)
+    if (req.user.isFirstLogin === undefined || req.user.isFirstLogin === null) {
+      req.user.isFirstLogin = false;
+      await req.user.save();
+      req.session.firstLoginChecked = true;
+    } 
+  } catch (error) {
+        console.error('❌ 첫 로그인 체크 오류:', error);
   }
   next();
 });
