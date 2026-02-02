@@ -66,7 +66,7 @@ router.post('/:id/delete', isAuthenticated, async (req, res) => {
 
 // 알림 설정 페이지
 router.get('/settings', isAuthenticated, async (req, res) => {
-    res.render('notifiations/settings', {
+    res.render('notifications/settings', {
         title: '알림 설정',
         settings: req.user.notificationSettings
     });

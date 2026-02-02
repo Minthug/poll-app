@@ -4,6 +4,10 @@ const User = require('../models/User');
 // 세션 복구 미들웨어
 // ==========================================
 async function deserializeUser(req, res, next) {
+
+    if (req.path.match(/\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/i)) {
+        return next();
+    }
     // 정적 파일 스킵
     const staticPaths = ['/css', '/js', '/images', '/favicon.ico', '/api'];
     if (staticPaths.some(path => req.path.startsWith(path))) {
