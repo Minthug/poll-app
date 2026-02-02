@@ -180,8 +180,20 @@ app.post('/auth/oauth-terms', async (req, res) => {
 app.use(csrfProtection);
 app.use(addCsrfToViews);
 
-// ⬇️⬇️⬇️ OAuth 첫 로그인 체크 미들웨어 ⬇️⬇️⬇️
+// ⬇️⬇️⬇️ OAuth 첫 로그인 체크 미들웨어(최적화) ⬇️⬇️⬇️
 app.use(async (req, res, next) => {
+
+  // 정적 파일은 즉시 스킵(확장자로 판단)
+  if (req.path.match(/\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/i)) {
+    return next();
+  }
+  // 정적 경로 스킵
+  const skipPaths = ['/api/', '/public/', '/images/', '/css/', '/js/', '/favicon'];
+  if (skipPaths.some(path => req.path.startsWith(path))) {
+    return next();
+  }
+
+  
   if (req.session && req.session.userId) {
     try {
       // 제외할 경로들
