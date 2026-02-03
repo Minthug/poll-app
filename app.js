@@ -219,7 +219,7 @@ app.use(async (req, res, next) => {
     }
 
     // 첫 로그인이 아닌 경우 세션에 플래그 저장 (다시 체크하지 않음)
-    if (req.user.isFirstLogin === fasle) {
+    if (req.user.isFirstLogin === false) {
       req.session.firstLoginChecked = true;
       return next();
     }

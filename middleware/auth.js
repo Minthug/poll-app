@@ -14,18 +14,32 @@ async function deserializeUser(req, res, next) {
         return next();
     } 
 
-    // 세션에 userId가 있지만 req.user가 없는 경우 DB 조회
-    if (req.session && req.session.userId && !req.user) {
-        try {
-            const user = await User.findById(req.session.userId);
-            if (user) {
-                req.user = user;
-            }
-        } catch (err) {
-            console.error('세션 복구 오류:', err);
-        }
+    if (!req.session || !req.session.userId) {
+        return next();
     }
 
+    if (req.session.userCache) {
+        req.user = req.session.userCache;
+        return next();
+    }
+    // DB 조회 (첫 요청에만)
+    try {
+        const user = await User.findById(req.session.userId);
+        if (user) {
+            req.user = user;
+            req.session.userCache = {
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+                displayName: user.displayName,
+                isFirstLogin: user.isFirstLogin,
+                notificationSettings: user.notificationSettings,
+                verificationLevel: user.verificationLevel,
+            };
+        }
+    } catch (error) {
+        console.error('세션 복구 오류', error);
+    }
     next();
 }
 
