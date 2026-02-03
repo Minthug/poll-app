@@ -1,5 +1,12 @@
 const User = require('../models/User');
 
+// 로그 제어
+const debug = (...args) => {
+    if (process.env.DEBUG_AUTH === 'true') {
+        console.log(...args);
+    }
+}
+
 // ==========================================
 // 세션 복구 미들웨어
 // ==========================================
@@ -22,25 +29,41 @@ async function deserializeUser(req, res, next) {
         req.user = req.session.userCache;
         return next();
     }
-    // DB 조회 (첫 요청에만)
-    try {
-        const user = await User.findById(req.session.userId);
-        if (user) {
-            req.user = user;
-            req.session.userCache = {
-                _id: user._id,
-                username: user.username,
-                email: user.email,
-                displayName: user.displayName,
-                isFirstLogin: user.isFirstLogin,
-                notificationSettings: user.notificationSettings,
-                verificationLevel: user.verificationLevel,
-            };
-        }
-    } catch (error) {
-        console.error('세션 복구 오류', error);
+     // 캐시 있으면 바로 사용 (DB 안 가음)
+  if (req.session.userCache) {
+    req.user = req.session.userCache;
+    debug('⚡ 캐시에서 복구:', req.session.userId);
+    return next();
+  }
+
+  // 캐시 없으면 DB 조회한 번만
+  try {
+    debug('🔍 DB 조회:', req.session.userId);
+    const user = await User.findById(req.session.userId);
+    if (user) {
+      req.user = user;
+      saveUserCache(req, user); // 캐시 저장
     }
+  } catch (err) {
+    console.error('❌ 세션 복구 오류:', err);
+  }
+
     next();
+}
+
+// ==========================================
+// 캐시 저장 헬퍼
+// ==========================================
+function saveUserCache(req, user) {
+  req.session.userCache = {
+    _id: user._id,
+    username: user.username,
+    email: user.email,
+    displayName: user.displayName,
+    isFirstLogin: user.isFirstLogin,
+    notificationSettings: user.notificationSettings,
+    verificationLevel: user.verificationLevel
+  };
 }
 
 
@@ -131,6 +154,9 @@ function isNotAuthenticated(req, res, next) {
     res.redirect('/');
 }
 
+// ==========================================
+// 캐시 무효화 헬퍼
+// ==========================================
 function invalidateUserCache(req) {
     if (req.session && req.session.userCache) {
         delete req.session.userCache;
