@@ -131,6 +131,12 @@ function isNotAuthenticated(req, res, next) {
     res.redirect('/');
 }
 
+function invalidateUserCache(req) {
+    if (req.session && req.session.userCache) {
+        delete req.session.userCache;
+    }
+}
+
 module.exports = { deserializeUser,
   checkAuth,
   requireLogin,
