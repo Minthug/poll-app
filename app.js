@@ -78,7 +78,7 @@ const {
   checkSessionWarning
 } = require('./middleware/session');
 
-const { deserializeUser } = require('./middleware/auth');
+const { deserializeUser, saveUserCache, invalidateUserCache } = require('./middleware/auth');
 
 // 기본 미들웨어
 app.use(express.json());
@@ -216,6 +216,7 @@ app.use(async (req, res, next) => {
         return next();
       }
       req.user = user;
+      saveUserCache(req, user);
     }
 
     // 첫 로그인이 아닌 경우 세션에 플래그 저장 (다시 체크하지 않음)
@@ -233,6 +234,7 @@ app.use(async (req, res, next) => {
     if (req.user.isFirstLogin === undefined || req.user.isFirstLogin === null) {
       req.user.isFirstLogin = false;
       await req.user.save();
+      saveUserCache(req, req.user);
       req.session.firstLoginChecked = true;
     } 
   } catch (error) {
