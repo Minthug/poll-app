@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const User = require('../models/User');
 const { body, validationResult } = require('express-validator');
-
+const { saveUserCache, invalidateUserCache } = require('../middleware/auth'); // ⬅️ import만 여기
 
 // ========================================
 // 이메일 발송 설정
@@ -200,6 +200,7 @@ router.get('/verify-email/:token', async (req, res) => {
         // 자동 로그인 (세션 생성)
         req.session.userId = user._id;
         req.session.username = user.username;
+        saveUserCache(req, user);
     
         console.log('🔐 자동 로그인:', user.username);
 
@@ -286,6 +287,7 @@ router.post('/login', [
         // 세션 저장
         req.session.userId = user._id;
         req.session.username = user.username;
+        saveUserCache(req, user);
 
         console.log('✅ 로그인 성공:', user.username);
 
@@ -355,9 +357,12 @@ router.post('/oauth-terms', async (req, res) => {
         }
         
         // isFirstLogin 플래그 해제
-        const result = await User.findByIdAndUpdate(req.session.userId, {
-            isFirstLogin: false
-        });
+        const result = await User.findByIdAndUpdate(req.session.userId, 
+            { isFirstLogin: false },
+            { new: true }
+        );
+
+        invalidateUserCache(req);
         
         console.log('✅ 약관 동의 완료:', result.username);
         console.log('🔄 /polls로 리디렉션');

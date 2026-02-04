@@ -1,6 +1,7 @@
 const express = require('express');
 const passport = require('../config/passport');
 const router = express.Router();
+const { saveUserCache } = require('../middleware/auth');
 
 
 // ========================================
@@ -31,6 +32,7 @@ router.get('/google/callback', (req, res, next) => {
     req.session.userId = req.user._id;
     req.session.username = req.user.username;
     req.session.lastActivity = Date.now();
+    saveUserCache(req, req.user);
 
     // ✅ 세션 저장 후 리디렉션
     req.session.save((err) => {
@@ -60,6 +62,7 @@ router.get('/naver/callback', passport.authenticate('naver', { failureRedirect: 
     req.session.userId = req.user._id;
     req.session.username = req.user.username;
     req.session.lastActivity = Date.now();
+    saveUserCache(req, req.user);
 
     if (req.user.isFirstLogin) {
         return res.redirect('/auth/oauth-terms');
