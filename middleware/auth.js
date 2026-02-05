@@ -11,46 +11,46 @@ const debug = (...args) => {
 // 세션 복구 미들웨어
 // ==========================================
 async function deserializeUser(req, res, next) {
-
+    // 정적 파일 스킵
     if (req.path.match(/\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/i)) {
         return next();
     }
-    // 정적 파일 스킵
-    const staticPaths = ['/css', '/js', '/images', '/favicon.ico', '/api'];
-    if (staticPaths.some(path => req.path.startsWith(path))) {
+
+    const staticPaths = ['/css', '/js', '/images', '/favicon', '/api', '/public'];
+    if (staticPaths.some(p => req.path.startsWith(p))) {
         return next();
-    } 
+    }
+
+    if (req.user) {
+        return next();
+    }
 
     if (!req.session || !req.session.userId) {
         return next();
     }
 
+    // ⬇️⬇️⬇️ 여기서 확인! ⬇️⬇️⬇️
     if (req.session.userCache) {
         req.user = req.session.userCache;
+        console.log('✅ 캐시 사용 (DB 조회 안 함)');  // ⬅️ 이게 나와야 함!
         return next();
     }
-     // 캐시 있으면 바로 사용 (DB 안 가음)
-  if (req.session.userCache) {
-    req.user = req.session.userCache;
-    debug('⚡ 캐시에서 복구:', req.session.userId);
-    return next();
-  }
 
-  // 캐시 없으면 DB 조회한 번만
-  try {
-    debug('🔍 DB 조회:', req.session.userId);
-    const user = await User.findById(req.session.userId);
-    if (user) {
-      req.user = user;
-      saveUserCache(req, user); // 캐시 저장
+    // ⬇️⬇️⬇️ 여기가 실행되면 문제! ⬇️⬇️⬇️
+    try {
+        console.log('🔍 DB 조회 (캐시 없음)');  // ⬅️ 이게 계속 나오면 문제!
+        const user = await User.findById(req.session.userId);
+        if (user) {
+            req.user = user;
+            saveUserCache(req, user);
+            console.log('💾 캐시 저장함');
+        }
+    } catch (err) {
+        console.error('❌ 세션 복구 오류:', err);
     }
-  } catch (err) {
-    console.error('❌ 세션 복구 오류:', err);
-  }
 
     next();
 }
-
 // ==========================================
 // 캐시 저장 헬퍼
 // ==========================================

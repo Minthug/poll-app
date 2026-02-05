@@ -12,7 +12,7 @@ const app = express();
 const server = http.createServer(app);
 
 // ========================================
-// 1. 기본 설정
+// 1. 뷰 엔진 설정
 // ========================================
 app.set('trust proxy', true);
 app.set('view engine', 'ejs');
@@ -65,6 +65,7 @@ const Notification = require('./models/Notification');
 // 5. 미들웨어
 // ========================================
 const passport = require('./config/passport');
+const { deserializeUser, saveUserCache, invalidateUserCache } = require('./middleware/auth');
 
 const {
   cookieParser,
@@ -78,13 +79,15 @@ const {
   checkSessionWarning
 } = require('./middleware/session');
 
-const { deserializeUser, saveUserCache, invalidateUserCache } = require('./middleware/auth');
+// 정적 파일 처리
+app.use('/css', express.static(path.join(__dirname, 'public/css')));
+app.use('/js', express.static(path.join(__dirname, 'public/js')));
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // 기본 미들웨어
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
-
 // 보안 미들웨어
 app.use(cookieParser());
 app.use(globalLimiter);
@@ -109,7 +112,6 @@ app.use(session({
 app.use(sessionActivity);
 app.use(checkSessionWarning);
 app.use(passport.initialize());
-// app.use(passport.session());
 
 // 세션 복구 미들웨어 추가(Passport 이후)
 app.use(deserializeUser);
