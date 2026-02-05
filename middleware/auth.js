@@ -163,9 +163,15 @@ function invalidateUserCache(req) {
     }
 }
 
-module.exports = { deserializeUser,
-  checkAuth,
-  requireLogin,
-  isAuthenticated,
-  isAuthenticatedAPI,
-  isNotAuthenticated };
+
+module.exports = {
+    deserializeUser,
+    saveUserCache,        
+    invalidateUserCache,    
+    checkFirstLogin,
+    checkAuth,
+    requireLogin,
+    isAuthenticated,
+    isAuthenticatedAPI,
+    isNotAuthenticated
+};

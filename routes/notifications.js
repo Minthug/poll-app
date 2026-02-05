@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const NotificationHelper = require('../utils/notificationHelper');
-const { isAuthenticated } = require('../middleware/auth');
+const { isAuthenticated, invalidateUserCache } = require('../middleware/auth');
 
 // 알림 목록 조회
 router.get('/', isAuthenticated, async (req, res) => {

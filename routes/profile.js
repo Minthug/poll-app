@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Poll = require('../models/Poll');
 const Visitor = require('../models/Visitor');
-const { requireLogin } = require('../middleware/auth');
+const { requireLogin, invalidateUserCache } = require('../middleware/auth');
 
 /* 프로필 페이지 (로그인 필수) */
 router.get('/', requireLogin, async (req, res) => {

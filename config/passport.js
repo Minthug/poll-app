@@ -13,6 +13,7 @@ passport.serializeUser((user, done) => {
     done(null, user.id);
 });
 
+// 로그 제거 + 최적화 
 passport.deserializeUser(async (id, done) => {
     try {
         console.log('🔍 사용자 세션 복구:', id);

@@ -109,7 +109,7 @@ app.use(session({
 app.use(sessionActivity);
 app.use(checkSessionWarning);
 app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.session());
 
 // 세션 복구 미들웨어 추가(Passport 이후)
 app.use(deserializeUser);
