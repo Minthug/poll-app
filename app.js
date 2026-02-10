@@ -374,6 +374,9 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`🌐 BASE_URL: ${BASE_URL}`);
   console.log(`🔐 Google Callback: ${GOOGLE_CALLBACK_URL}`);
   console.log(`🔐 Naver Callback: ${NAVER_CALLBACK_URL}`);
+  server.timeout = 300000;
+  server.keepAliveTimeout = 65000;
+  server.headersTimeout = 66000;
 
   if (ENV === 'development') {
     console.log(`💡 로컬 접속: http://localhost:${PORT}`);
