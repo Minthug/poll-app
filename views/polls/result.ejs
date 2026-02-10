@@ -1164,7 +1164,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
-  const pollId = '<%= poll._id %>';
+  window.pollId = '<%= poll._id %>';
   const socket = io();
 
   const colors = [
@@ -1189,98 +1189,134 @@
     'rgba(160, 160, 160, 0.8)'
   ];
 
-  // 메인 차트
-  const ctx = document.getElementById('pollChart').getContext('2d');
-  let pollChart = new Chart(ctx, {
-    type: 'pie',
-    data: {
-      labels: [
-        <% poll.options.forEach((option, index) => { %>
-          '<%= option.text %>'<%= index < poll.options.length - 1 ? ',' : '' %>
-        <% }); %>
-      ],
-      datasets: [{
-        data: [
+  let pollChart, locationChart;
+
+  // ⭐ DOM 완전 로딩 후 차트 생성
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('📊 차트 초기화 시작');
+    
+    try {
+      initPollChart();
+      initLocationChart();
+      console.log('✅ 차트 초기화 완료');
+    } catch (error) {
+      console.error('❌ 차트 초기화 실패:', error);
+      showToast('❌ 차트를 불러올 수 없습니다');
+    }
+  });
+
+  // 메인 투표 차트
+  function initPollChart() {
+    const ctx = document.getElementById('pollChart');
+    
+    if (!ctx) {
+      console.error('❌ pollChart 캔버스를 찾을 수 없습니다');
+      return;
+    }
+    
+    pollChart = new Chart(ctx.getContext('2d'), {
+      type: 'pie',
+      data: {
+        labels: [
           <% poll.options.forEach((option, index) => { %>
-            <%= option.votes %><%= index < poll.options.length - 1 ? ',' : '' %>
+            '<%= option.text %>'<%= index < poll.options.length - 1 ? ',' : '' %>
           <% }); %>
         ],
-        backgroundColor: colors,
-        borderColor: 'white',
-        borderWidth: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            padding: 15,
-            font: { size: 12 },
-            color: getComputedStyle(document.documentElement).getPropertyValue('--text-color')
-          }
-        },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              const label = context.label || '';
-              const value = context.parsed || 0;
-              const total = context.dataset.data.reduce((a, b) => a + b, 0);
-              const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-              return label + ': ' + value + '표 (' + percentage + '%)';
+        datasets: [{
+          data: [
+            <% poll.options.forEach((option, index) => { %>
+              <%= option.votes %><%= index < poll.options.length - 1 ? ',' : '' %>
+            <% }); %>
+          ],
+          backgroundColor: colors,
+          borderColor: 'white',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 15,
+              font: { size: 12 },
+              color: getComputedStyle(document.documentElement).getPropertyValue('--text-color')
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.parsed || 0;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                return label + ': ' + value + '표 (' + percentage + '%)';
+              }
             }
           }
         }
       }
-    }
-  });
+    });
+    
+    console.log('✅ 투표 차트 생성 완료');
+  }
 
   // 지역 차트
-  const locationCtx = document.getElementById('locationChart').getContext('2d');
-  let locationChart = new Chart(locationCtx, {
-    type: 'pie',
-    data: {
-      labels: [
-        <% if (locationStats && locationStats.length > 0) { %>
-          <% locationStats.forEach((stat, index) => { %>
-            '<%= stat._id || "알 수 없음" %>'<%= index < locationStats.length - 1 ? ',' : '' %>
-          <% }); %>
-        <% } else { %>
-          '투표 데이터 없음'
-        <% } %>
-      ],
-      datasets: [{
-        data: [
+  function initLocationChart() {
+    const locationCtx = document.getElementById('locationChart');
+    
+    if (!locationCtx) {
+      console.error('❌ locationChart 캔버스를 찾을 수 없습니다');
+      return;
+    }
+    
+    locationChart = new Chart(locationCtx.getContext('2d'), {
+      type: 'pie',
+      data: {
+        labels: [
           <% if (locationStats && locationStats.length > 0) { %>
             <% locationStats.forEach((stat, index) => { %>
-              <%= stat.count %><%= index < locationStats.length - 1 ? ',' : '' %>
+              '<%= stat._id || "알 수 없음" %>'<%= index < locationStats.length - 1 ? ',' : '' %>
             <% }); %>
           <% } else { %>
-            0
+            '투표 데이터 없음'
           <% } %>
         ],
-        backgroundColor: locationColors,
-        borderColor: 'white',
-        borderWidth: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            padding: 10,
-            font: { size: 11 },
-            color: getComputedStyle(document.documentElement).getPropertyValue('--text-color')
+        datasets: [{
+          data: [
+            <% if (locationStats && locationStats.length > 0) { %>
+              <% locationStats.forEach((stat, index) => { %>
+                <%= stat.count %><%= index < locationStats.length - 1 ? ',' : '' %>
+              <% }); %>
+            <% } else { %>
+              0
+            <% } %>
+          ],
+          backgroundColor: locationColors,
+          borderColor: 'white',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 10,
+              font: { size: 11 },
+              color: getComputedStyle(document.documentElement).getPropertyValue('--text-color')
+            }
           }
         }
       }
-    }
-  });
+    });
+    
+    console.log('✅ 지역 차트 생성 완료');
+  }
 
   // 링크 복사
   function copyShareLink() {
@@ -1505,22 +1541,27 @@
       setTimeout(() => toast.remove(), 300);
     }, 3000);
   }
-
-  // 실시간 업데이트
+// 실시간 업데이트
   socket.on('vote-update', (data) => {
-    if (data.pollId === pollId) {
+    if (data.pollId === pollId && pollChart) { // ⭐ pollChart 존재 확인 추가
       pollChart.data.datasets[0].data = data.poll.options.map(opt => opt.votes);
       pollChart.update('active');
 
       const totalVotes = data.poll.options.reduce((sum, opt) => sum + opt.votes, 0);
-      document.getElementById('total-votes').textContent = totalVotes;
+      const totalVotesEl = document.getElementById('total-votes');
+      if (totalVotesEl) {
+        totalVotesEl.textContent = totalVotes;
+      }
 
       data.poll.options.forEach(option => {
         const optionElement = document.querySelector('[data-option-id="' + option._id + '"]');
         if (optionElement) {
           const percentage = totalVotes > 0 ? ((option.votes / totalVotes) * 100).toFixed(1) : 0;
-          optionElement.querySelector('.option-votes').textContent = option.votes + '표';
-          optionElement.querySelector('.option-percentage').textContent = percentage + '%';
+          const votesEl = optionElement.querySelector('.option-votes');
+          const percentEl = optionElement.querySelector('.option-percentage');
+          
+          if (votesEl) votesEl.textContent = option.votes + '표';
+          if (percentEl) percentEl.textContent = percentage + '%';
         }
       });
     }

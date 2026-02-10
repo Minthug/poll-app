@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= poll.title %></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: transparent;
+            padding: 20px;
+        }
+
+        .embed-container {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .poll-header {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .poll-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .poll-description {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .poll-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 0.85rem;
+            color: #95a5a6;
+            margin-top: 8px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* 투표 폼 */
+        .vote-form {
+            margin: 20px 0;
+        }
+
+        .option-item {
+            margin-bottom: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f8f9fa;
+        }
+
+        .option-label:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .option-label input[type="radio"]:checked + span {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .option-label:has(input:checked) {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .vote-button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 16px;
+        }
+
+        .vote-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .vote-button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 결과 표시 */
+        .results-container {
+            margin: 20px 0;
+        }
+
+        .result-item {
+            margin-bottom: 16px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .result-text {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .result-stats {
+            color: #7f8c8d;
+        }
+
+        .result-bar-container {
+            width: 100%;
+            height: 32px;
+            background: #ecf0f1;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .result-bar {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.6s ease;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .result-bar.winner {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        /* 메시지 */
+        .message-box {
+            padding: 16px;
+            border-radius: 12px;
+            margin: 16px 0;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .message-voted {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message-ended {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .message-success {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .message-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 원본 링크 */
+        .view-full {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .view-full a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .view-full a:hover {
+            text-decoration: underline;
+        }
+
+        /* 반응형 */
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+            }
+
+            .embed-container {
+                padding: 16px;
+            }
+
+            .poll-title {
+                font-size: 1.2rem;
+            }
+
+            .option-label {
+                padding: 12px 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="embed-container">
+        <!-- 헤더 -->
+        <div class="poll-header">
+            <h1 class="poll-title">📊 <%= poll.title %></h1>
+            <% if (poll.description) { %>
+                <p class="poll-description"><%= poll.description %></p>
+            <% } %>
+            <div class="poll-meta">
+                <div class="meta-item">
+                    <span>📊</span>
+                    <span><%= totalVotes %>표</span>
+                </div>
+                <div class="meta-item">
+                    <span>👥</span>
+                    <span><%= poll.votedIPs ? poll.votedIPs.length : 0 %>명 참여</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 메시지 -->
+        <% if (hasVoted) { %>
+            <div class="message-box message-voted">
+                ✅ 이미 투표하셨습니다. 결과를 확인하세요!
+            </div>
+        <% } else if (isEnded) { %>
+            <div class="message-box message-ended">
+                ⏰ 투표가 종료되었습니다.
+            </div>
+        <% } %>
+
+        <div id="messageBox"></div>
+
+        <!-- 투표 폼 또는 결과 -->
+        <% if (!hasVoted && !isEnded) { %>
+            <!-- 투표 폼 -->
+            <form class="vote-form" id="voteForm">
+                <% poll.options.forEach(option => { %>
+                    <div class="option-item">
+                        <label class="option-label">
+                            <input type="radio" name="option" value="<%= option._id %>" required>
+                            <span><%= option.text %></span>
+                        </label>
+                    </div>
+                <% }); %>
+                <button type="submit" class="vote-button">투표하기</button>
+            </form>
+        <% } else { %>
+            <!-- 결과 표시 -->
+            <div class="results-container" id="resultsContainer">
+                <% 
+                const sortedOptions = [...poll.options].sort((a, b) => b.votes - a.votes);
+                const maxVotes = sortedOptions[0].votes;
+                %>
+                <% sortedOptions.forEach(option => { 
+                    const percentage = totalVotes > 0 ? ((option.votes / totalVotes) * 100).toFixed(1) : 0;
+                    const isWinner = option.votes === maxVotes && option.votes > 0;
+                %>
+                    <div class="result-item">
+                        <div class="result-header">
+                            <span class="result-text">
+                                <%= option.text %>
+                                <% if (isWinner) { %>👑<% } %>
+                            </span>
+                            <span class="result-stats">
+                                <%= option.votes %>표 (<%= percentage %>%)
+                            </span>
+                        </div>
+                        <div class="result-bar-container">
+                            <div class="result-bar <%= isWinner ? 'winner' : '' %>" 
+                                 style="width: <%= percentage %>%">
+                                <%= percentage %>%
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } %>
+
+        <!-- 원본 링크 -->
+        <div class="view-full">
+            <a href="/polls/<%= poll._id %>" target="_blank">
+                전체 화면으로 보기 →
+            </a>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let hasVoted = <%= hasVoted ? 'true' : 'false' %>;
+        const isEnded = <%= isEnded ? 'true' : 'false' %>;
+
+        // Socket.IO 연결
+        const socket = io();
+
+        // 투표 제출
+        const voteForm = document.getElementById('voteForm');
+        if (voteForm) {
+            voteForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const selectedOption = document.querySelector('input[name="option"]:checked');
+                if (!selectedOption) {
+                    showMessage('선택지를 선택해주세요.', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/polls/${pollId}/vote`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ optionId: selectedOption.value })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showMessage('✅ 투표가 완료되었습니다!', 'success');
+                        hasVoted = true;
+                        
+                        // 결과 화면으로 전환
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showMessage(data.error || '투표 처리 중 오류가 발생했습니다.', 'error');
+                        if (data.alreadyVoted) {
+                            setTimeout(() => location.reload(), 2000);
+                        }
+                    }
+                } catch (error) {
+                    console.error('투표 오류:', error);
+                    showMessage('투표 처리 중 오류가 발생했습니다.', 'error');
+                }
+            });
+        }
+
+        // 실시간 업데이트
+        socket.on('vote-update', (data) => {
+            if (data.pollId === pollId && hasVoted) {
+                location.reload();
+            }
+        });
+
+        // 메시지 표시
+        function showMessage(text, type) {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.className = `message-box message-${type}`;
+            messageBox.textContent = text;
+            messageBox.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

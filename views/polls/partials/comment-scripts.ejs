@@ -4,7 +4,6 @@ console.log('🚀 댓글 스크립트 로드됨');
 let currentPage = 1;
 let hasMore = true;
 let isPollCreator = false;
-const pollId = '<%= poll._id %>';
 const isLoggedIn = <%= isAuthenticated ? 'true' : 'false' %>;
 
 console.log('📌 초기화:', { pollId, isLoggedIn });

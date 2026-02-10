@@ -206,16 +206,21 @@ router.get('/:id', async (req, res) => {
 // 결과 페이지
 router.get('/:id/result', async (req, res) => {
     try {
+        const startTime = Date.now();
+        console.log('📊 결과 페이지 요청:', req.params.id);
+
         const poll = await Poll.findById(req.params.id);
         
         if (!poll) {
             return res.status(404).send('여론조사를 찾을 수 없습니다');
         }
 
-        const locationStats = await Visitor.aggregate([
+        const [locationStats] = await Promise.all([
+            Visitor.aggregate([
             { $match: { pollId: poll._id, action: 'vote' } },
             { $group: { _id: '$location.city', count: { $sum: 1 } } },
             { $sort: { count: -1 } }
+            ])
         ]);
 
         const alreadyVoted = req.query.alreadyVoted === 'true';
@@ -230,6 +235,15 @@ router.get('/:id/result', async (req, res) => {
         const topOption = sortedOptions[0];
         const baseUrl = `${req.protocol}://${req.get('host')}`; // ⭐ 추가
 
+
+        // ⭐ 차트 데이터 준비 (JSON 문자열로 변환)
+        const chartData = {
+            labels: poll.options.map(opt => opt.text),
+            votes: poll.options.map(opt => opt.votes),
+            memberVotes: poll.options.map(opt => opt.memberVotes || 0),
+            anonymousVotes: poll.options.map(opt => opt.anonymousVotes || 0)
+        };
+
         res.render('polls/result', { 
             poll, 
             totalVotes: poll.options.reduce((sum, opt) => sum + opt.votes, 0),
@@ -238,7 +252,8 @@ router.get('/:id/result', async (req, res) => {
             ended,
             isOwner,
             showRanking: true,
-            baseUrl, // ⭐ 추가
+            baseUrl,
+            chartData: JSON.stringify(chartData),
             isAuthenticated: req.isAuthenticated(),
             user: req.user || null,
             pageTitle: `${poll.title} - 투표 결과`,
