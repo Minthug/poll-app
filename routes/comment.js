@@ -91,25 +91,21 @@ router.post('/polls/:pollId/comments', async (req, res) => {
             }
         });
 
-        // 댓글 알림 생성
-        if (req.user) {
-            // 투표 생성자에게 알림
-            if (poll.creator.toString() !== req.user._id.toString()) {
-                await NotificationHelper.notifyComment(poll, comment, req.user);
-            }
-
-            // 대댓글인 경우 부모 댓글(상위 댓글) 작성자에게 알림
-            if (parentId) {
-                const parentComment = await Comment.findById(parentId);
-                if (parentComment && parentComment.author.toString() !== req.user._id.toString()) {
-                    await NotificationHelper.notifyReply(poll, comment, parentComment, req.user);
+        // 댓글 알림 생성 (응답 전송 후 비동기 처리)
+        try {
+            if (req.user) {
+                // 투표 생성자에게 알림
+                if (poll.createdBy.toString() !== req.user._id.toString()) {
+                    await NotificationHelper.notifyComment(poll, comment, req.user);
                 }
             }
+        } catch (notifyError) {
+            console.error('알림 생성 오류 (댓글은 정상 저장됨):', notifyError);
         }
     } catch (error) {
         console.error('❌ 댓글 작성 오류:', error);
         res.status(500).json({
-            success: true,
+            success: false,
             message: '댓글 작성에 실패했습니다.'
         });
     }
@@ -170,7 +166,7 @@ router.delete('/polls/:pollId/comments/:commentId', isAuthenticatedAPI, async (r
         const userId = req.user._id;
 
         // 댓글 조회
-        const omment = await Comment.findById(commentId);
+        const comment = await Comment.findById(commentId);
         if (!comment) {
             return res.status(404).json({
                 success: false,

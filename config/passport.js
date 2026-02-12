@@ -16,7 +16,6 @@ passport.serializeUser((user, done) => {
 // 로그 제거 + 최적화 
 passport.deserializeUser(async (id, done) => {
     try {
-        console.log('🔍 사용자 세션 복구:', id);
         const user = await User.findById(id);
         done(null, user);
     } catch (error) {

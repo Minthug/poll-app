@@ -89,6 +89,7 @@ router.post('/settings', isAuthenticated, async (req, res) => {
 
         req.user.notificationSettings = settings;
         await req.user.save();
+        invalidateUserCache(req);
 
         req.flash('success', '알림 설정이 저장되었습니다');
         res.redirect('/notifications/settings')

@@ -47,15 +47,30 @@ document.addEventListener('DOMContentLoaded', function() {
   // 시간 포맷
   function formatTime(dateString) {
     const date = new Date(dateString);
-    
-  }
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000); // 초 단위
 
+    if (diff < 60) return '방금 전';
+    if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)}일 전`;
+    return date.toLocaleDateString('ko-KR');
+  }
 
   // 초기 로드
   updateUnreadCount();
+  loadRecentNotifications();
 
   // 30초마다 업데이트
-  setInterval(updateUnreadCount, 30000);
+  setInterval(() => {
+    updateUnreadCount();
+    loadRecentNotifications();
+  }, 30000);
+
+  const dropdown = document.getElementById('notificationDropdown');
+  if (dropdown) {
+    dropdown.addEventListener('shown.bs.dropdown', loadRecentNotifications);
+  }
 
   // Socket.IO로 실시간 알림 (선택적)
   if (window.socket) {
@@ -67,6 +82,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+function markAsRead(notificationId) {
+  fetch(`/notifications/${notificationId}/read`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).catch(err => console.error('알림 읽음 처리 오류:', err));
+}
 
 function showNotificationToast(notification) {
   // Bootstrap Toast 사용
