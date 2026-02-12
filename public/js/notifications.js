@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch('/notifications/recent?limit=5')
         .then(res => res.json())
         .then(data => {
-            if (data.notification && data.notifications.length > 0) {
+            if (data.notifications && data.notifications.length > 0) {
                 notificationList.innerHTML = data.notifications.map(n => `
                     <li class="notification-item ${!n.read ? 'unread' : ''}">
               <a href="${n.link}" class="text-decoration-none text-reset d-block"

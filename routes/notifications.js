@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const Notification = require('../models/Notification');
 const NotificationHelper = require('../utils/notificationHelper');
 const { isAuthenticated, invalidateUserCache } = require('../middleware/auth');
 
