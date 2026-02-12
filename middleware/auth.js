@@ -24,11 +24,6 @@ async function deserializeUser(req, res, next) {
         return next();
     }
 
-    // 3. API 경로 체크
-    if (req.path.startsWith('/api/')) {
-        return next();
-    }
-
     // ⬇️⬇️⬇️ 여기부터 실제 인증 체크 ⬇️⬇️⬇️
 
     if (req.user) {
