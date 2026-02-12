@@ -136,7 +136,7 @@ router.get('/polls/:pollId/comments', async (req, res) => {
 
         // 현재 사용자가 작성자인지 확인
         const poll = await Poll.findById(pollId);
-        const isPollCreator = req.isAuthenticated() && poll.createdBy.toString() === req.user._id.toString();
+        const isPollCreator = req.isAuthenticated() && poll && poll.createdBy.toString() === req.user._id.toString();
 
         res.json({
             success: true,
