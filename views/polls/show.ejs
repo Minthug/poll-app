@@ -44,7 +44,7 @@
        메인 컨테이너 (투표 페이지 전체 감싸는 영역)
        ======================================== */
     .vote-container {
-      max-width: 800px;
+      max-width: 960px;
       margin: 0 auto;
     }
     
@@ -173,7 +173,7 @@
     .vote-card {
       background: var(--card-bg);
       border-radius: 20px;
-      padding: 40px;
+      padding: 25px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
     
@@ -185,50 +185,56 @@
       font-size: 0.95rem;
     }
     
-    /* 옵션 그리드 컨테이너 */
+    /* 옵션 그리드 컨테이너 - 가로 배치 */
     .options-grid {
       display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 15px;
       margin-bottom: 30px;
     }
-    
-    /* 개별 옵션 카드 */
+
+    /* 개별 옵션 카드 - 세로로 길게, 스티커 영역 강조 */
     .option-card {
       background: var(--card-bg);
       border: 3px solid var(--border-color);
       border-radius: 20px;
-      padding: 30px;
+      padding: 20px 15px;
       cursor: pointer;
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 280px;
     }
-    
+
     /* 옵션 카드 호버 효과 */
     .option-card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-4px);
       box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
       border-color: #667eea;
     }
-    
+
     /* 선택된 옵션 카드 스타일 */
     .option-card.selected {
       border-color: #667eea;
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-      transform: scale(1.02);
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 12px 35px rgba(102, 126, 234, 0.35);
     }
-    
+
     [data-theme="dark"] .option-card.selected {
       background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
     }
-    
-    /* 옵션 텍스트 */
+
+    /* 옵션 텍스트 - 컴팩트하게 */
     .option-text {
-      font-size: 1.5rem;
+      font-size: 1.15rem;
       font-weight: 700;
       color: var(--text-color);
       text-align: center;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
+      flex-shrink: 0;
     }
     
     /* (프로그레스바 제거 - 스티커 UI로 대체) */
@@ -440,13 +446,15 @@
     .sticker-area {
       display: flex;
       flex-wrap: wrap;
-      gap: 4px;
-      min-height: 40px;
-      padding: 10px;
+      gap: 5px;
+      flex: 1;
+      min-height: 120px;
+      padding: 12px;
       background: rgba(0, 0, 0, 0.03);
-      border-radius: 12px;
-      margin-bottom: 10px;
-      align-items: center;
+      border-radius: 14px;
+      margin-bottom: 12px;
+      align-items: flex-start;
+      align-content: flex-start;
     }
 
     [data-theme="dark"] .sticker-area {
@@ -454,11 +462,11 @@
     }
 
     .sticker {
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       display: inline-block;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
       opacity: 1;
       transform: scale(1) rotate(var(--rotation, 0deg));
       flex-shrink: 0;
@@ -477,9 +485,11 @@
 
     .sticker-count {
       text-align: center;
-      font-weight: 700;
-      font-size: 1rem;
-      color: var(--secondary-text);
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--text-color);
+      flex-shrink: 0;
+      padding-top: 4px;
     }
 
     .sticker-overflow {
@@ -503,38 +513,80 @@
       .poll-title {
         font-size: 2rem;
       }
-      
+
       .poll-description {
         font-size: 1rem;
       }
-      
+
+      .options-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+
+      .option-card {
+        padding: 15px 12px;
+        min-height: 220px;
+      }
+
       .option-text {
-        font-size: 1.2rem;
+        font-size: 1rem;
       }
-      
+
+      .sticker {
+        width: 20px;
+        height: 20px;
+      }
+
+      .sticker-area {
+        gap: 4px;
+        padding: 10px;
+        min-height: 100px;
+      }
+
       .vote-card {
-        padding: 25px;
+        padding: 18px;
       }
-      
+
       .poll-header-top {
         flex-direction: column;
         align-items: center;
         text-align: center;
       }
-      
+
       .poll-title {
         width: 100%;
       }
-      
+
       .owner-actions {
         width: 100%;
         justify-content: center;
       }
-      
+
       .btn-owner {
         flex: 1;
         justify-content: center;
         max-width: 150px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .options-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .option-card {
+        min-height: 180px;
+        padding: 12px 10px;
+      }
+
+      .option-text {
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+      }
+
+      .sticker {
+        width: 18px;
+        height: 18px;
       }
     }
   </style>
