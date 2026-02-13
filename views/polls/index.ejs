@@ -79,8 +79,11 @@
       <% polls.forEach(poll => { 
         const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
       %>
-        <a href="/polls/<%= poll._id %>" class="poll-card">
+        <a href="/polls/<%= poll._id %>" class="poll-card<%= (poll.endDate && new Date(poll.endDate) < new Date()) ? ' poll-ended' : '' %>">
           <div class="poll-badges">
+            <% if (poll.endDate && new Date(poll.endDate) < new Date()) { %>
+              <span class="poll-badge badge-ended">마감</span>
+            <% } %>
             <% if (poll.category) { %>
               <span class="poll-badge badge-category"><%= poll.category %></span>
             <% } %>
@@ -362,6 +365,15 @@
     transform: translateY(-8px);
     box-shadow: 0 15px 40px rgba(0,0,0,0.3);
   }
+
+  .poll-card.poll-ended {
+    opacity: 0.65;
+    position: relative;
+  }
+
+  .poll-card.poll-ended:hover {
+    opacity: 0.85;
+  }
   
   .poll-badges {
     display: flex;
@@ -389,6 +401,17 @@
   
   [data-theme="dark"] .badge-tag {
     background: #404040;
+  }
+
+  .badge-ended {
+    background: #ef4444;
+    color: white;
+    animation: pulse-ended 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-ended {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
   }
   
   .poll-card-title {
