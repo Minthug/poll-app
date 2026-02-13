@@ -83,6 +83,22 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
+function markAllNotificationsRead() {
+  fetch('/notifications/read-all')
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const badge = document.getElementById('notificationBadge');
+        if (badge) badge.style.display = 'none';
+        // 드롭다운 안의 unread 표시 제거
+        document.querySelectorAll('.notification-item.unread').forEach(el => {
+          el.classList.remove('unread');
+        });
+      }
+    })
+    .catch(err => console.error('모두 읽음 처리 오류:', err));
+}
+
 function markAsRead(notificationId) {
   fetch(`/notifications/${notificationId}/read`, {
     method: 'POST',

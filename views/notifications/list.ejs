@@ -6,6 +6,7 @@
         <h2>알림</h2>
         <div>
           <form action="/notifications/read-all" method="POST" class="d-inline">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <button type="submit" class="btn btn-sm btn-outline-primary">
               <i class="bi bi-check-all"></i> 모두 읽음
             </button>
@@ -43,6 +44,7 @@
                     </a>
                   <% } %>
                   <form action="/notifications/<%= notification._id %>/delete" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <button type="submit" class="btn btn-sm btn-outline-danger">
                       <i class="bi bi-trash"></i>
                     </button>

@@ -32,11 +32,9 @@
             aria-labelledby="notificationDropdown" style="min-width: 350px;">
           <li class="dropdown-header d-flex justify-content-between align-items-center">
             <span><strong>알림</strong></span>
-            <form action="/notifications/read-all" method="POST" class="d-inline">
-              <button type="submit" class="btn btn-sm btn-link p-0 text-decoration-none">
-                모두 읽음
-              </button>
-            </form>
+            <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none" onclick="markAllNotificationsRead()">
+              모두 읽음
+            </button>
           </li>
           <li><hr class="dropdown-divider"></li>
           <div id="notificationList" style="max-height: 400px; overflow-y: auto;">

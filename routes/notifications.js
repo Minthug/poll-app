@@ -41,15 +41,24 @@ router.get('/:id/read', isAuthenticated, async (req, res) => {
     }
 });
 
-// 모든 알람 읽음 처리
+// 모든 알람 읽음 처리 (POST: 폼, GET: fetch/링크)
+router.post('/read-all', isAuthenticated, async (req, res) => {
+    try {
+        await NotificationHelper.markAllAsRead(req.user._id);
+        if (req.flash) req.flash('success', '모든 알림을 읽음 처리했습니다');
+        res.redirect('/notifications');
+    } catch (error) {
+        if (req.flash) req.flash('error', '오류가 발생했습니다');
+        res.redirect('/notifications');
+    }
+});
+
 router.get('/read-all', isAuthenticated, async (req, res) => {
     try {
         await NotificationHelper.markAllAsRead(req.user._id);
-        req.flash('success', '모든 알림을 읽음 처리했습니다');
-        res.redirect('/notifications');
+        res.json({ success: true });
     } catch (error) {
-        req.flash('error', '오류가 발생했습니다');
-        res.redirect('/notifications');
+        res.status(500).json({ error: '오류가 발생했습니다' });
     }
 });
 
