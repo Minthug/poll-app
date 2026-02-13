@@ -37,6 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const MAX_STICKERS = 50;
 
+  // 내가 방금 투표한 옵션 ID (소켓 중복 방지용)
+  let myLastVotedOptionId = null;
+
   // ========================================
   // 스티커 생성 함수
   // ========================================
@@ -92,9 +95,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initStickers();
 
   // ========================================
-  // 스티커 1개 추가 (애니메이션 포함)
+  // 스티커 1개 시각적으로 추가 (카운트 변경 없음)
   // ========================================
-  function addStickerToOption(optionId) {
+  function addStickerVisual(optionId) {
     const card = document.querySelector('[data-option-id="' + optionId + '"]');
     if (!card) return;
 
@@ -103,12 +106,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const stickerArea = card.querySelector('.sticker-area');
     if (!stickerArea) return;
 
-    // 현재 스티커 수 체크
     const currentStickers = stickerArea.querySelectorAll('.sticker').length;
     const overflowEl = stickerArea.querySelector('.sticker-overflow');
 
     if (currentStickers >= MAX_STICKERS) {
-      // overflow 텍스트만 업데이트
       if (overflowEl) {
         const currentExtra = parseInt(overflowEl.textContent.replace('+', ''), 10) || 0;
         overflowEl.textContent = '+' + (currentExtra + 1);
@@ -119,20 +120,23 @@ document.addEventListener('DOMContentLoaded', () => {
         stickerArea.appendChild(overflow);
       }
     } else {
-      // overflow 앞에 삽입
       const sticker = createSticker(stickerArea, color, true);
       if (overflowEl) {
         stickerArea.insertBefore(sticker, overflowEl);
       }
     }
+  }
 
-    // 투표 수 텍스트 업데이트
+  // ========================================
+  // 옵션 카운트 텍스트 업데이트
+  // ========================================
+  function updateOptionCount(optionId, votes) {
+    const card = document.querySelector('[data-option-id="' + optionId + '"]');
+    if (!card) return;
+    card.dataset.votes = votes;
     const countEl = card.querySelector('.sticker-count');
     if (countEl) {
-      const currentVotes = parseInt(card.dataset.votes, 10) || 0;
-      const newVotes = currentVotes + 1;
-      card.dataset.votes = newVotes;
-      countEl.textContent = newVotes + '표';
+      countEl.textContent = votes + '표';
     }
   }
 
@@ -208,7 +212,6 @@ document.addEventListener('DOMContentLoaded', () => {
       totalVotesElement.textContent = totalVotes;
     }
 
-    // 각 옵션 업데이트 - 스티커 기반
     pollData.options.forEach(option => {
       const card = document.querySelector('[data-option-id="' + option._id + '"]');
       if (!card) return;
@@ -216,23 +219,21 @@ document.addEventListener('DOMContentLoaded', () => {
       const oldVotes = parseInt(card.dataset.votes, 10) || 0;
       const newVotes = option.votes || 0;
 
-      // 새 투표가 있으면 스티커 추가
-      if (newVotes > oldVotes) {
+      // 내가 방금 투표한 옵션이면 스티커는 이미 추가됨 → 스킵
+      if (option._id === myLastVotedOptionId) {
+        myLastVotedOptionId = null;
+      } else if (newVotes > oldVotes) {
+        // 다른 사용자의 투표 → 스티커 추가
         const diff = newVotes - oldVotes;
         for (let i = 0; i < diff; i++) {
-          // 약간의 시간차를 두고 스티커 추가
           setTimeout(() => {
-            addStickerToOption(option._id);
+            addStickerVisual(option._id);
           }, i * 150);
         }
       }
 
-      // 투표 수 텍스트 동기화
-      card.dataset.votes = newVotes;
-      const countEl = card.querySelector('.sticker-count');
-      if (countEl) {
-        countEl.textContent = newVotes + '표';
-      }
+      // 카운트는 항상 서버 데이터로 동기화 (단일 소스)
+      updateOptionCount(option._id, newVotes);
     });
   }
 
@@ -346,6 +347,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const csrfToken = document.getElementById('csrf-token').value;
 
+      // 소켓 중복 방지 플래그를 fetch 전에 설정
+      myLastVotedOptionId = optionId;
+
       try {
         const response = await fetch('/polls/' + pollId + '/vote', {
           method: 'POST',
@@ -359,9 +363,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
 
         if (data.success) {
-          // 스티커 pop 애니메이션 추가
-          addStickerToOption(optionId);
-          // 0.6초 후 성공 모달 표시
+          addStickerVisual(optionId);
+          const dblCard = document.querySelector('[data-option-id="' + optionId + '"]');
+          if (dblCard) {
+            updateOptionCount(optionId, (parseInt(dblCard.dataset.votes, 10) || 0) + 1);
+          }
           setTimeout(() => {
             showVoteSuccessModal();
           }, 600);
@@ -377,6 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
       } catch (error) {
+        myLastVotedOptionId = null;
         console.error('Error:', error);
         showVoteErrorModal('error', '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요');
       }
@@ -395,6 +402,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const csrfToken = document.getElementById('csrf-token').value;
+    const votedOptionId = optionIdInput.value;
+
+    // 소켓 중복 방지 플래그를 fetch 전에 설정
+    myLastVotedOptionId = votedOptionId;
 
     try {
       const response = await fetch('/polls/' + pollId + '/vote', {
@@ -404,7 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
           'CSRF-Token': csrfToken
         },
         body: JSON.stringify({
-          optionId: optionIdInput.value,
+          optionId: votedOptionId,
           _csrf: csrfToken
         })
       });
@@ -413,9 +424,11 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('서버 응답:', data);
 
       if (data.success) {
-        // 스티커 pop 애니메이션 추가
-        addStickerToOption(optionIdInput.value);
-        // 0.6초 후 성공 모달 표시
+        addStickerVisual(votedOptionId);
+        const submitCard = document.querySelector('[data-option-id="' + votedOptionId + '"]');
+        if (submitCard) {
+          updateOptionCount(votedOptionId, (parseInt(submitCard.dataset.votes, 10) || 0) + 1);
+        }
         setTimeout(() => {
           showVoteSuccessModal();
         }, 600);
@@ -431,6 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     } catch (error) {
+      myLastVotedOptionId = null;
       console.error('Error:', error);
       showVoteErrorModal('error', '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요');
     }
