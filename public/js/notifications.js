@@ -83,20 +83,46 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-function markAllNotificationsRead() {
+function markAllNotificationsRead(btn) {
+  // 클릭한 버튼 참조 (navbar or list page)
+  var target = btn || document.querySelector('[onclick*="markAllNotificationsRead"]');
+  if (target) {
+    target.disabled = true;
+    target.textContent = '처리 중...';
+  }
+
   fetch('/notifications/read-all')
     .then(res => res.json())
     .then(data => {
       if (data.success) {
         const badge = document.getElementById('notificationBadge');
         if (badge) badge.style.display = 'none';
-        // 드롭다운 안의 unread 표시 제거
         document.querySelectorAll('.notification-item.unread').forEach(el => {
           el.classList.remove('unread');
         });
+        // 목록 페이지의 bg-light 도 제거
+        document.querySelectorAll('.list-group-item.bg-light').forEach(el => {
+          el.classList.remove('bg-light', 'list-group-item-action');
+        });
+        if (target) {
+          target.textContent = '완료!';
+          setTimeout(() => {
+            target.textContent = '모두 읽음';
+            target.disabled = false;
+          }, 1500);
+        }
       }
     })
-    .catch(err => console.error('모두 읽음 처리 오류:', err));
+    .catch(err => {
+      console.error('모두 읽음 처리 오류:', err);
+      if (target) {
+        target.textContent = '실패';
+        setTimeout(() => {
+          target.textContent = '모두 읽음';
+          target.disabled = false;
+        }, 1500);
+      }
+    });
 }
 
 function markAsRead(notificationId) {
