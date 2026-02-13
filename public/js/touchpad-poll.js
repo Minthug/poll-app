@@ -37,8 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const MAX_STICKERS = 50;
 
-  // 내가 방금 투표한 옵션 ID (소켓 중복 방지용)
-  let myLastVotedOptionId = null;
+  // 내 투표 처리 상태: 먼저 도착하는 쪽(fetch/socket)이 스티커를 붙이고 플래그 소비
+  let pendingMyVote = null;
 
   // ========================================
   // 스티커 생성 함수
@@ -219,9 +219,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const oldVotes = parseInt(card.dataset.votes, 10) || 0;
       const newVotes = option.votes || 0;
 
-      // 내가 방금 투표한 옵션이면 스티커는 이미 추가됨 → 스킵
-      if (option._id === myLastVotedOptionId) {
-        myLastVotedOptionId = null;
+      if (option._id === pendingMyVote) {
+        // 내 투표 - 소켓이 먼저 도착: 스티커 붙이고 플래그 소비
+        addStickerVisual(option._id);
+        pendingMyVote = null;
       } else if (newVotes > oldVotes) {
         // 다른 사용자의 투표 → 스티커 추가
         const diff = newVotes - oldVotes;
@@ -232,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // 카운트는 항상 서버 데이터로 동기화 (단일 소스)
+      // 카운트는 항상 서버 데이터로 동기화
       updateOptionCount(option._id, newVotes);
     });
   }
@@ -346,9 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!optionId) return;
 
       const csrfToken = document.getElementById('csrf-token').value;
-
-      // 소켓 중복 방지 플래그를 fetch 전에 설정
-      myLastVotedOptionId = optionId;
+      pendingMyVote = optionId;
 
       try {
         const response = await fetch('/polls/' + pollId + '/vote', {
@@ -363,15 +362,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
 
         if (data.success) {
-          addStickerVisual(optionId);
-          const dblCard = document.querySelector('[data-option-id="' + optionId + '"]');
-          if (dblCard) {
-            updateOptionCount(optionId, (parseInt(dblCard.dataset.votes, 10) || 0) + 1);
+          // fetch가 먼저 도착 → 플래그 남아있으면 스티커+카운트 처리
+          if (pendingMyVote === optionId) {
+            addStickerVisual(optionId);
+            updateOptionCount(optionId, (parseInt(card.dataset.votes, 10) || 0) + 1);
+            pendingMyVote = null;
           }
+          // 소켓이 먼저 도착 → 플래그 이미 소비됨 → 스킵
           setTimeout(() => {
             showVoteSuccessModal();
           }, 600);
         } else {
+          pendingMyVote = null;
           if (data.alreadyVoted) {
             showVoteErrorModal('alreadyVoted', '이미 이 여론조사에 투표 하셨습니다.');
           } else if (data.ended) {
@@ -383,7 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
       } catch (error) {
-        myLastVotedOptionId = null;
+        pendingMyVote = null;
         console.error('Error:', error);
         showVoteErrorModal('error', '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요');
       }
@@ -403,9 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const csrfToken = document.getElementById('csrf-token').value;
     const votedOptionId = optionIdInput.value;
-
-    // 소켓 중복 방지 플래그를 fetch 전에 설정
-    myLastVotedOptionId = votedOptionId;
+    pendingMyVote = votedOptionId;
 
     try {
       const response = await fetch('/polls/' + pollId + '/vote', {
@@ -424,15 +424,19 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('서버 응답:', data);
 
       if (data.success) {
-        addStickerVisual(votedOptionId);
-        const submitCard = document.querySelector('[data-option-id="' + votedOptionId + '"]');
-        if (submitCard) {
-          updateOptionCount(votedOptionId, (parseInt(submitCard.dataset.votes, 10) || 0) + 1);
+        if (pendingMyVote === votedOptionId) {
+          addStickerVisual(votedOptionId);
+          const submitCard = document.querySelector('[data-option-id="' + votedOptionId + '"]');
+          if (submitCard) {
+            updateOptionCount(votedOptionId, (parseInt(submitCard.dataset.votes, 10) || 0) + 1);
+          }
+          pendingMyVote = null;
         }
         setTimeout(() => {
           showVoteSuccessModal();
         }, 600);
       } else {
+        pendingMyVote = null;
         if (data.alreadyVoted) {
           showVoteErrorModal('alreadyVoted', '이미 이 여론조사에 투표 하셨습니다.');
         } else if (data.ended) {
@@ -444,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     } catch (error) {
-      myLastVotedOptionId = null;
+      pendingMyVote = null;
       console.error('Error:', error);
       showVoteErrorModal('error', '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요');
     }
