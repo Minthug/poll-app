@@ -231,27 +231,7 @@
       margin-bottom: 15px;
     }
     
-    /* 진행바 배경 */
-    .option-progress {
-      height: 35px;
-      background: var(--border-color);
-      border-radius: 50px;
-      overflow: hidden;
-      position: relative;
-    }
-    
-    /* 진행바 (투표수에 따라 채워지는 부분) */
-    .progress-bar {
-      height: 100%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 700;
-      font-size: 0.95rem;
-      transition: width 0.6s ease;
-    }
+    /* (프로그레스바 제거 - 스티커 UI로 대체) */
     
     /* ========================================
        선택 알림 (옵션 선택 시 표시되는 메시지)
@@ -455,6 +435,68 @@
     }
     
     /* ========================================
+       스티커 투표 영역
+       ======================================== */
+    .sticker-area {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      min-height: 40px;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.03);
+      border-radius: 12px;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+
+    [data-theme="dark"] .sticker-area {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .sticker {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      opacity: 1;
+      transform: scale(1) rotate(var(--rotation, 0deg));
+      flex-shrink: 0;
+    }
+
+    .sticker.new {
+      animation: sticker-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes sticker-pop {
+      0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+      50%  { transform: scale(1.4) rotate(5deg); opacity: 1; }
+      70%  { transform: scale(0.85) rotate(-3deg); }
+      100% { transform: scale(1) rotate(var(--rotation, 0deg)); opacity: 1; }
+    }
+
+    .sticker-count {
+      text-align: center;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--secondary-text);
+    }
+
+    .sticker-overflow {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--secondary-text);
+      padding: 2px 8px;
+      background: rgba(0, 0, 0, 0.06);
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+
+    [data-theme="dark"] .sticker-overflow {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* ========================================
        반응형 디자인 (모바일)
        ======================================== */
     @media (max-width: 768px) {
@@ -556,7 +598,7 @@
     <!-- 투표 카드 -->
     <div class="vote-card">
       <p class="vote-instruction">
-        💡 원하는 옵션을 <strong>클릭</strong>하여 선택하고 투표하세요<br>
+        🎯 원하는 옵션에 <strong>스티커를 붙여</strong> 투표하세요<br>
         <strong>더블클릭</strong>으로 바로 투표할 수 있습니다
       </p>
       
@@ -570,18 +612,15 @@
         
         <!-- 옵션 목록 -->
         <div class="options-grid">
-          <% 
-            const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
-            poll.options.forEach(option => { 
-              const percentage = totalVotes > 0 ? ((option.votes / totalVotes) * 100).toFixed(1) : 0;
+          <%
+            poll.options.forEach((option, optIndex) => {
           %>
-            <div class="option-card" data-option-id="<%= option._id %>">
+            <div class="option-card" data-option-id="<%= option._id %>" data-option-index="<%= optIndex %>" data-votes="<%= option.votes %>">
               <h3 class="option-text card-title"><%= option.text %></h3>
-              <div class="option-progress">
-                <div class="progress-bar" style="width: <%= percentage %>%">
-                  <%= option.votes %>표 (<%= percentage %>%)
-                </div>
+              <div class="sticker-area">
+                <!-- JS에서 기존 투표 수만큼 스티커 생성 -->
               </div>
+              <div class="sticker-count"><%= option.votes %>표</div>
             </div>
           <% }); %>
         </div>
@@ -610,8 +649,8 @@
         <div class="modal-body">
           <h6>투표 방법</h6>
           <ul>
-            <li>원하는 옵션을 <strong>클릭</strong>하면 선택됩니다</li>
-            <li>같은 옵션을 <strong>더블클릭</strong>하면 바로 투표됩니다</li>
+            <li>원하는 옵션을 <strong>클릭</strong>하여 선택하세요</li>
+            <li>같은 옵션을 <strong>더블클릭</strong>하면 바로 스티커가 붙습니다</li>
             <li>한 번만 투표가 가능합니다 (IP 기반 중복 방지)</li>
           </ul>
           <div class="alert alert-info mb-0">
