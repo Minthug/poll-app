@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://poll-app-smhl.onrender.com/sitemap.xml

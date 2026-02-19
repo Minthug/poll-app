@@ -384,3 +384,5 @@ server.listen(PORT, '0.0.0.0', () => {
 server.timeout = 300000; // 5분
 server.keepAliveTimeout = 65000; // 65초
 server.headersTimeout = 66000; // 66초
+
+app.use(express.static('public'));
