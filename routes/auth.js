@@ -145,17 +145,26 @@ router.post('/register', [
 
         console.log('✅ 회원가입 완료 (자동 인증):', user.username);
 
-        // ⭐ 이메일 발송 시도 (실패해도 가입은 완료)
+        // 이메일 발송 시도 (실패해도 가입은 완료)
         try {
             const verificationToken = crypto.randomBytes(32).toString('hex');
             await sendVerificationEmail(email, verificationToken);
-            console.log('📧 인증 이메일 발송 성공');
         } catch (emailError) {
             console.error('⚠️ 이메일 발송 실패 (무시):', emailError.message);
         }
 
-        // ⭐ 바로 로그인 페이지로 리디렉트
-        res.redirect('/auth/login?message=회원가입이 완료되었습니다. 로그인해주세요.');
+        // 가입 즉시 자동 로그인
+        req.session.userId = user._id;
+        req.session.username = user.username;
+        saveUserCache(req, user);
+
+        req.session.save((err) => {
+            if (err) {
+                console.error('세션 저장 실패:', err);
+                return res.redirect('/auth/login');
+            }
+            res.redirect('/polls?welcome=1');
+        });
 
     } catch (error) {
         console.error('❌ 회원가입 오류:', error);

@@ -81,13 +81,14 @@ router.get('/', async (req, res) => {
 
         const baseUrl = `${req.protocol}://${req.get('host')}`; // ⭐ 수정 (host → 'host')
 
-        res.render('polls/index', { 
-            polls: polls, 
+        res.render('polls/index', {
+            polls: polls,
             category: category || null,
             search: search || '',
             sort: sort || 'newest',
-            topPolls: topPolls,  
+            topPolls: topPolls,
             showRanking: true,
+            welcome: req.query.welcome === '1',
             pageTitle: '한국 여론조사 - 실시간 투표 플랫폼',
             pageDescription: `${polls.length}개의 여론조사가 진행 중입니다. 지금 바로 참여하세요!`,
             ogTitle: '한국 여론조사',

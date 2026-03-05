@@ -502,4 +502,43 @@
       width: 100%;
     }
   }
+
+  /* 환영 토스트 */
+  .welcome-toast {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 16px 28px;
+    border-radius: 50px;
+    box-shadow: 0 8px 30px rgba(102,126,234,0.5);
+    font-size: 1rem;
+    font-weight: 700;
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.4s ease;
+    white-space: nowrap;
+  }
+  .welcome-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 </style>
+
+<% if (typeof welcome !== 'undefined' && welcome) { %>
+<div class="welcome-toast" id="welcome-toast">
+  🎉 가입을 축하합니다! 여론조사에 참여해보세요
+</div>
+<script>
+  (function() {
+    const toast = document.getElementById('welcome-toast');
+    setTimeout(() => toast.classList.add('show'), 100);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(-50%) translateY(-20px)';
+    }, 3500);
+  })();
+</script>
+<% } %>
