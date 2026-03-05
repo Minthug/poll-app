@@ -22,8 +22,8 @@ router.get('/google/callback', (req, res, next) => {
     console.log('🔵 Google 콜백 도착');
     console.log('Query:', req.query);
     next();
-}, passport.authenticate('google', { 
-    failureRedirect: '/login'
+}, passport.authenticate('google', {
+    failureRedirect: '/auth/login'
 }), (req, res) => {
     console.log('✅ Google 인증 성공');
     console.log('User:', req.user);

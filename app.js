@@ -79,6 +79,34 @@ const {
   checkSessionWarning
 } = require('./middleware/session');
 
+// ========================================
+// 동적 sitemap.xml (static보다 먼저 등록해야 함)
+// ========================================
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const BASE = process.env.BASE_URL || process.env.RENDER_EXTERNAL_URL || 'https://poll-app-smhl.onrender.com';
+    const polls = await Poll.find({}, '_id createdAt').lean();
+    const today = new Date().toISOString().split('T')[0];
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+    xml += `  <url><loc>${BASE}/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>\n`;
+    xml += `  <url><loc>${BASE}/polls</loc><lastmod>${today}</lastmod><changefreq>hourly</changefreq><priority>0.9</priority></url>\n`;
+
+    polls.forEach(poll => {
+      const lastmod = new Date(poll.createdAt).toISOString().split('T')[0];
+      xml += `  <url><loc>${BASE}/polls/${poll._id}</loc><lastmod>${lastmod}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>\n`;
+      xml += `  <url><loc>${BASE}/polls/${poll._id}/result</loc><lastmod>${lastmod}</lastmod><changefreq>daily</changefreq><priority>0.6</priority></url>\n`;
+    });
+
+    xml += `</urlset>`;
+    res.header('Content-Type', 'application/xml');
+    res.send(xml);
+  } catch (err) {
+    console.error('sitemap 생성 오류:', err);
+    res.status(500).send('sitemap 생성 실패');
+  }
+});
+
 // 정적 파일 처리
 app.use('/css', express.static(path.join(__dirname, 'public/css')));
 app.use('/js', express.static(path.join(__dirname, 'public/js')));
@@ -96,7 +124,7 @@ app.use(globalLimiter);
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true,
   store: MongoStore.create({
     client: mongoose.connection.getClient(),
     touchAfter: 24 * 3600
@@ -112,6 +140,7 @@ app.use(session({
 app.use(sessionActivity);
 app.use(checkSessionWarning);
 app.use(passport.initialize());
+app.use(passport.session());
 
 // 세션 복구 미들웨어 추가(Passport 이후)
 app.use(deserializeUser);

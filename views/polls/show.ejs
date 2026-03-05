@@ -3,7 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= poll.title %> | 여론조사</title>
+  <title><%= typeof pageTitle !== 'undefined' ? pageTitle : poll.title + ' | 여론조사' %></title>
+  <meta name="description" content="<%= typeof pageDescription !== 'undefined' ? pageDescription : poll.title %>">
+  <meta name="keywords" content="여론조사, 투표, <%= poll.title %><%= poll.category ? ', ' + poll.category : '' %>">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="한국 여론조사">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:title" content="<%= typeof ogTitle !== 'undefined' ? ogTitle : poll.title %>">
+  <meta property="og:description" content="<%= typeof ogDescription !== 'undefined' ? ogDescription : (poll.description || poll.title) %>">
+  <meta property="og:url" content="<%= typeof ogUrl !== 'undefined' ? ogUrl : '' %>">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<%= typeof ogTitle !== 'undefined' ? ogTitle : poll.title %>">
+  <meta name="twitter:description" content="<%= typeof ogDescription !== 'undefined' ? ogDescription : '' %>">
+
+  <!-- Canonical -->
+  <link rel="canonical" href="<%= typeof ogUrl !== 'undefined' ? ogUrl : '' %>">
+
+  <!-- JSON-LD 구조화 데이터 -->
+  <script type="application/ld+json"><%- JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": poll.title,
+    "description": poll.description || poll.title,
+    "url": typeof ogUrl !== 'undefined' ? ogUrl : '',
+    "publisher": {
+      "@type": "Organization",
+      "name": "한국 여론조사",
+      "url": "https://poll-app-smhl.onrender.com"
+    },
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://poll-app-smhl.onrender.com" },
+        { "@type": "ListItem", "position": 2, "name": "여론조사", "item": "https://poll-app-smhl.onrender.com/polls" },
+        { "@type": "ListItem", "position": 3, "name": poll.title, "item": typeof ogUrl !== 'undefined' ? ogUrl : '' }
+      ]
+    }
+  }) %>
+  </script>
+
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="/css/style.css">
   
