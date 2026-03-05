@@ -79,6 +79,9 @@ const {
   checkSessionWarning
 } = require('./middleware/session');
 
+// 헬스체크 (UptimeRobot용)
+app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }));
+
 // ========================================
 // 동적 sitemap.xml (static보다 먼저 등록해야 함)
 // ========================================
