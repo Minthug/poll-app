@@ -222,6 +222,52 @@
     font-size: 0.9rem;
     font-weight: 600;
   }
+
+  /* 이메일 자동완성 */
+  .email-wrapper {
+    position: relative;
+  }
+
+  .email-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    border: 2px solid #667eea;
+    border-radius: 12px;
+    list-style: none;
+    margin: 0;
+    padding: 6px 0;
+    z-index: 100;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    overflow: hidden;
+  }
+
+  .email-dropdown.show {
+    display: block;
+  }
+
+  .email-dropdown li {
+    padding: 10px 16px;
+    cursor: pointer;
+    color: var(--text-color);
+    font-size: 0.95rem;
+    transition: background 0.15s;
+  }
+
+  .email-dropdown li:hover,
+  .email-dropdown li.active {
+    background: linear-gradient(135deg, rgba(102,126,234,0.12) 0%, rgba(118,75,162,0.12) 100%);
+    color: #667eea;
+    font-weight: 600;
+  }
+
+  .email-dropdown li span.domain-highlight {
+    font-weight: 700;
+    color: #667eea;
+  }
 </style>
 
 <div class="auth-container">
@@ -284,14 +330,18 @@
       
       <div class="form-group">
         <label for="email" class="form-label">이메일</label>
-        <input 
-          type="email" 
-          class="form-control" 
-          id="email" 
-          name="email"
-          placeholder="example@email.com"
-          required
-        >
+        <div class="email-wrapper">
+          <input
+            type="email"
+            class="form-control"
+            id="email"
+            name="email"
+            placeholder="example@email.com"
+            autocomplete="off"
+            required
+          >
+          <ul class="email-dropdown" id="email-dropdown"></ul>
+        </div>
       </div>
       
       <div class="form-group">
@@ -409,6 +459,86 @@ function updateRequirements(length, letter, number, special) {
     document.getElementById('req-special').style.color = special ? '#28a745' : '#dc3545';
     document.getElementById('req-special').textContent = special ? '✓' : '✗';
 }
+
+// 이메일 도메인 자동완성
+(function() {
+  const EMAIL_DOMAINS = [
+    'gmail.com', 'naver.com', 'daum.net', 'kakao.com',
+    'hanmail.net', 'nate.com', 'hotmail.com', 'outlook.com',
+    'yahoo.com', 'icloud.com'
+  ];
+
+  const input = document.getElementById('email');
+  const dropdown = document.getElementById('email-dropdown');
+  let activeIndex = -1;
+
+  function showDropdown(local, typed) {
+    const filtered = typed
+      ? EMAIL_DOMAINS.filter(d => d.startsWith(typed))
+      : EMAIL_DOMAINS;
+
+    if (!filtered.length) { hideDropdown(); return; }
+
+    activeIndex = -1;
+    dropdown.innerHTML = filtered.map(domain =>
+      `<li data-domain="${domain}">
+        ${local}@<span class="domain-highlight">${domain}</span>
+      </li>`
+    ).join('');
+    dropdown.classList.add('show');
+  }
+
+  function hideDropdown() {
+    dropdown.classList.remove('show');
+    activeIndex = -1;
+  }
+
+  function selectItem(domain) {
+    const local = input.value.split('@')[0];
+    input.value = local + '@' + domain;
+    hideDropdown();
+    input.focus();
+  }
+
+  input.addEventListener('input', function() {
+    const val = this.value;
+    const atIdx = val.indexOf('@');
+    if (atIdx === -1) { hideDropdown(); return; }
+    const local = val.slice(0, atIdx);
+    const typed = val.slice(atIdx + 1);
+    showDropdown(local, typed);
+  });
+
+  input.addEventListener('keydown', function(e) {
+    const items = dropdown.querySelectorAll('li');
+    if (!items.length) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIndex = (activeIndex + 1) % items.length;
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIndex = (activeIndex - 1 + items.length) % items.length;
+    } else if (e.key === 'Enter' && activeIndex >= 0) {
+      e.preventDefault();
+      selectItem(items[activeIndex].dataset.domain);
+      return;
+    } else if (e.key === 'Escape') {
+      hideDropdown(); return;
+    } else { return; }
+
+    items.forEach((li, i) => li.classList.toggle('active', i === activeIndex));
+  });
+
+  dropdown.addEventListener('mousedown', function(e) {
+    const li = e.target.closest('li');
+    if (li) selectItem(li.dataset.domain);
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!input.contains(e.target) && !dropdown.contains(e.target)) hideDropdown();
+  });
+})();
 
 function checkPasswordMatch() {
   const password = document.getElementById('password').value;
