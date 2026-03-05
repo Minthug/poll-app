@@ -206,6 +206,27 @@
   .auth-links a:hover {
     text-decoration: underline;
   }
+
+  .remember-me {
+    margin-bottom: 16px;
+  }
+
+  .remember-me label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--secondary-text);
+    font-size: 0.9rem;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .remember-me input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #667eea;
+    cursor: pointer;
+  }
   
   /* Toast 알림 스타일 */
   .toast-notification {
@@ -317,6 +338,13 @@
         >
       </div>
       
+      <div class="remember-me">
+        <label>
+          <input type="checkbox" id="remember-me">
+          아이디 기억하기
+        </label>
+      </div>
+
       <button type="submit" class="btn-submit">
         로그인
       </button>
@@ -357,6 +385,26 @@
 </div>
 
 <script>
+  // 아이디 기억하기
+  (function() {
+    const emailInput = document.getElementById('email');
+    const checkbox = document.getElementById('remember-me');
+    const saved = localStorage.getItem('rememberedEmail');
+
+    if (saved) {
+      emailInput.value = saved;
+      checkbox.checked = true;
+    }
+
+    document.querySelector('form').addEventListener('submit', function() {
+      if (checkbox.checked) {
+        localStorage.setItem('rememberedEmail', emailInput.value);
+      } else {
+        localStorage.removeItem('rememberedEmail');
+      }
+    });
+  })();
+
   // Toast 알림 표시 함수
   function showToast(message) {
     const toast = document.createElement('div');
