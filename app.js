@@ -283,6 +283,7 @@ app.use((req, res, next) => {
     id: req.session.userId,
     username: req.session.username
   } : null;
+  res.locals.kakaoKey = process.env.KAKAO_JS_KEY || '';
   next();
 });
 

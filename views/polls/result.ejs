@@ -172,6 +172,14 @@
     
     <div class="export-buttons">
       <!-- 링크 복사 -->
+      <button class="export-btn kakao-export-btn" id="kakao-result-share">
+        <span class="export-icon" style="font-size:1.6rem;">💬</span>
+        <div>
+          <div class="export-title">카카오톡 공유</div>
+          <div class="export-desc">결과 공유하기</div>
+        </div>
+      </button>
+
       <button class="export-btn" onclick="copyShareLink()">
         <span class="export-icon">🔗</span>
         <div>
@@ -746,6 +754,19 @@
 /* ============================================
    공유 및 내보내기 버튼
    ============================================ */
+.kakao-export-btn {
+  background: #FEE500 !important;
+  border-color: #FEE500 !important;
+  color: #000 !important;
+}
+.kakao-export-btn:hover {
+  background: #fdd800 !important;
+  box-shadow: 0 5px 15px rgba(254,229,0,0.4) !important;
+}
+[data-theme="dark"] .kakao-export-btn {
+  background: #FEE500 !important;
+  color: #000 !important;
+}
 .export-buttons {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -1317,6 +1338,28 @@
     
     console.log('✅ 지역 차트 생성 완료');
   }
+
+  // 카카오 공유
+  document.getElementById('kakao-result-share').addEventListener('click', function() {
+    const pollUrl = window.location.origin + '/polls/<%= poll._id %>';
+    const resultUrl = window.location.origin + '/polls/<%= poll._id %>/result';
+    const data = <%- JSON.stringify({
+      title: poll.title + ' - 투표 결과',
+      description: (poll.options.reduce((a, b) => a.votes > b.votes ? a : b)).text + '가 1위! 당신의 생각은?'
+    }) %>;
+    Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: {
+        title: data.title,
+        description: data.description,
+        link: { mobileWebUrl: resultUrl, webUrl: resultUrl }
+      },
+      buttons: [
+        { title: '결과 보기', link: { mobileWebUrl: resultUrl, webUrl: resultUrl } },
+        { title: '나도 투표하기', link: { mobileWebUrl: pollUrl, webUrl: pollUrl } }
+      ]
+    });
+  });
 
   // 링크 복사
   function copyShareLink() {
