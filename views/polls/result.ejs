@@ -1181,7 +1181,6 @@
 <!-- 라이브러리 -->
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
@@ -1537,30 +1536,146 @@
   });
 
   // 이미지 저장
-  async function downloadAsImage() {
+  function downloadAsImage() {
     showToast('📸 이미지 생성 중...');
-    
+
     try {
-      const resultContainer = document.querySelector('.result-container');
-      const canvas = await html2canvas(resultContainer, {
-        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-color'),
-        scale: 2,
-        logging: false,
-        useCORS: true
+      const W = 1200, H = 630;
+      const canvas = document.createElement('canvas');
+      canvas.width = W; canvas.height = H;
+      const ctx = canvas.getContext('2d');
+
+      const poll = <%- JSON.stringify({
+        title: poll.title,
+        options: poll.options.map(o => ({ text: o.text, votes: o.votes }))
+      }) %>;
+      const total = poll.options.reduce((s, o) => s + o.votes, 0);
+      const sorted = [...poll.options].sort((a, b) => b.votes - a.votes).slice(0, 4);
+
+      // --- 헬퍼 ---
+      function rr(x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+      }
+
+      function fitText(text, maxW, font) {
+        ctx.font = font;
+        if (ctx.measureText(text).width <= maxW) return text;
+        while (text.length > 1 && ctx.measureText(text + '…').width > maxW)
+          text = text.slice(0, -1);
+        return text + '…';
+      }
+
+      function wrapText(text, x, y, maxW, lineH, font, maxLines) {
+        ctx.font = font;
+        let line = '', lines = 0;
+        for (const ch of text) {
+          const test = line + ch;
+          if (ctx.measureText(test).width > maxW) {
+            if (lines >= maxLines - 1) { ctx.fillText(fitText(line, maxW, font), x, y); break; }
+            ctx.fillText(line, x, y + lines * lineH);
+            line = ch; lines++;
+          } else { line = test; }
+        }
+        if (line && lines < maxLines) ctx.fillText(line, x, y + lines * lineH);
+        return Math.min(lines + 1, maxLines);
+      }
+
+      // --- 배경 그라데이션 ---
+      const bg = ctx.createLinearGradient(0, 0, W, H);
+      bg.addColorStop(0, '#667eea'); bg.addColorStop(1, '#764ba2');
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+      // --- 카드 ---
+      const PAD = 60;
+      rr(PAD, PAD, W - PAD * 2, H - PAD * 2, 28);
+      ctx.fillStyle = '#ffffff'; ctx.fill();
+
+      const iX = PAD + 36, iW = W - PAD * 2 - 72;
+
+      // --- 사이트 배지 ---
+      ctx.fillStyle = '#667eea';
+      rr(iX, PAD + 28, 160, 30, 15); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 14px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('한국 여론조사', iX + 80, PAD + 48);
+      ctx.textAlign = 'left';
+
+      // --- 투표 제목 ---
+      ctx.fillStyle = '#1a1a2e';
+      const titleLines = wrapText(poll.title, iX, PAD + 100, iW, 48, 'bold 36px system-ui, sans-serif', 2);
+
+      // --- 총 참여 수 ---
+      const afterTitle = PAD + 100 + titleLines * 48 + 10;
+      ctx.fillStyle = '#888';
+      ctx.font = '18px system-ui, sans-serif';
+      ctx.fillText(`총 ${total.toLocaleString()}명 참여`, iX, afterTitle);
+
+      // --- 구분선 ---
+      const divY = afterTitle + 22;
+      ctx.strokeStyle = '#eee'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(iX, divY); ctx.lineTo(iX + iW, divY); ctx.stroke();
+
+      // --- 결과 바 ---
+      const barY0 = divY + 24, barH = 38, barGap = 54;
+      sorted.forEach((opt, i) => {
+        const y = barY0 + i * barGap;
+        const pct = total > 0 ? opt.votes / total : 0;
+        const isFirst = i === 0;
+
+        // 트랙
+        rr(iX, y, iW, barH, barH / 2);
+        ctx.fillStyle = '#f2f2f7'; ctx.fill();
+
+        // 채우기
+        const fillW = Math.max(iW * pct, barH);
+        if (isFirst) {
+          const g = ctx.createLinearGradient(iX, 0, iX + fillW, 0);
+          g.addColorStop(0, '#667eea'); g.addColorStop(1, '#764ba2');
+          ctx.fillStyle = g;
+        } else {
+          ctx.fillStyle = '#c7d0fa';
+        }
+        rr(iX, y, fillW, barH, barH / 2); ctx.fill();
+
+        // 옵션 텍스트
+        ctx.fillStyle = isFirst && pct > 0.15 ? '#fff' : '#333';
+        const label = fitText(opt.text, iW * 0.58, `${isFirst ? 'bold' : ''} 17px system-ui, sans-serif`);
+        ctx.fillText(label, iX + 14, y + barH / 2 + 6);
+
+        // 퍼센트 + 표수
+        ctx.fillStyle = isFirst && pct > 0.15 ? '#fff' : '#667eea';
+        ctx.font = 'bold 16px system-ui, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(`${(pct * 100).toFixed(1)}%  ${opt.votes.toLocaleString()}표`, iX + iW - 14, y + barH / 2 + 6);
+        ctx.textAlign = 'left';
       });
-      
+
+      // --- URL ---
+      ctx.fillStyle = '#bbb';
+      ctx.font = '15px system-ui, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText('poll-app-smhl.onrender.com', PAD + (W - PAD * 2) - 36, H - PAD - 18);
+      ctx.textAlign = 'left';
+
+      // --- 다운로드 ---
       canvas.toBlob((blob) => {
         const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.download = 'poll-result-<%= poll._id %>.png';
-        link.href = url;
-        link.click();
+        const a = document.createElement('a');
+        a.download = 'poll-result.png';
+        a.href = url; a.click();
         URL.revokeObjectURL(url);
-        showToast('✅ 이미지가 다운로드되었습니다!');
-      });
-      
-    } catch (error) {
-      console.error('이미지 생성 오류:', error);
+        showToast('✅ 이미지가 저장되었습니다!');
+      }, 'image/png');
+
+    } catch (err) {
+      console.error('이미지 생성 오류:', err);
       showToast('❌ 이미지 생성 중 오류가 발생했습니다');
     }
   }
