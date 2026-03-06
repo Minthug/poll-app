@@ -1,0 +1,166 @@
+<style>
+  .privacy-container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding-bottom: 60px;
+  }
+
+  .privacy-card {
+    background: var(--card-bg);
+    border-radius: 24px;
+    padding: 50px 60px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  }
+
+  .privacy-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-color);
+    margin-bottom: 8px;
+  }
+
+  .privacy-date {
+    color: var(--secondary-text);
+    font-size: 0.9rem;
+    margin-bottom: 40px;
+  }
+
+  .privacy-section {
+    margin-bottom: 36px;
+  }
+
+  .privacy-section h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #667eea;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(102,126,234,0.15);
+  }
+
+  .privacy-section p,
+  .privacy-section li {
+    color: var(--secondary-text);
+    line-height: 1.8;
+    font-size: 0.95rem;
+  }
+
+  .privacy-section ul {
+    padding-left: 20px;
+    margin: 8px 0;
+  }
+
+  .privacy-section ul li {
+    margin-bottom: 6px;
+  }
+
+  .privacy-contact {
+    background: rgba(102,126,234,0.08);
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-top: 8px;
+  }
+
+  .privacy-contact a {
+    color: #667eea;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  @media (max-width: 768px) {
+    .privacy-card { padding: 30px 24px; }
+    .privacy-title { font-size: 1.5rem; }
+  }
+</style>
+
+<div class="privacy-container">
+  <div class="privacy-card">
+    <h1 class="privacy-title">개인정보처리방침</h1>
+    <p class="privacy-date">시행일: 2026년 3월 6일 &nbsp;|&nbsp; 최종 수정일: 2026년 3월 6일</p>
+
+    <div class="privacy-section">
+      <h2>1. 총칙</h2>
+      <p>한국 여론조사(이하 "서비스")는 이용자의 개인정보를 중요시하며, 「개인정보 보호법」을 준수합니다. 본 방침을 통해 수집하는 개인정보의 항목, 이용 목적, 보유 기간 및 이용자의 권리를 안내합니다.</p>
+    </div>
+
+    <div class="privacy-section">
+      <h2>2. 수집하는 개인정보 항목 및 수집 방법</h2>
+      <ul>
+        <li><strong>회원가입 시:</strong> 이메일 주소, 사용자명, 암호화된 비밀번호</li>
+        <li><strong>소셜 로그인 시:</strong> OAuth 제공자(Google, Naver)로부터 받은 이름, 이메일, 프로필 이미지</li>
+        <li><strong>서비스 이용 시:</strong> IP 주소, 접속 일시, 브라우저 정보, 투표 참여 기록</li>
+        <li><strong>수집 방법:</strong> 회원가입 폼, 소셜 로그인, 서비스 이용 과정에서 자동 수집</li>
+      </ul>
+    </div>
+
+    <div class="privacy-section">
+      <h2>3. 개인정보의 이용 목적</h2>
+      <ul>
+        <li>회원 식별 및 서비스 제공</li>
+        <li>중복 투표 방지 (IP 주소 기반)</li>
+        <li>투표 결과 통계 제공</li>
+        <li>서비스 개선 및 부정 이용 방지</li>
+        <li>이메일 인증 및 공지사항 전달</li>
+      </ul>
+    </div>
+
+    <div class="privacy-section">
+      <h2>4. 개인정보의 보유 및 이용 기간</h2>
+      <ul>
+        <li><strong>회원 정보:</strong> 회원 탈퇴 시까지</li>
+        <li><strong>투표 참여 기록(IP):</strong> 투표 종료 후 90일</li>
+        <li><strong>방문 기록:</strong> 1년</li>
+        <li>관련 법령에 의한 보존 의무가 있는 경우 해당 기간 동안 보존</li>
+      </ul>
+    </div>
+
+    <div class="privacy-section">
+      <h2>5. 제3자 제공</h2>
+      <p>서비스는 원칙적으로 이용자의 개인정보를 제3자에게 제공하지 않습니다. 다만, 다음의 경우는 예외로 합니다.</p>
+      <ul>
+        <li>이용자가 사전에 동의한 경우</li>
+        <li>법령의 규정에 의거하거나 수사 목적으로 법령에 정해진 절차에 따른 요청이 있는 경우</li>
+      </ul>
+    </div>
+
+    <div class="privacy-section">
+      <h2>6. 쿠키(Cookie) 사용</h2>
+      <p>서비스는 이용자의 편의를 위해 쿠키를 사용합니다.</p>
+      <ul>
+        <li><strong>세션 쿠키:</strong> 로그인 상태 유지</li>
+        <li><strong>CSRF 쿠키:</strong> 보안 공격 방지</li>
+        <li><strong>테마 설정:</strong> 다크모드 등 UI 설정 저장 (localStorage)</li>
+      </ul>
+      <p>브라우저 설정을 통해 쿠키를 거부할 수 있으나, 일부 서비스 이용이 제한될 수 있습니다.</p>
+    </div>
+
+    <div class="privacy-section">
+      <h2>7. 광고 서비스 (Google AdSense)</h2>
+      <p>본 서비스는 Google AdSense를 통한 광고를 게재할 수 있습니다. Google은 광고 제공을 위해 쿠키를 사용하며, 이용자는 <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener">Google 광고 설정</a>에서 개인 맞춤 광고를 비활성화할 수 있습니다. Google의 개인정보 처리방침은 <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">여기</a>에서 확인하실 수 있습니다.</p>
+    </div>
+
+    <div class="privacy-section">
+      <h2>8. 이용자의 권리</h2>
+      <p>이용자는 언제든지 다음의 권리를 행사할 수 있습니다.</p>
+      <ul>
+        <li>개인정보 열람, 정정, 삭제 요청</li>
+        <li>개인정보 처리 정지 요청</li>
+        <li>회원 탈퇴를 통한 개인정보 삭제</li>
+      </ul>
+    </div>
+
+    <div class="privacy-section">
+      <h2>9. 개인정보 보호책임자 및 연락처</h2>
+      <div class="privacy-contact">
+        <p><strong>서비스명:</strong> 한국 여론조사</p>
+        <p><strong>이메일:</strong> <a href="mailto:jkisimmortal4@gmail.com">jkisimmortal4@gmail.com</a></p>
+        <p style="margin-top:8px; font-size:0.88rem;">개인정보 관련 문의, 열람·정정·삭제 요청은 위 이메일로 연락 주시면 빠르게 처리해드립니다.</p>
+      </div>
+    </div>
+
+    <div class="privacy-section">
+      <h2>10. 방침 변경</h2>
+      <p>본 개인정보처리방침은 법령 또는 서비스 정책 변경에 따라 수정될 수 있으며, 변경 시 서비스 내 공지를 통해 안내합니다.</p>
+    </div>
+  </div>
+</div>

@@ -325,8 +325,14 @@ app.use('/profile', profileRoutes);
 app.use('/notifications', notificationRoutes);
 
 // ========================================
-// 7. 홈 라우트
+// 7. 홈 라우트 및 정책 페이지
 // ========================================
+app.get('/privacy', (req, res) => {
+  res.render('privacy', {
+    title: '개인정보처리방침 | 한국 여론조사',
+    showRanking: false
+  });
+});
 app.get('/', async (req, res) => {
   try {
     const recentPolls = await Poll.find().sort({ createdAt: -1 }).limit(3);
